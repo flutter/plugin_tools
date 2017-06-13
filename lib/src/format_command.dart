@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 
@@ -15,15 +14,13 @@ import 'common.dart';
 const String _googleFormatterUrl =
     'https://github.com/google/google-java-format/releases/download/google-java-format-1.3/google-java-format-1.3-all-deps.jar';
 
-class FormatCommand extends Command<Null> {
-  FormatCommand(this.packagesDir) {
+class FormatCommand extends PluginCommand {
+  FormatCommand(Directory packagesDir) : super(packagesDir) {
     argParser.addFlag('travis', hide: true);
     argParser.addOption('clang-format',
         defaultsTo: 'clang-format',
         help: 'Path to executable of clang-format 3.');
   }
-
-  final Directory packagesDir;
 
   @override
   final String name = 'format';
@@ -77,8 +74,8 @@ class FormatCommand extends Command<Null> {
 
   Future<Null> _formatObjectiveC() async {
     print('Formatting all .m and .h files...');
-    final Iterable<String> hFiles = _getFilesWithExtension(packagesDir, '.h');
-    final Iterable<String> mFiles = _getFilesWithExtension(packagesDir, '.m');
+    final Iterable<String> hFiles = _getFilesWithExtension('.h');
+    final Iterable<String> mFiles = _getFilesWithExtension('.m');
     await Process.run(argResults['clang-format'],
         <String>['-i', '--style=Google']..addAll(hFiles)..addAll(mFiles),
         workingDirectory: packagesDir.path);
@@ -86,8 +83,7 @@ class FormatCommand extends Command<Null> {
 
   Future<Null> _formatJava(String googleFormatterPath) async {
     print('Formatting all .java files...');
-    final Iterable<String> javaFiles =
-        _getFilesWithExtension(packagesDir, '.java');
+    final Iterable<String> javaFiles = _getFilesWithExtension('.java');
     await Process.run('java',
         <String>['-jar', googleFormatterPath, '--replace']..addAll(javaFiles),
         workingDirectory: packagesDir.path);
@@ -95,13 +91,13 @@ class FormatCommand extends Command<Null> {
 
   Future<Null> _formatDart() async {
     print('Formatting all .dart files...');
-    await Process.run('flutter', <String>['format', packagesDir.path],
+    final Iterable<String> dartFiles = _getFilesWithExtension('.dart');
+    await Process.run('flutter', <String>['format']..addAll(dartFiles),
         workingDirectory: packagesDir.path);
   }
 
-  Iterable<String> _getFilesWithExtension(Directory dir, String extension) =>
-      dir
-          .listSync(recursive: true)
+  Iterable<String> _getFilesWithExtension(String extension) =>
+      getPackages(recursive: true)
           .where((FileSystemEntity entity) =>
               entity is File && p.extension(entity.path) == extension)
           .map((FileSystemEntity entity) => entity.path);

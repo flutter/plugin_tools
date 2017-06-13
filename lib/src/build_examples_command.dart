@@ -5,18 +5,15 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
-class BuildExamplesCommand extends Command<Null> {
-  BuildExamplesCommand(this.packagesDir) {
+class BuildExamplesCommand extends PluginCommand {
+  BuildExamplesCommand(Directory packagesDir) : super(packagesDir) {
     argParser.addFlag('ipa', defaultsTo: Platform.isMacOS);
     argParser.addFlag('apk');
   }
-
-  final Directory packagesDir;
 
   @override
   final String name = 'build-examples';
@@ -27,7 +24,7 @@ class BuildExamplesCommand extends Command<Null> {
   @override
   Future<Null> run() async {
     final List<String> failingPackages = <String>[];
-    for (Directory example in _getExamplePackages(packagesDir)) {
+    for (Directory example in _getExamplePackages()) {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
 
@@ -63,8 +60,7 @@ class BuildExamplesCommand extends Command<Null> {
     print('All builds successful!');
   }
 
-  Iterable<Directory> _getExamplePackages(Directory dir) => dir
-          .listSync(recursive: true)
+  Iterable<Directory> _getExamplePackages() => getPackages(recursive: true)
           .where((FileSystemEntity entity) =>
               entity is Directory && p.basename(entity.path) == 'example')
           .where((FileSystemEntity entity) {

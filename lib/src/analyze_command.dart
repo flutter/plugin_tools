@@ -5,15 +5,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
-class AnalyzeCommand extends Command<Null> {
-  AnalyzeCommand(this.packagesDir);
-
-  final Directory packagesDir;
+class AnalyzeCommand extends PluginCommand {
+  AnalyzeCommand(Directory packagesDir) : super(packagesDir);
 
   @override
   final String name = 'analyze';
@@ -32,7 +29,7 @@ class AnalyzeCommand extends Command<Null> {
       throw new ToolExit(1);
     }
 
-    await for (Directory package in _listAllPackages(packagesDir)) {
+    for (Directory package in _listAllPackages()) {
       final int exitCode =
           await runAndStream('flutter', <String>['packages', 'get'], package);
       if (exitCode != 0) {
@@ -43,7 +40,7 @@ class AnalyzeCommand extends Command<Null> {
     }
 
     final List<String> failingPackages = <String>[];
-    await for (Directory package in _listAllPluginPackages(packagesDir)) {
+    for (Directory package in _listAllPluginPackages()) {
       final int exitCode = await runAndStream(
           'pub', <String>['global', 'run', 'tuneup', 'check'], package);
       if (exitCode != 0) {
@@ -63,13 +60,12 @@ class AnalyzeCommand extends Command<Null> {
     print('No analyzer errors found!');
   }
 
-  Stream<Directory> _listAllPluginPackages(Directory root) =>
-      root.list().where((FileSystemEntity entity) =>
+  List<Directory> _listAllPluginPackages() =>
+      getPackages().where((FileSystemEntity entity) =>
           entity is Directory &&
           new File(p.join(entity.path, 'pubspec.yaml')).existsSync());
 
-  Stream<Directory> _listAllPackages(Directory root) => root
-      .list(recursive: true)
+  List<Directory> _listAllPackages() => getPackages(recursive: true)
       .where((FileSystemEntity entity) =>
           entity is File && p.basename(entity.path) == 'pubspec.yaml')
       .map((FileSystemEntity entity) => entity.parent);

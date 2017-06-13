@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
+import 'package:async/async.dart';
 
 /// Error thrown when a command needs to exit with a non-zero exit code.
 class ToolExit extends Error {
@@ -20,27 +21,32 @@ abstract class PluginCommand extends Command<Null> {
   final Directory packagesDir;
 
   PluginCommand(this.packagesDir) {
-    argParser.addOption(_pluginsArg,
-        allowMultiple: true, splitCommas: true, help: 'Specifies which plugins the command should run on.',);
+    argParser.addOption(
+      _pluginsArg,
+      allowMultiple: true,
+      splitCommas: true,
+      help: 'Specifies which plugins the command should run on.',
+    );
   }
 
-  List<FileSystemEntity> getPluginFiles({bool recursive: false}) {
+  Stream<FileSystemEntity> getPluginFiles({bool recursive: false}) {
     final List<String> packages = argResults[_pluginsArg];
     if (packages.isEmpty) {
-      return packagesDir.listSync(recursive: recursive);
+      return packagesDir.list(recursive: recursive);
     } else {
       final List<Directory> filteredPackages = packagesDir.listSync().where(
           (FileSystemEntity entity) =>
               entity is Directory &&
               packages.contains(p.basename(entity.path)));
       if (recursive) {
-        final List<FileSystemEntity> allFiles = <FileSystemEntity>[];
+        final List<Stream<FileSystemEntity>> streams =
+            <Stream<FileSystemEntity>>[];
         for (Directory directory in filteredPackages) {
-          allFiles.addAll(directory.listSync(recursive: true));
+          streams.add(directory.list(recursive: true));
         }
-        return allFiles;
+        return StreamGroup.merge(streams);
       } else {
-        return filteredPackages;
+        return new Stream<FileSystemEntity>.fromIterable(filteredPackages);
       }
     }
   }

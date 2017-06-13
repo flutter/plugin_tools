@@ -24,7 +24,7 @@ class BuildExamplesCommand extends PluginCommand {
   @override
   Future<Null> run() async {
     final List<String> failingPackages = <String>[];
-    for (Directory example in _getExamplePackages()) {
+    await for (Directory example in _getExamplePackages()) {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
 
@@ -60,7 +60,7 @@ class BuildExamplesCommand extends PluginCommand {
     print('All builds successful!');
   }
 
-  Iterable<Directory> _getExamplePackages() => getPluginFiles(recursive: true)
+  Stream<Directory> _getExamplePackages() => getPluginFiles(recursive: true)
           .where((FileSystemEntity entity) =>
               entity is Directory && p.basename(entity.path) == 'example')
           .where((FileSystemEntity entity) {

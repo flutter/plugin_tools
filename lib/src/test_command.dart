@@ -21,7 +21,7 @@ class TestCommand extends PluginCommand {
   @override
   Future<Null> run() async {
     final List<String> failingPackages = <String>[];
-    for (Directory packageDir in _listAllPackages()) {
+    await for (Directory packageDir in _listAllPackages()) {
       final String packageName =
           p.relative(packageDir.path, from: packagesDir.path);
       if (!new Directory(p.join(packageDir.path, 'test')).existsSync()) {
@@ -49,7 +49,7 @@ class TestCommand extends PluginCommand {
     print('All tests are passing!');
   }
 
-  List<Directory> _listAllPackages() => getPluginFiles(recursive: true)
+  Stream<Directory> _listAllPackages() => getPluginFiles(recursive: true)
       .where((FileSystemEntity entity) =>
           entity is File && p.basename(entity.path) == 'pubspec.yaml')
       .map((FileSystemEntity entity) => entity.parent);

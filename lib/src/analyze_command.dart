@@ -29,7 +29,7 @@ class AnalyzeCommand extends PluginCommand {
       throw new ToolExit(1);
     }
 
-    for (Directory package in _listAllPackages()) {
+    await for (Directory package in _listAllPackages()) {
       final int exitCode =
           await runAndStream('flutter', <String>['packages', 'get'], package);
       if (exitCode != 0) {
@@ -40,7 +40,7 @@ class AnalyzeCommand extends PluginCommand {
     }
 
     final List<String> failingPackages = <String>[];
-    for (Directory package in _listAllPluginPackages()) {
+    await for (Directory package in _listAllPluginPackages()) {
       final int exitCode = await runAndStream(
           'pub', <String>['global', 'run', 'tuneup', 'check'], package);
       if (exitCode != 0) {
@@ -60,12 +60,12 @@ class AnalyzeCommand extends PluginCommand {
     print('No analyzer errors found!');
   }
 
-  List<Directory> _listAllPluginPackages() =>
+  Stream<Directory> _listAllPluginPackages() =>
       getPluginFiles().where((FileSystemEntity entity) =>
           entity is Directory &&
           new File(p.join(entity.path, 'pubspec.yaml')).existsSync());
 
-  List<Directory> _listAllPackages() => getPluginFiles(recursive: true)
+  Stream<Directory> _listAllPackages() => getPluginFiles(recursive: true)
       .where((FileSystemEntity entity) =>
           entity is File && p.basename(entity.path) == 'pubspec.yaml')
       .map((FileSystemEntity entity) => entity.parent);

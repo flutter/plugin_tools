@@ -74,8 +74,8 @@ class FormatCommand extends PluginCommand {
 
   Future<Null> _formatObjectiveC() async {
     print('Formatting all .m and .h files...');
-    final Iterable<String> hFiles = _getFilesWithExtension('.h');
-    final Iterable<String> mFiles = _getFilesWithExtension('.m');
+    final Iterable<String> hFiles = await _getFilesWithExtension('.h');
+    final Iterable<String> mFiles = await _getFilesWithExtension('.m');
     await Process.run(argResults['clang-format'],
         <String>['-i', '--style=Google']..addAll(hFiles)..addAll(mFiles),
         workingDirectory: packagesDir.path);
@@ -83,7 +83,7 @@ class FormatCommand extends PluginCommand {
 
   Future<Null> _formatJava(String googleFormatterPath) async {
     print('Formatting all .java files...');
-    final Iterable<String> javaFiles = _getFilesWithExtension('.java');
+    final Iterable<String> javaFiles = await _getFilesWithExtension('.java');
     await Process.run('java',
         <String>['-jar', googleFormatterPath, '--replace']..addAll(javaFiles),
         workingDirectory: packagesDir.path);
@@ -91,17 +91,18 @@ class FormatCommand extends PluginCommand {
 
   Future<Null> _formatDart() async {
     print('Formatting all .dart files...');
-    final Iterable<String> dartFiles = _getFilesWithExtension('.dart');
+    final Iterable<String> dartFiles = await _getFilesWithExtension('.dart');
     print(dartFiles);
     await Process.run('flutter', <String>['format']..addAll(dartFiles),
         workingDirectory: packagesDir.path);
   }
 
-  Iterable<String> _getFilesWithExtension(String extension) =>
+  Future<List<String>> _getFilesWithExtension(String extension) async =>
       getPluginFiles(recursive: true)
           .where((FileSystemEntity entity) =>
               entity is File && p.extension(entity.path) == extension)
-          .map((FileSystemEntity entity) => entity.path);
+          .map((FileSystemEntity entity) => entity.path)
+          .toList();
 
   Future<String> _getGogleFormatterPath() async {
     final String javaFormatterPath = p.join(

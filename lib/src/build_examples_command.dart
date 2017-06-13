@@ -60,7 +60,7 @@ class BuildExamplesCommand extends PluginCommand {
     print('All builds successful!');
   }
 
-  Iterable<Directory> _getExamplePackages() => getPackages(recursive: true)
+  Iterable<Directory> _getExamplePackages() => getPluginFiles(recursive: true)
           .where((FileSystemEntity entity) =>
               entity is Directory && p.basename(entity.path) == 'example')
           .where((FileSystemEntity entity) {

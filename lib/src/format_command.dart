@@ -92,12 +92,13 @@ class FormatCommand extends PluginCommand {
   Future<Null> _formatDart() async {
     print('Formatting all .dart files...');
     final Iterable<String> dartFiles = _getFilesWithExtension('.dart');
+    print(dartFiles);
     await Process.run('flutter', <String>['format']..addAll(dartFiles),
         workingDirectory: packagesDir.path);
   }
 
   Iterable<String> _getFilesWithExtension(String extension) =>
-      getPackages(recursive: true)
+      getPluginFiles(recursive: true)
           .where((FileSystemEntity entity) =>
               entity is File && p.extension(entity.path) == extension)
           .map((FileSystemEntity entity) => entity.path);

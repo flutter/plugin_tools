@@ -16,16 +16,19 @@ class ToolExit extends Error {
 }
 
 abstract class PluginCommand extends Command<Null> {
+  static const String _pluginsArg = 'plugins';
   final Directory packagesDir;
 
   PluginCommand(this.packagesDir) {
-    argParser.addOption('changedPackages',
-        allowMultiple: true, splitCommas: true);
+    argParser.addOption(_pluginsArg,
+        allowMultiple: true, splitCommas: true, help: 'Specifies which plugins the command should run on.',);
   }
 
-  List<FileSystemEntity> getPackages({bool recursive: false}) {
-    final List<String> packages = argResults['changedPackages'];
-    if (packages.isNotEmpty) {
+  List<FileSystemEntity> getPluginFiles({bool recursive: false}) {
+    final List<String> packages = argResults[_pluginsArg];
+    if (packages.isEmpty) {
+      return packagesDir.listSync(recursive: recursive);
+    } else {
       final List<Directory> filteredPackages = packagesDir.listSync().where(
           (FileSystemEntity entity) =>
               entity is Directory &&
@@ -39,8 +42,6 @@ abstract class PluginCommand extends Command<Null> {
       } else {
         return filteredPackages;
       }
-    } else {
-      return packagesDir.listSync(recursive: recursive);
     }
   }
 }

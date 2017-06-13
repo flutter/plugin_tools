@@ -61,11 +61,11 @@ class AnalyzeCommand extends PluginCommand {
   }
 
   List<Directory> _listAllPluginPackages() =>
-      getPackages().where((FileSystemEntity entity) =>
+      getPluginFiles().where((FileSystemEntity entity) =>
           entity is Directory &&
           new File(p.join(entity.path, 'pubspec.yaml')).existsSync());
 
-  List<Directory> _listAllPackages() => getPackages(recursive: true)
+  List<Directory> _listAllPackages() => getPluginFiles(recursive: true)
       .where((FileSystemEntity entity) =>
           entity is File && p.basename(entity.path) == 'pubspec.yaml')
       .map((FileSystemEntity entity) => entity.parent);

@@ -92,7 +92,6 @@ class FormatCommand extends PluginCommand {
   Future<Null> _formatDart() async {
     print('Formatting all .dart files...');
     final Iterable<String> dartFiles = await _getFilesWithExtension('.dart');
-    print(dartFiles);
     await Process.run('flutter', <String>['format']..addAll(dartFiles),
         workingDirectory: packagesDir.path);
   }

@@ -26,6 +26,7 @@ abstract class PluginCommand extends Command<Null> {
       allowMultiple: true,
       splitCommas: true,
       help: 'Specifies which plugins the command should run on.',
+      valueHelp: 'plugin1,plugin2,...',
     );
   }
 

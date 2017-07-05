@@ -30,7 +30,7 @@ class FormatCommand extends PluginCommand {
 
   @override
   Future<Null> run() async {
-    final String googleFormatterPath = await _getGogleFormatterPath();
+    final String googleFormatterPath = await _getGoogleFormatterPath();
 
     await _formatDart();
     await _formatJava(googleFormatterPath);
@@ -103,7 +103,7 @@ class FormatCommand extends PluginCommand {
           .map((FileSystemEntity entity) => entity.path)
           .toList();
 
-  Future<String> _getGogleFormatterPath() async {
+  Future<String> _getGoogleFormatterPath() async {
     final String javaFormatterPath = p.join(
         p.dirname(p.fromUri(Platform.script)),
         'google-java-format-1.3-all-deps.jar');

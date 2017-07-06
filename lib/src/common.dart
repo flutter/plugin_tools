@@ -60,7 +60,8 @@ Future<int> runAndStream(String executable, List<String> args,
   stdout.addStream(process.stdout);
   stderr.addStream(process.stderr);
   if (exitOnError && await process.exitCode != 0) {
-    String error = _getErrorString(executable, args, workingDir: workingDir);
+    final String error =
+        _getErrorString(executable, args, workingDir: workingDir);
     print('$error See above for details.');
     throw new ToolExit(await process.exitCode);
   }
@@ -72,15 +73,16 @@ Future<ProcessResult> runAndExitOnError(String executable, List<String> args,
   final ProcessResult result =
       await Process.run(executable, args, workingDirectory: workingDir?.path);
   if (result.exitCode != 0) {
-    String error = _getErrorString(executable, args, workingDir: workingDir);
+    final String error =
+        _getErrorString(executable, args, workingDir: workingDir);
     print('$error Stderr:\n${result.stdout}');
-    throw new ToolExit(await result.exitCode);
+    throw new ToolExit(result.exitCode);
   }
   return result;
 }
 
 String _getErrorString(String executable, List<String> args,
     {Directory workingDir}) {
-  String workdir = workingDir == null ? '' : ' in ${workingDir.path}';
+  final String workdir = workingDir == null ? '' : ' in ${workingDir.path}';
   return 'ERROR: Unable to execute "$executable ${args.join(' ')}"$workdir.';
 }

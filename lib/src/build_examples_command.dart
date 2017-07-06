@@ -19,7 +19,9 @@ class BuildExamplesCommand extends PluginCommand {
   final String name = 'build-examples';
 
   @override
-  final String description = 'Builds all example apps.';
+  final String description =
+      'Builds all example apps (IPA for iOS and APK for Android).\n\n'
+      'This command requires "flutter" to be in your path.';
 
   @override
   Future<Null> run() async {
@@ -31,7 +33,8 @@ class BuildExamplesCommand extends PluginCommand {
       if (argResults['ipa']) {
         print('\nBUILDING IPA for $packageName');
         final int exitCode = await runAndStream(
-            'flutter', <String>['build', 'ios', '--no-codesign'], example);
+            'flutter', <String>['build', 'ios', '--no-codesign'],
+            workingDir: example);
         if (exitCode != 0) {
           failingPackages.add('$packageName (ipa)');
         }
@@ -39,8 +42,9 @@ class BuildExamplesCommand extends PluginCommand {
 
       if (argResults['apk']) {
         print('\nBUILDING APK for $packageName');
-        final int exitCode =
-            await runAndStream('flutter', <String>['build', 'apk'], example);
+        final int exitCode = await runAndStream(
+            'flutter', <String>['build', 'apk'],
+            workingDir: example);
         if (exitCode != 0) {
           failingPackages.add('$packageName (apk)');
         }

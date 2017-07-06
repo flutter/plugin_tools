@@ -23,10 +23,18 @@ In order to use the tools you need to enable them once by running the following 
 $ pub global activate flutter_plugin_tools
 ```
 
+## Requirements
+
+To use all features of `flutter_plugin_tools` you'll need the following commands in your `PATH`:
+* `flutter`
+* `git`
+* `pub` (recommended: version from `<path/to/flutter>/bin/cache/dart-sdk/bin`)
+* `clang-format` version 5 (alternatively, you can provide the path via `--clang-format=`)
+
 ## Usage
 
 ```shell
 $ pub global run flutter_plugin_tools <command>
 ```
 
-Repalce `<command>` with `help` to print a list of available commands.
+Replace `<command>` with `help` to print a list of available commands.

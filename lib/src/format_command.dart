@@ -19,14 +19,17 @@ class FormatCommand extends PluginCommand {
     argParser.addFlag('travis', hide: true);
     argParser.addOption('clang-format',
         defaultsTo: 'clang-format',
-        help: 'Path to executable of clang-format 3.');
+        help: 'Path to executable of clang-format v5.');
   }
 
   @override
   final String name = 'format';
 
   @override
-  final String description = 'Formats the code of all packages.';
+  final String description =
+      'Formats the code of all packages (Java, Objective-C, and Dart).\n\n'
+      'This command requires "git", "flutter" and "clang-format" v5 to be in '
+      'your path.';
 
   @override
   Future<Null> run() async {
@@ -45,9 +48,9 @@ class FormatCommand extends PluginCommand {
   }
 
   Future<bool> _didModifyAnything() async {
-    final ProcessResult modifiedFiles = await Process.run(
+    final ProcessResult modifiedFiles = await runAndExitOnError(
         'git', <String>['ls-files', '--modified'],
-        workingDirectory: packagesDir.path);
+        workingDir: packagesDir);
 
     print('\n\n');
 
@@ -56,9 +59,9 @@ class FormatCommand extends PluginCommand {
       return false;
     }
 
-    final ProcessResult diff = await Process.run(
+    final ProcessResult diff = await runAndExitOnError(
         'git', <String>['diff', '--color'],
-        workingDirectory: packagesDir.path);
+        workingDir: packagesDir);
     print(diff.stdout);
 
     print('These files are not formatted correctly (see diff above):');
@@ -76,24 +79,26 @@ class FormatCommand extends PluginCommand {
     print('Formatting all .m and .h files...');
     final Iterable<String> hFiles = await _getFilesWithExtension('.h');
     final Iterable<String> mFiles = await _getFilesWithExtension('.m');
-    await Process.run(argResults['clang-format'],
+    await runAndStream(argResults['clang-format'],
         <String>['-i', '--style=Google']..addAll(hFiles)..addAll(mFiles),
-        workingDirectory: packagesDir.path);
+        workingDir: packagesDir, exitOnError: true);
   }
 
   Future<Null> _formatJava(String googleFormatterPath) async {
     print('Formatting all .java files...');
     final Iterable<String> javaFiles = await _getFilesWithExtension('.java');
-    await Process.run('java',
+    await runAndStream('java',
         <String>['-jar', googleFormatterPath, '--replace']..addAll(javaFiles),
-        workingDirectory: packagesDir.path);
+        workingDir: packagesDir, exitOnError: true);
   }
 
   Future<Null> _formatDart() async {
     print('Formatting all .dart files...');
     final Iterable<String> dartFiles = await _getFilesWithExtension('.dart');
-    await Process.run('flutter', <String>['format']..addAll(dartFiles),
-        workingDirectory: packagesDir.path);
+    // TODO(goderbauer): add "exitOnError: true" after fix for
+    //     https://github.com/dart-lang/dart_style/issues/522 is released.
+    await runAndStream('flutter', <String>['format']..addAll(dartFiles),
+        workingDir: packagesDir, /* exitOnError: true */);
   }
 
   Future<List<String>> _getFilesWithExtension(String extension) async =>

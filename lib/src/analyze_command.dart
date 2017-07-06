@@ -16,33 +16,25 @@ class AnalyzeCommand extends PluginCommand {
   final String name = 'analyze';
 
   @override
-  final String description = 'Analyzes all packages.';
+  final String description = 'Analyzes all packages using package:tuneup.\n\n'
+      'This command requires "pub" and "flutter" to be in your path.';
 
   @override
   Future<Null> run() async {
     print('Activating tuneup package...');
-    final ProcessResult activationResult = await Process.run(
-        'pub', <String>['global', 'activate', 'tuneup'],
-        workingDirectory: packagesDir.path);
-    if (activationResult.exitCode != 0) {
-      print('ERROR: Unable to activate tuneup package.');
-      throw new ToolExit(1);
-    }
+    await runAndStream('pub', <String>['global', 'activate', 'tuneup'],
+        workingDir: packagesDir, exitOnError: true);
 
     await for (Directory package in _listAllPackages()) {
-      final int exitCode =
-          await runAndStream('flutter', <String>['packages', 'get'], package);
-      if (exitCode != 0) {
-        print(
-            'ERROR: Unable to run "flutter packages get" in package $package.');
-        throw new ToolExit(1);
-      }
+      await runAndStream('flutter', <String>['packages', 'get'],
+          workingDir: package, exitOnError: true);
     }
 
     final List<String> failingPackages = <String>[];
     await for (Directory package in _listAllPluginPackages()) {
       final int exitCode = await runAndStream(
-          'pub', <String>['global', 'run', 'tuneup', 'check'], package);
+          'pub', <String>['global', 'run', 'tuneup', 'check'],
+          workingDir: package);
       if (exitCode != 0) {
         failingPackages.add(p.basename(package.path));
       }

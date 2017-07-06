@@ -16,7 +16,8 @@ class TestCommand extends PluginCommand {
   final String name = 'test';
 
   @override
-  final String description = 'Runs the Dart tests for all packages.';
+  final String description = 'Runs the Dart tests for all packages.\n\n'
+      'This command requires "flutter" to be in your path.';
 
   @override
   Future<Null> run() async {
@@ -25,13 +26,14 @@ class TestCommand extends PluginCommand {
       final String packageName =
           p.relative(packageDir.path, from: packagesDir.path);
       if (!new Directory(p.join(packageDir.path, 'test')).existsSync()) {
-        print('\nSKIPPING $packageName - no test subdirectory');
+        print('SKIPPING $packageName - no test subdirectory');
         continue;
       }
 
-      print('\nRUNNING $packageName tests...');
+      print('RUNNING $packageName tests...');
       final int exitCode = await runAndStream(
-          'flutter', <String>['test', '--color'], packageDir);
+          'flutter', <String>['test', '--color'],
+          workingDir: packageDir);
       if (exitCode != 0) {
         failingPackages.add(packageName);
       }

@@ -53,11 +53,34 @@ abstract class PluginCommand extends Command<Null> {
   }
 }
 
-Future<int> runAndStream(
-    String executable, List<String> args, Directory workingDir) async {
+Future<int> runAndStream(String executable, List<String> args,
+    {Directory workingDir, bool exitOnError: false}) async {
   final Process process =
-      await Process.start(executable, args, workingDirectory: workingDir.path);
+      await Process.start(executable, args, workingDirectory: workingDir?.path);
   stdout.addStream(process.stdout);
   stderr.addStream(process.stderr);
+  if (exitOnError && await process.exitCode != 0) {
+    String error = _getErrorString(executable, args, workingDir: workingDir);
+    print('$error See above for details.');
+    throw new ToolExit(await process.exitCode);
+  }
   return process.exitCode;
+}
+
+Future<ProcessResult> runAndExitOnError(String executable, List<String> args,
+    {Directory workingDir, bool exitOnError: false}) async {
+  final ProcessResult result =
+      await Process.run(executable, args, workingDirectory: workingDir?.path);
+  if (result.exitCode != 0) {
+    String error = _getErrorString(executable, args, workingDir: workingDir);
+    print('$error Stderr:\n${result.stdout}');
+    throw new ToolExit(await result.exitCode);
+  }
+  return result;
+}
+
+String _getErrorString(String executable, List<String> args,
+    {Directory workingDir}) {
+  String workdir = workingDir == null ? '' : ' in ${workingDir.path}';
+  return 'ERROR: Unable to execute "$executable ${args.join(' ')}"$workdir.';
 }

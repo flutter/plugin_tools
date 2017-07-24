@@ -95,13 +95,8 @@ class FormatCommand extends PluginCommand {
   Future<Null> _formatDart() async {
     print('Formatting all .dart files...');
     final Iterable<String> dartFiles = await _getFilesWithExtension('.dart');
-    // TODO(goderbauer): add "exitOnError: true" after fix for
-    //     https://github.com/dart-lang/dart_style/issues/522 is released.
-    await runAndStream(
-      'flutter',
-      <String>['format']..addAll(dartFiles),
-      workingDir: packagesDir, /* exitOnError: true */
-    );
+    await runAndStream('flutter', <String>['format']..addAll(dartFiles),
+        workingDir: packagesDir, exitOnError: true);
   }
 
   Future<List<String>> _getFilesWithExtension(String extension) async =>

@@ -100,7 +100,7 @@ class FormatCommand extends PluginCommand {
   }
 
   Future<List<String>> _getFilesWithExtension(String extension) async =>
-      getPluginFiles(recursive: true)
+      getPluginFiles()
           .where((FileSystemEntity entity) =>
               entity is File && p.extension(entity.path) == extension)
           .map((FileSystemEntity entity) => entity.path)

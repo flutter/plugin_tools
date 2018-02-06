@@ -51,7 +51,7 @@ class TestCommand extends PluginCommand {
     print('All tests are passing!');
   }
 
-  Stream<Directory> _listAllPackages() => getPluginFiles(recursive: true)
+  Stream<Directory> _listAllPackages() => getPluginFiles()
       .where((FileSystemEntity entity) =>
           entity is File && p.basename(entity.path) == 'pubspec.yaml')
       .map((FileSystemEntity entity) => entity.parent);

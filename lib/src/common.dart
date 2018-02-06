@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
-import 'package:async/async.dart';
 
 /// Error thrown when a command needs to exit with a non-zero exit code.
 class ToolExit extends Error {
@@ -30,26 +30,18 @@ abstract class PluginCommand extends Command<Null> {
     );
   }
 
-  Stream<FileSystemEntity> getPluginFiles({bool recursive: false}) {
+  Stream<FileSystemEntity> getPluginFiles() async* {
     final List<String> packages = argResults[_pluginsArg];
-    if (packages.isEmpty) {
-      return packagesDir.list(recursive: recursive);
-    } else {
-      final List<Directory> filteredPackages = packagesDir.listSync().where(
-          (FileSystemEntity entity) =>
-              entity is Directory &&
-              packages.contains(p.basename(entity.path)));
-      if (recursive) {
-        final List<Stream<FileSystemEntity>> streams =
-            <Stream<FileSystemEntity>>[];
-        for (Directory directory in filteredPackages) {
-          streams.add(directory.list(recursive: true));
-        }
-        return StreamGroup.merge(streams);
-      } else {
-        return new Stream<FileSystemEntity>.fromIterable(filteredPackages);
-      }
+    final ProcessResult result = await runAndExitOnError(
+        'git', <String>['ls-files'],
+        workingDir: packagesDir);
+    Iterable<String> files = const LineSplitter().convert(result.stdout);
+    if (packages.isNotEmpty) {
+      files = files
+          .where((String s) => packages.contains(s.split(p.separator).first));
     }
+    yield* new Stream<FileSystemEntity>.fromIterable(
+        files.map((String s) => new File(p.join(packagesDir.path, s))));
   }
 }
 

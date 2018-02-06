@@ -64,7 +64,7 @@ class BuildExamplesCommand extends PluginCommand {
     print('All builds successful!');
   }
 
-  Stream<Directory> _getExamplePackages() => getPluginFiles(recursive: true)
+  Stream<Directory> _getExamplePackages() => getPluginFiles()
           .where((FileSystemEntity entity) =>
               entity is Directory && p.basename(entity.path) == 'example')
           .where((FileSystemEntity entity) {

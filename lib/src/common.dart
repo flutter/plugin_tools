@@ -33,17 +33,18 @@ abstract class PluginCommand extends Command<Null> {
   Stream<FileSystemEntity> getPluginFiles({bool recursive: false}) {
     final List<String> packages = argResults[_pluginsArg];
     if (packages.isEmpty) {
-      return packagesDir.list(recursive: recursive);
+      return packagesDir.list(recursive: recursive, followLinks: false);
     } else {
-      final List<Directory> filteredPackages = packagesDir.listSync().where(
-          (FileSystemEntity entity) =>
+      final List<Directory> filteredPackages = packagesDir
+          .listSync(followLinks: false)
+          .where((FileSystemEntity entity) =>
               entity is Directory &&
               packages.contains(p.basename(entity.path)));
       if (recursive) {
         final List<Stream<FileSystemEntity>> streams =
             <Stream<FileSystemEntity>>[];
         for (Directory directory in filteredPackages) {
-          streams.add(directory.list(recursive: true));
+          streams.add(directory.list(recursive: true, followLinks: false));
         }
         return StreamGroup.merge(streams);
       } else {

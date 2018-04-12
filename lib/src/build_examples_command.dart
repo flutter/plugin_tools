@@ -69,7 +69,7 @@ class BuildExamplesCommand extends PluginCommand {
               entity is Directory && p.basename(entity.path) == 'example')
           .where((FileSystemEntity entity) {
         final Directory dir = entity;
-        return dir.listSync().any((FileSystemEntity entity) =>
+        return dir.listSync(followLinks: false).any((FileSystemEntity entity) =>
             entity is File && p.basename(entity.path) == 'pubspec.yaml');
       });
 }

@@ -26,7 +26,7 @@ class BuildExamplesCommand extends PluginCommand {
   @override
   Future<Null> run() async {
     final List<String> failingPackages = <String>[];
-    await for (Directory example in _getExamplePackages()) {
+    await for (Directory example in getExamplePackages()) {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
 
@@ -63,13 +63,4 @@ class BuildExamplesCommand extends PluginCommand {
 
     print('All builds successful!');
   }
-
-  Stream<Directory> _getExamplePackages() => getPluginFiles(recursive: true)
-          .where((FileSystemEntity entity) =>
-              entity is Directory && p.basename(entity.path) == 'example')
-          .where((FileSystemEntity entity) {
-        final Directory dir = entity;
-        return dir.listSync(followLinks: false).any((FileSystemEntity entity) =>
-            entity is File && p.basename(entity.path) == 'pubspec.yaml');
-      });
 }

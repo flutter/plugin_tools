@@ -16,7 +16,7 @@ class JavaTestCommand extends PluginCommand {
   final String name = 'java-test';
 
   @override
-  final String description = 'Runs the java tests of the example apps.\n\n'
+  final String description = 'Runs the Java tests of the example apps.\n\n'
       'Building the apks of the example apps is required before executing this'
       'command.';
 
@@ -58,7 +58,7 @@ class JavaTestCommand extends PluginCommand {
     print('\n\n');
     if (failingPackages.isNotEmpty) {
       print(
-          'The java tests for the following packages are failing (see above for'
+          'The Java tests for the following packages are failing (see above for'
           'details):');
       for (String package in failingPackages) {
         print(' * $package');
@@ -76,6 +76,6 @@ class JavaTestCommand extends PluginCommand {
       throw new ToolExit(1);
     }
 
-    print('All java tests successful!');
+    print('All Java tests successful!');
   }
 }

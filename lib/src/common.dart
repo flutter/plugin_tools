@@ -17,7 +17,7 @@ class ToolExit extends Error {
 
 abstract class PluginCommand extends Command<Null> {
   static const String _pluginsArg = 'plugins';
-  static const String _shardArg = 'shard';
+  static const String _shardIndexArg = 'shardIndex';
   static const String _shardCountArg = 'shardCount';
   final Directory packagesDir;
 
@@ -26,11 +26,11 @@ abstract class PluginCommand extends Command<Null> {
       _pluginsArg,
       allowMultiple: true,
       splitCommas: true,
-      help: 'Specifies which plugins the command should run on.',
+      help: 'Specifies which plugins the command should run on (before sharding).',
       valueHelp: 'plugin1,plugin2,...',
     );
     argParser.addOption(
-      _shardArg,
+      _shardIndexArg,
       help: 'Specifies the zero-based index of the shard to '
           'which the command applies.',
       valueHelp: 'i',
@@ -46,19 +46,20 @@ abstract class PluginCommand extends Command<Null> {
 
   @override
   FutureOr<Null> run() {
-    final int shard = int.tryParse(argResults[_shardArg]);
+    final int shardIndex = int.tryParse(argResults[_shardIndexArg]);
     final int shardCount = int.tryParse(argResults[_shardCountArg]);
-    if (shard == null) {
-      usageException('shard must be an integer');
+    if (shardIndex == null) {
+      usageException('$_shardIndexArg must be an integer');
     }
     if (shardCount == null) {
-      usageException('shardCount must be an integer');
+      usageException('$_shardCountArg must be an integer');
     }
     if (shardCount < 1) {
-      usageException('shardCount must be positive');
+      usageException('$_shardCountArg must be positive');
     }
-    if (shard < 0 || shardCount <= shard) {
-      usageException('shard must be in the half-open range [0..$shardCount[');
+    if (shardIndex < 0 || shardCount <= shardIndex) {
+      usageException(
+          '$_shardIndexArg must be in the half-open range [0..$shardCount[');
     }
     return super.run();
   }
@@ -67,7 +68,7 @@ abstract class PluginCommand extends Command<Null> {
   /// command execution.
   Stream<Directory> getPlugins() {
     final int shardCount = int.parse(argResults[_shardCountArg]);
-    final int shard = int.parse(argResults[_shardArg]);
+    final int shard = int.parse(argResults[_shardIndexArg]);
     final Set<String> packages = new Set<String>.from(argResults[_pluginsArg]);
     int i = 0;
     return packagesDir

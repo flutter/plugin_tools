@@ -26,7 +26,8 @@ abstract class PluginCommand extends Command<Null> {
       _pluginsArg,
       allowMultiple: true,
       splitCommas: true,
-      help: 'Specifies which plugins the command should run on (before sharding).',
+      help:
+          'Specifies which plugins the command should run on (before sharding).',
       valueHelp: 'plugin1,plugin2,...',
     );
     argParser.addOption(

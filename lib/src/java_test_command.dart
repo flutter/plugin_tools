@@ -24,7 +24,7 @@ class JavaTestCommand extends PluginCommand {
 
   @override
   Future<Null> run() async {
-    final Stream<Directory> examplesWithTests = getExamplePackages().where(
+    final Stream<Directory> examplesWithTests = getExamples().where(
         (Directory d) =>
             new Directory(p.join(d.path, 'android', 'app', 'src', 'test'))
                 .existsSync());

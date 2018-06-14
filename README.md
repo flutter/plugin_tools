@@ -12,8 +12,9 @@ testing on Travis for these repositories (see [travis.yaml](https://github.com/f
 As an example, Flutter Plugin Tools allows you to:
 
 * Build all plugin example apps with one command
-* Run the tests of all pluigns with one command
+* Run the tests of all plugins with one command
 * Format all Dart, Java, and Objective-C code in the repository
+* Define shards of the above tasks
 
 ## Installation
 

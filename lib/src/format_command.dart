@@ -33,6 +33,7 @@ class FormatCommand extends PluginCommand {
 
   @override
   Future<Null> run() async {
+    checkSharding();
     final String googleFormatterPath = await _getGoogleFormatterPath();
 
     await _formatDart();

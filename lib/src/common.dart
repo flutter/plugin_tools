@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
@@ -20,6 +21,8 @@ abstract class PluginCommand extends Command<Null> {
   static const String _shardIndexArg = 'shardIndex';
   static const String _shardCountArg = 'shardCount';
   final Directory packagesDir;
+  int _shardIndex;
+  int _shardCount;
 
   PluginCommand(this.packagesDir) {
     argParser.addOption(
@@ -45,8 +48,21 @@ abstract class PluginCommand extends Command<Null> {
     );
   }
 
-  @override
-  FutureOr<Null> run() {
+  int get shardIndex {
+    if (_shardIndex == null) {
+      checkSharding();
+    }
+    return _shardIndex;
+  }
+
+  int get shardCount {
+    if (_shardCount == null) {
+      checkSharding();
+    }
+    return _shardCount;
+  }
+
+  void checkSharding() {
     final int shardIndex = int.tryParse(argResults[_shardIndexArg]);
     final int shardCount = int.tryParse(argResults[_shardCountArg]);
     if (shardIndex == null) {
@@ -62,22 +78,40 @@ abstract class PluginCommand extends Command<Null> {
       usageException(
           '$_shardIndexArg must be in the half-open range [0..$shardCount[');
     }
-    return super.run();
+    _shardIndex = shardIndex;
+    _shardCount = shardCount;
   }
 
   /// Returns the root Dart package folders of the plugins involved in this
   /// command execution.
-  Stream<Directory> getPlugins() {
-    final int shardCount = int.parse(argResults[_shardCountArg]);
-    final int shard = int.parse(argResults[_shardIndexArg]);
+  Stream<Directory> getPlugins() async* {
+    // To avoid assuming consistency of `Directory.list` across command
+    // invocations, we collect and sort the plugin folders before sharding.
+    // This is considered an implementation detail which is why the API still
+    // uses streams.
+    final List<Directory> allPlugins = await _getAllPlugins().toList();
+    allPlugins.sort((Directory d1, Directory d2) => d1.path.compareTo(d2.path));
+    // Sharding 10 elements into 3 shards should yield shard sizes 4, 4, 2.
+    // Sharding  9 elements into 3 shards should yield shard sizes 3, 3, 3.
+    // Sharding  2 elements into 3 shards should yield shard sizes 1, 1, 0.
+    final int shardSize = allPlugins.length ~/ shardCount +
+        (allPlugins.length % shardCount == 0 ? 0 : 1);
+    final int start = min(shardIndex * shardSize, allPlugins.length);
+    final int end = min(start + shardSize, allPlugins.length);
+    for (Directory plugin in allPlugins.sublist(start, end)) {
+      yield plugin;
+    }
+  }
+
+  /// Returns the root Dart package folders of the plugins involved in this
+  /// command execution, assuming there is only one shard.
+  Stream<Directory> _getAllPlugins() {
     final Set<String> packages = new Set<String>.from(argResults[_pluginsArg]);
-    int i = 0;
     return packagesDir
         .list(followLinks: false)
         .where(_isDartPackage)
         .where((FileSystemEntity entity) =>
             packages.isEmpty || packages.contains(p.basename(entity.path)))
-        .where((_) => i++ % shardCount == shard)
         .cast<Directory>();
   }
 

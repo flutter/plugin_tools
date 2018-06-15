@@ -21,6 +21,7 @@ class TestCommand extends PluginCommand {
 
   @override
   Future<Null> run() async {
+    checkSharding();
     final List<String> failingPackages = <String>[];
     await for (Directory packageDir in getPackages()) {
       final String packageName =

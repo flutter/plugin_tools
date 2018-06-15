@@ -21,6 +21,7 @@ class AnalyzeCommand extends PluginCommand {
 
   @override
   Future<Null> run() async {
+    checkSharding();
     print('Activating tuneup package...');
     await runAndStream('pub', <String>['global', 'activate', 'tuneup'],
         workingDir: packagesDir, exitOnError: true);

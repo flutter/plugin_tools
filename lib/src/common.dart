@@ -117,11 +117,7 @@ abstract class PluginCommand extends Command<Null> {
 
   /// Returns the example Dart package folders of the plugins involved in this
   /// command execution.
-  Stream<Directory> getExamples() {
-    return getPlugins()
-        .map<Directory>(_getExampleForPlugin)
-        .where((Directory example) => example != null);
-  }
+  Stream<Directory> getExamples() => getPlugins().expand(_getExamplesForPlugin);
 
   /// Returns all Dart package folders (typically, plugin + example) of the
   /// plugins involved in this command execution.
@@ -151,12 +147,21 @@ abstract class PluginCommand extends Command<Null> {
         new File(p.join(entity.path, 'pubspec.yaml')).existsSync();
   }
 
-  /// Returns the example Dart package contained in the specified plugin, or
-  /// null, if the plugin has no example.
-  Directory _getExampleForPlugin(Directory plugin) {
+  /// Returns the example Dart packages contained in the specified plugin, or
+  /// an empty List, if the plugin has no examples.
+  List<Directory> _getExamplesForPlugin(Directory plugin) {
     final Directory exampleFolder =
         new Directory(p.join(plugin.path, 'example'));
-    return _isDartPackage(exampleFolder) ? exampleFolder : null;
+    if (!exampleFolder.existsSync()) {
+      return <Directory>[];
+    }
+    if (_isDartPackage(exampleFolder)) {
+      return <Directory>[exampleFolder];
+    }
+    // Only look at the subdirectories of the example directory if the example
+    // directory itself is not a Dart package, and only look one level below the
+    // example directory for other dart packages.
+    return exampleFolder.listSync().where(_isDartPackage);
   }
 }
 

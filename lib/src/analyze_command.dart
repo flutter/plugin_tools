@@ -21,17 +21,18 @@ class AnalyzeCommand extends PluginCommand {
 
   @override
   Future<Null> run() async {
+    checkSharding();
     print('Activating tuneup package...');
     await runAndStream('pub', <String>['global', 'activate', 'tuneup'],
         workingDir: packagesDir, exitOnError: true);
 
-    await for (Directory package in _listAllPackages()) {
+    await for (Directory package in getPackages()) {
       await runAndStream('flutter', <String>['packages', 'get'],
           workingDir: package, exitOnError: true);
     }
 
     final List<String> failingPackages = <String>[];
-    await for (Directory package in _listAllPluginPackages()) {
+    await for (Directory package in getPlugins()) {
       final int exitCode = await runAndStream(
           'pub', <String>['global', 'run', 'tuneup', 'check'],
           workingDir: package);
@@ -51,14 +52,4 @@ class AnalyzeCommand extends PluginCommand {
 
     print('No analyzer errors found!');
   }
-
-  Stream<Directory> _listAllPluginPackages() =>
-      getPluginFiles().where((FileSystemEntity entity) =>
-          entity is Directory &&
-          new File(p.join(entity.path, 'pubspec.yaml')).existsSync());
-
-  Stream<Directory> _listAllPackages() => getPluginFiles(recursive: true)
-      .where((FileSystemEntity entity) =>
-          entity is File && p.basename(entity.path) == 'pubspec.yaml')
-      .map((FileSystemEntity entity) => entity.parent);
 }

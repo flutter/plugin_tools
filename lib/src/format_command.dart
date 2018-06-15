@@ -33,6 +33,7 @@ class FormatCommand extends PluginCommand {
 
   @override
   Future<Null> run() async {
+    checkSharding();
     final String googleFormatterPath = await _getGoogleFormatterPath();
 
     await _formatDart();
@@ -100,10 +101,9 @@ class FormatCommand extends PluginCommand {
   }
 
   Future<List<String>> _getFilesWithExtension(String extension) async =>
-      getPluginFiles(recursive: true)
-          .where((FileSystemEntity entity) =>
-              entity is File && p.extension(entity.path) == extension)
-          .map((FileSystemEntity entity) => entity.path)
+      getFiles()
+          .where((File file) => p.extension(file.path) == extension)
+          .map((File file) => file.path)
           .toList();
 
   Future<String> _getGoogleFormatterPath() async {

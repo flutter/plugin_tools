@@ -25,8 +25,9 @@ class BuildExamplesCommand extends PluginCommand {
 
   @override
   Future<Null> run() async {
+    checkSharding();
     final List<String> failingPackages = <String>[];
-    await for (Directory example in getExamplePackages()) {
+    await for (Directory example in getExamples()) {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
 

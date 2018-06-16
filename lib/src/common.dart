@@ -125,11 +125,13 @@ abstract class PluginCommand extends Command<Null> {
 
   /// Returns all Dart package folders (typically, plugin + example) of the
   /// plugins involved in this command execution.
-  Stream<Directory> getPackages() {
-    return getPlugins().asyncExpand<Directory>((Directory folder) => folder
-        .list(recursive: true, followLinks: false)
+  Stream<Directory> getPackages() async* {
+    await for (Directory plugin in getPlugins()) {
+      yield plugin;
+      yield* plugin.list(recursive: true, followLinks: false)
         .where(_isDartPackage)
-        .cast<Directory>());
+        .cast<Directory>();
+      }
   }
 
   /// Returns the files contained, recursively, within the plugins

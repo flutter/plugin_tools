@@ -128,10 +128,11 @@ abstract class PluginCommand extends Command<Null> {
   Stream<Directory> getPackages() async* {
     await for (Directory plugin in getPlugins()) {
       yield plugin;
-      yield* plugin.list(recursive: true, followLinks: false)
-        .where(_isDartPackage)
-        .cast<Directory>();
-      }
+      yield* plugin
+          .list(recursive: true, followLinks: false)
+          .where(_isDartPackage)
+          .cast<Directory>();
+    }
   }
 
   /// Returns the files contained, recursively, within the plugins

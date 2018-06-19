@@ -25,6 +25,12 @@ class BuildExamplesCommand extends PluginCommand {
 
   @override
   Future<Null> run() async {
+    if (!argResults['ipa'] && !argResults['apk']) {
+      print('Neither --apk nor --ipa were specified, so not building '
+          'anything.');
+      return;
+    }
+
     checkSharding();
     final List<String> failingPackages = <String>[];
     await for (Directory example in getExamples()) {

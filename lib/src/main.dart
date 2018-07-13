@@ -38,7 +38,8 @@ void main(List<String> args) {
     ..addCommand(new JavaTestCommand(packagesDir))
     ..addCommand(new ListCommand(packagesDir));
 
-  commandRunner.run(args).catchError((ToolExit e) {
-    exit(e.exitCode);
+  commandRunner.run(args).catchError((Object e) {
+    final ToolExit toolExit = e;
+    exit(toolExit.exitCode);
   }, test: (Object e) => e is ToolExit);
 }

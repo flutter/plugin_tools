@@ -25,9 +25,8 @@ abstract class PluginCommand extends Command<Null> {
   int _shardCount;
 
   PluginCommand(this.packagesDir) {
-    argParser.addOption(
+    argParser.addMultiOption(
       _pluginsArg,
-      allowMultiple: true,
       splitCommas: true,
       help:
           'Specifies which plugins the command should run on (before sharding).',

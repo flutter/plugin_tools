@@ -66,8 +66,7 @@ class FormatCommand extends PluginCommand {
     print(diff.stdout);
 
     print('These files are not formatted correctly (see diff above):');
-    LineSplitter
-        .split(modifiedFiles.stdout)
+    LineSplitter.split(modifiedFiles.stdout)
         .map((String line) => '  $line')
         .forEach(print);
     print('\nTo fix run "pub global activate flutter_plugin_tools && '

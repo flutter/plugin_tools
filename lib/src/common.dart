@@ -160,7 +160,7 @@ abstract class PluginCommand extends Command<Null> {
     // Only look at the subdirectories of the example directory if the example
     // directory itself is not a Dart package, and only look one level below the
     // example directory for other dart packages.
-    return exampleFolder.listSync().where(_isDartPackage);
+    return exampleFolder.listSync().where(_isDartPackage).cast<Directory>();
   }
 }
 

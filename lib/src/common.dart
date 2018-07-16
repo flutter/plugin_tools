@@ -116,7 +116,8 @@ abstract class PluginCommand extends Command<Null> {
 
   /// Returns the example Dart package folders of the plugins involved in this
   /// command execution.
-  Stream<Directory> getExamples() => getPlugins().expand(_getExamplesForPlugin);
+  Stream<Directory> getExamples() =>
+      getPlugins().expand<Directory>(_getExamplesForPlugin);
 
   /// Returns all Dart package folders (typically, plugin + example) of the
   /// plugins involved in this command execution.
@@ -148,7 +149,7 @@ abstract class PluginCommand extends Command<Null> {
 
   /// Returns the example Dart packages contained in the specified plugin, or
   /// an empty List, if the plugin has no examples.
-  List<Directory> _getExamplesForPlugin(Directory plugin) {
+  Iterable<Directory> _getExamplesForPlugin(Directory plugin) {
     final Directory exampleFolder =
         new Directory(p.join(plugin.path, 'example'));
     if (!exampleFolder.existsSync()) {

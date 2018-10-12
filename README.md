@@ -39,6 +39,6 @@ $ pub global run flutter_plugin_tools <command>
 $ pub global run flutter_plugin_tools <command> --shardIndex 0 --shardCount 3
 ```
 
-Replace `<command>` with `help` to print a list of available commands.
+Run commands from the `flutter/plugins` directory. Replace `<command>` with `help` to print a list of available commands.
 The sharded example above divides the plugins into three shards
 and executes the tool on the first shard (index 0).

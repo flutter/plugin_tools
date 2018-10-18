@@ -93,6 +93,8 @@ class FormatCommand extends PluginCommand {
   }
 
   Future<Null> _formatDart() async {
+    // This acutally should be fine for non-Flutter dart projects, no need to specifically
+    // shell out to dartfmt -w in that case.
     print('Formatting all .dart files...');
     final Iterable<String> dartFiles = await _getFilesWithExtension('.dart');
     await runAndStream('flutter', <String>['format']..addAll(dartFiles),

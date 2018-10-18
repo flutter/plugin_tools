@@ -27,6 +27,7 @@ class JavaTestCommand extends PluginCommand {
     checkSharding();
     final Stream<Directory> examplesWithTests = getExamples().where(
         (Directory d) =>
+            isFlutterPackage(d) &&
             new Directory(p.join(d.path, 'android', 'app', 'src', 'test'))
                 .existsSync());
 

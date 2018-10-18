@@ -18,10 +18,12 @@ bool isFlutterPackage(FileSystemEntity entity) {
 
   try {
     final File pubspecFile = new File(p.join(entity.path, 'pubspec.yaml'));
-    final Map<dynamic, dynamic> pubspecYaml =
-        loadYaml(pubspecFile.readAsStringSync());
-
-    return pubspecYaml.containsKey('flutter');
+    final YamlMap pubspecYaml = loadYaml(pubspecFile.readAsStringSync());
+    final YamlMap dependencies = pubspecYaml['dependencies'];
+    if (dependencies == null) {
+      return false;
+    }
+    return dependencies.containsKey('flutter');
   } on FileSystemException {
     return false;
   } on YamlException {

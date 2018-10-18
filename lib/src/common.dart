@@ -8,6 +8,26 @@ import 'dart:math';
 
 import 'package:args/command_runner.dart';
 import 'package:path/path.dart' as p;
+import 'package:yaml/yaml.dart';
+
+/// Returns whether the given directory contains a Flutter package.
+bool isFlutterPackage(FileSystemEntity entity) {
+  if (entity == null || entity is! Directory) {
+    return false;
+  }
+
+  try {
+    final File pubspecFile = new File(p.join(entity.path, 'pubspec.yaml'));
+    final Map<dynamic, dynamic> pubspecYaml =
+        loadYaml(pubspecFile.readAsStringSync());
+
+    return pubspecYaml.containsKey('flutter');
+  } on FileSystemException {
+    return false;
+  } on YamlException {
+    return false;
+  }
+}
 
 /// Error thrown when a command needs to exit with a non-zero exit code.
 class ToolExit extends Error {
@@ -17,13 +37,6 @@ class ToolExit extends Error {
 }
 
 abstract class PluginCommand extends Command<Null> {
-  static const String _pluginsArg = 'plugins';
-  static const String _shardIndexArg = 'shardIndex';
-  static const String _shardCountArg = 'shardCount';
-  final Directory packagesDir;
-  int _shardIndex;
-  int _shardCount;
-
   PluginCommand(this.packagesDir) {
     argParser.addMultiOption(
       _pluginsArg,
@@ -46,6 +59,13 @@ abstract class PluginCommand extends Command<Null> {
       defaultsTo: '1',
     );
   }
+
+  static const String _pluginsArg = 'plugins';
+  static const String _shardIndexArg = 'shardIndex';
+  static const String _shardCountArg = 'shardCount';
+  final Directory packagesDir;
+  int _shardIndex;
+  int _shardCount;
 
   int get shardIndex {
     if (_shardIndex == null) {
@@ -155,13 +175,13 @@ abstract class PluginCommand extends Command<Null> {
     if (!exampleFolder.existsSync()) {
       return <Directory>[];
     }
-    if (_isDartPackage(exampleFolder)) {
+    if (isFlutterPackage(exampleFolder)) {
       return <Directory>[exampleFolder];
     }
     // Only look at the subdirectories of the example directory if the example
     // directory itself is not a Dart package, and only look one level below the
     // example directory for other dart packages.
-    return exampleFolder.listSync().where(_isDartPackage).cast<Directory>();
+    return exampleFolder.listSync().where(isFlutterPackage).cast<Directory>();
   }
 }
 

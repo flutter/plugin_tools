@@ -37,13 +37,6 @@ class ToolExit extends Error {
 }
 
 abstract class PluginCommand extends Command<Null> {
-  static const String _pluginsArg = 'plugins';
-  static const String _shardIndexArg = 'shardIndex';
-  static const String _shardCountArg = 'shardCount';
-  final Directory packagesDir;
-  int _shardIndex;
-  int _shardCount;
-
   PluginCommand(this.packagesDir) {
     argParser.addMultiOption(
       _pluginsArg,
@@ -66,6 +59,13 @@ abstract class PluginCommand extends Command<Null> {
       defaultsTo: '1',
     );
   }
+
+  static const String _pluginsArg = 'plugins';
+  static const String _shardIndexArg = 'shardIndex';
+  static const String _shardCountArg = 'shardCount';
+  final Directory packagesDir;
+  int _shardIndex;
+  int _shardCount;
 
   int get shardIndex {
     if (_shardIndex == null) {

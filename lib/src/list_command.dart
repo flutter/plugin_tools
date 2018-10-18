@@ -8,12 +8,6 @@ import 'dart:io';
 import 'common.dart';
 
 class ListCommand extends PluginCommand {
-  static const String _type = 'type';
-  static const String _plugin = 'plugin';
-  static const String _example = 'example';
-  static const String _package = 'package';
-  static const String _file = 'file';
-
   ListCommand(Directory packagesDir) : super(packagesDir) {
     argParser.addOption(
       _type,
@@ -22,6 +16,12 @@ class ListCommand extends PluginCommand {
       help: 'What type of file system content to list.',
     );
   }
+
+  static const String _type = 'type';
+  static const String _plugin = 'plugin';
+  static const String _example = 'example';
+  static const String _package = 'package';
+  static const String _file = 'file';
 
   @override
   final String name = 'list';

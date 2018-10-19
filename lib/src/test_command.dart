@@ -32,11 +32,28 @@ class TestCommand extends PluginCommand {
       }
 
       print('RUNNING $packageName tests...');
-      final int exitCode = isFlutterPackage(packageDir)
-          ? await runAndStream('flutter', <String>['test', '--color'],
-              workingDir: packageDir)
-          : await runAndStream('pub', <String>['run', 'test'],
-              workingDir: packageDir);
+      // `flutter test` automatically gets packages.  `pub run test` does not.  :(
+      int exitCode = 0;
+      if (isFlutterPackage(packageDir)) {
+        exitCode = await runAndStream(
+          'flutter',
+          <String>['test', '--color'],
+          workingDir: packageDir,
+        );
+      } else {
+        exitCode = await runAndStream(
+          'pub',
+          <String>['get'],
+          workingDir: packageDir,
+        );
+        if (exitCode == 0) {
+          exitCode = await runAndStream(
+            'pub',
+            <String>['run', 'test'],
+            workingDir: packageDir,
+          );
+        }
+      }
       if (exitCode != 0) {
         failingPackages.add(packageName);
       }

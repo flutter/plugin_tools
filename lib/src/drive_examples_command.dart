@@ -17,8 +17,7 @@ class DriveExamplesCommand extends PluginCommand {
   final String name = 'drive-examples';
 
   @override
-  final String description =
-      'Runs driver tests for plugin example apps.\n\n'
+  final String description = 'Runs driver tests for plugin example apps.\n\n'
       'For each *_test.dart in test_driver/ it drives an application with a '
       'corresponding name in the test/ or test_driver/ directories.\n\n'
       'For example, test_driver/app_test.dart would match test/app.dart.\n\n'
@@ -31,14 +30,16 @@ class DriveExamplesCommand extends PluginCommand {
     await for (Directory example in getExamples()) {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
-      final Directory driverTests = Directory(p.join(example.path, 'test_driver'));
+      final Directory driverTests =
+          Directory(p.join(example.path, 'test_driver'));
       if (!driverTests.existsSync()) {
         // No driver tests available for this example
         continue;
       }
       // Look for driver tests ending in _test.dart in test_driver/
       await for (FileSystemEntity test in driverTests.list()) {
-        final String driverTestName = p.relative(test.path, from: driverTests.path);
+        final String driverTestName =
+            p.relative(test.path, from: driverTests.path);
         if (!driverTestName.endsWith("_test.dart")) {
           continue;
         }

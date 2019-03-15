@@ -74,7 +74,6 @@ class DriveExamplesCommand extends PluginCommand {
         });
         stderr.addStream(process.stderr);
         if (await process.exitCode != 0) {
-          print('failed');
           failingTests.add(p.join(packageName, deviceTestPath));
         }
       }

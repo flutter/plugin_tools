@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -18,7 +18,10 @@ class DriveExamplesCommand extends PluginCommand {
 
   @override
   final String description =
-      'Runs driver tests for example apps.\n\n'
+      'Runs driver tests for plugin example apps.\n\n'
+      'For each *_test.dart in test_driver/ it drives an application with a '
+      'corresponding name in the test/ or test_driver/ directories.\n\n'
+      'For example, test_driver/app_test.dart would match test/app.dart.\n\n'
       'This command requires "flutter" to be in your path.';
 
   @override

@@ -4,10 +4,9 @@
 [![pub package](https://img.shields.io/pub/v/flutter_plugin_tools.svg)](https://pub.dartlang.org/packages/flutter_plugin_tools)
 
 
-Flutter Plugin Tools implements a CLI with various productivity tools for hosting multiple Flutter plugins in one github
-repository. It is mainly used by the [flutter/plugins](https://github.com/flutter/plugins) and
-[flutter/flutterfire](https://github.com/flutter/flutterfire) repositories. It was mainly written to facilitate
-testing on Travis for these repositories (see [travis.yaml](https://github.com/flutter/plugins/blob/master/.travis.yml)).
+Flutter Plugin Tools implements a CLI with various productivity tools for hosting multiple Flutter plugins in one GitHub
+repository. It is mainly used by the [flutter/plugins](https://github.com/flutter/plugins) repository to facilite
+testing on Cirrus (see [.cirrus.yaml](https://github.com/flutter/plugins/blob/master/.cirrus.yml)).
 
 As an example, Flutter Plugin Tools allows you to:
 

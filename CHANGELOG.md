@@ -3,6 +3,7 @@
 ## v0.0.15
 
 - Add a command for running driver tests of plugin examples.
+- Update README.md with updated information on plugin repository testing.
 
 ## v0.0.14
 

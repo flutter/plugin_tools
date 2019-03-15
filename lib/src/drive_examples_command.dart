@@ -33,13 +33,17 @@ class DriveExamplesCommand extends PluginCommand {
         // No driver tests available for this example
         continue;
       }
-      // Look for tests ending in _test.dart in test_driver/
+      // Look for driver tests ending in _test.dart in test_driver/
       await for (FileSystemEntity test in driverTests.list()) {
         final String driverTestName = p.relative(test.path, from: driverTests.path);
         if (!driverTestName.endsWith("_test.dart")) {
           continue;
         }
-        final String deviceTestName = driverTestName.replaceAll(RegExp(r'_test.dart$'), '.dart');
+        // Try to find a matching app to drive without the _test.dart
+        final String deviceTestName = driverTestName.replaceAll(
+          RegExp(r'_test.dart$'),
+          '.dart',
+        );
         String deviceTestPath = p.join('test', deviceTestName);
         if (!File(p.join(example.path, deviceTestPath)).existsSync()) {
           // If the app isn't in test/ folder, look in test_driver/ instead.
@@ -50,9 +54,12 @@ class DriveExamplesCommand extends PluginCommand {
           failingTests.add(p.join(example.path, driverTestName));
           continue;
         }
-        print(deviceTestPath);
-        final Process process =
-          await Process.start('flutter', <String>['drive', deviceTestPath], workingDirectory: example.path);
+        print('RUNNING DRIVER TEST for ${p.join(packageName, deviceTestPath)}');
+        final Process process = await Process.start(
+          'flutter',
+          <String>['drive', deviceTestPath],
+          workingDirectory: example.path,
+        );
         process.stdout.transform(utf8.decoder).listen((String data) {
           if (data.contains('Some tests failed.')) {
             failingTests.add(p.join(example.path, deviceTestPath));

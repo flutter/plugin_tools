@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
@@ -79,9 +80,19 @@ class FormatCommand extends PluginCommand {
     print('Formatting all .m and .h files...');
     final Iterable<String> hFiles = await _getFilesWithExtension('.h');
     final Iterable<String> mFiles = await _getFilesWithExtension('.m');
-    await runAndStream(argResults['clang-format'],
-        <String>['-i', '--style=Google']..addAll(hFiles)..addAll(mFiles),
-        workingDir: packagesDir, exitOnError: true);
+    // Split this into multiple invocations to avoid a
+    // 'ProcessException: Argument list too long'
+    final List<String> allFiles = []..addAll(hFiles)..addAll(mFiles);
+    int batchSize = 100;
+    for (int i = 0; i < allFiles.length / batchSize; i ++) {
+      final Iterable<String> someFiles = allFiles.sublist(
+        i * batchSize,
+        math.min(allFiles.length, (i+1) * batchSize),
+      );
+      await runAndStream(argResults['clang-format'],
+          <String>['-i', '--style=Google']..addAll(someFiles),
+          workingDir: packagesDir, exitOnError: true);
+    }
   }
 
   Future<Null> _formatJava(String googleFormatterPath) async {

@@ -5,10 +5,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
+import 'package:quiver/iterables.dart';
 
 import 'common.dart';
 
@@ -82,13 +82,9 @@ class FormatCommand extends PluginCommand {
     final Iterable<String> mFiles = await _getFilesWithExtension('.m');
     // Split this into multiple invocations to avoid a
     // 'ProcessException: Argument list too long'
-    final List<String> allFiles = []..addAll(hFiles)..addAll(mFiles);
-    final int batchSize = 100;
-    for (int i = 0; i < allFiles.length / batchSize; i++) {
-      final Iterable<String> batch = allFiles.sublist(
-        i * batchSize,
-        math.min(allFiles.length, (i+1) * batchSize),
-      );
+    Iterable<String> allFiles = []..addAll(hFiles)..addAll(mFiles);
+    final Iterable<List<String>> batches = partition(allFiles, 100);
+    for(List<String> batch in batches) {
       await runAndStream(argResults['clang-format'],
           <String>['-i', '--style=Google']..addAll(batch),
           workingDir: packagesDir, exitOnError: true);

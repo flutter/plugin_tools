@@ -82,7 +82,7 @@ class FormatCommand extends PluginCommand {
     final Iterable<String> mFiles = await _getFilesWithExtension('.m');
     // Split this into multiple invocations to avoid a
     // 'ProcessException: Argument list too long'
-    Iterable<String> allFiles = []..addAll(hFiles)..addAll(mFiles);
+    final Iterable<String> allFiles = <String>[]..addAll(hFiles)..addAll(mFiles);
     final Iterable<List<String>> batches = partition(allFiles, 100);
     for(List<String> batch in batches) {
       await runAndStream(argResults['clang-format'],
@@ -100,8 +100,8 @@ class FormatCommand extends PluginCommand {
   }
 
   Future<Null> _formatDart() async {
-    // This acutally should be fine for non-Flutter dart projects, no need to specifically
-    // shell out to dartfmt -w in that case.
+    // This actually should be fine for non-Flutter Dart projects, no need to
+    // specifically shell out to dartfmt -w in that case.
     print('Formatting all .dart files...');
     final Iterable<String> dartFiles = await _getFilesWithExtension('.dart');
     await runAndStream('flutter', <String>['format']..addAll(dartFiles),

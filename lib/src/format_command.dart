@@ -83,14 +83,14 @@ class FormatCommand extends PluginCommand {
     // Split this into multiple invocations to avoid a
     // 'ProcessException: Argument list too long'
     final List<String> allFiles = []..addAll(hFiles)..addAll(mFiles);
-    int batchSize = 100;
-    for (int i = 0; i < allFiles.length / batchSize; i ++) {
-      final Iterable<String> someFiles = allFiles.sublist(
+    final int batchSize = 100;
+    for (int i = 0; i < allFiles.length / batchSize; i++) {
+      final Iterable<String> batch = allFiles.sublist(
         i * batchSize,
         math.min(allFiles.length, (i+1) * batchSize),
       );
       await runAndStream(argResults['clang-format'],
-          <String>['-i', '--style=Google']..addAll(someFiles),
+          <String>['-i', '--style=Google']..addAll(batch),
           workingDir: packagesDir, exitOnError: true);
     }
   }

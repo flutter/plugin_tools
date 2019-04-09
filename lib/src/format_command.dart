@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
+import 'package:quiver/iterables.dart';
 
 import 'common.dart';
 
@@ -79,9 +80,17 @@ class FormatCommand extends PluginCommand {
     print('Formatting all .m and .h files...');
     final Iterable<String> hFiles = await _getFilesWithExtension('.h');
     final Iterable<String> mFiles = await _getFilesWithExtension('.m');
-    await runAndStream(argResults['clang-format'],
-        <String>['-i', '--style=Google']..addAll(hFiles)..addAll(mFiles),
-        workingDir: packagesDir, exitOnError: true);
+    // Split this into multiple invocations to avoid a
+    // 'ProcessException: Argument list too long'
+    final Iterable<String> allFiles = <String>[]
+      ..addAll(hFiles)
+      ..addAll(mFiles);
+    final Iterable<List<String>> batches = partition(allFiles, 100);
+    for (List<String> batch in batches) {
+      await runAndStream(argResults['clang-format'],
+          <String>['-i', '--style=Google']..addAll(batch),
+          workingDir: packagesDir, exitOnError: true);
+    }
   }
 
   Future<Null> _formatJava(String googleFormatterPath) async {
@@ -93,8 +102,8 @@ class FormatCommand extends PluginCommand {
   }
 
   Future<Null> _formatDart() async {
-    // This acutally should be fine for non-Flutter dart projects, no need to specifically
-    // shell out to dartfmt -w in that case.
+    // This actually should be fine for non-Flutter Dart projects, no need to
+    // specifically shell out to dartfmt -w in that case.
     print('Formatting all .dart files...');
     final Iterable<String> dartFiles = await _getFilesWithExtension('.dart');
     await runAndStream('flutter', <String>['format']..addAll(dartFiles),

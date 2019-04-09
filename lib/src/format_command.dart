@@ -82,9 +82,11 @@ class FormatCommand extends PluginCommand {
     final Iterable<String> mFiles = await _getFilesWithExtension('.m');
     // Split this into multiple invocations to avoid a
     // 'ProcessException: Argument list too long'
-    final Iterable<String> allFiles = <String>[]..addAll(hFiles)..addAll(mFiles);
+    final Iterable<String> allFiles = <String>[]
+      ..addAll(hFiles)
+      ..addAll(mFiles);
     final Iterable<List<String>> batches = partition(allFiles, 100);
-    for(List<String> batch in batches) {
+    for (List<String> batch in batches) {
       await runAndStream(argResults['clang-format'],
           <String>['-i', '--style=Google']..addAll(batch),
           workingDir: packagesDir, exitOnError: true);

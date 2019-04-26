@@ -13,7 +13,7 @@ import 'package:quiver/iterables.dart';
 import 'common.dart';
 
 const String _googleFormatterUrl =
-    'https://github.com/google/google-java-format/releases/download/google-java-format-1.3/google-java-format-1.3-all-deps.jar';
+    'https://github.com/google/google-java-format/releases/download/google-java-format-1.7/google-java-format-1.7-all-deps.jar';
 
 class FormatCommand extends PluginCommand {
   FormatCommand(Directory packagesDir) : super(packagesDir) {
@@ -119,7 +119,7 @@ class FormatCommand extends PluginCommand {
   Future<String> _getGoogleFormatterPath() async {
     final String javaFormatterPath = p.join(
         p.dirname(p.fromUri(Platform.script)),
-        'google-java-format-1.3-all-deps.jar');
+        'google-java-format-1.7-all-deps.jar');
     final File javaFormatterFile = new File(javaFormatterPath);
 
     if (!javaFormatterFile.existsSync()) {

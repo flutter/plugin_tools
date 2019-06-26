@@ -40,7 +40,7 @@ void main(List<String> args) {
     ..addCommand(new DriveExamplesCommand(packagesDir))
     ..addCommand(new JavaTestCommand(packagesDir))
     ..addCommand(new ListCommand(packagesDir))
-    ..addCommand(new ListCommand(packagesDir));
+    ..addCommand(new VersionCheckCommand(packagesDir));
 
   commandRunner.run(args).catchError((Object e) {
     final ToolExit toolExit = e;

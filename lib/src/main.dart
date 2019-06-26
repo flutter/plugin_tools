@@ -41,7 +41,7 @@ void main(List<String> args) {
     ..addCommand(new DriveExamplesCommand(packagesDir))
     ..addCommand(new JavaTestCommand(packagesDir))
     ..addCommand(new ListCommand(packagesDir))
-    ..addCommand(new VersionCheckCommand(packagesDir));
+    ..addCommand(new VersionCheckCommand(packagesDir))
     ..addCommand(new GenPubspecCommand(packagesDir));
 
   commandRunner.run(args).catchError((Object e) {

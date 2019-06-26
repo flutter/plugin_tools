@@ -32,13 +32,13 @@ class GenPubspecCommand extends PluginCommand {
       environment: <String, VersionConstraint>{
         'sdk': VersionConstraint.compatibleWith(
           Version.parse('2.0.0'),
-        )
+        ),
       },
       dependencies: <String, Dependency>{
         'flutter': SdkDependency('flutter'),
       }..addAll(await _getValidPathDependencies()),
       devDependencies: <String, Dependency>{
-        'flutter_test': SdkDependency('flutter')
+        'flutter_test': SdkDependency('flutter'),
       },
     );
 
@@ -76,32 +76,34 @@ description: ${pubspec.description}
 
 version: ${pubspec.version}
 
-environment: ${_pubspecMapString(pubspec.environment)}
+environment:${_pubspecMapString(pubspec.environment)}
 
-dependencies: ${_pubspecMapString(pubspec.dependencies)}
+dependencies:${_pubspecMapString(pubspec.dependencies)}
 
-dev_dependencies: ${_pubspecMapString(pubspec.devDependencies)}
+dev_dependencies:${_pubspecMapString(pubspec.devDependencies)}
 ###''';
   }
 
   String _pubspecMapString(Map<String, dynamic> values) {
-    return values.entries.fold(
-      '',
-      (String prev, MapEntry<String, dynamic> next) {
-        if (next.value is VersionConstraint) {
-          return '$prev\n  ${next.key}: ${next.value}';
-        } else if (next.value is SdkDependency) {
-          final SdkDependency dep = next.value;
-          return '$prev\n  ${next.key}: \n    sdk: ${dep.sdk}';
-        } else if (next.value is PathDependency) {
-          final PathDependency dep = next.value;
-          return '$prev\n  ${next.key}: \n    path: ${dep.path}';
-        }
+    final StringBuffer buffer = StringBuffer();
 
+    for (MapEntry<String, dynamic> entry in values.entries) {
+      buffer.writeln();
+      if (entry.value is VersionConstraint) {
+        buffer.write('  ${entry.key}: ${entry.value}');
+      } else if (entry.value is SdkDependency) {
+        final SdkDependency dep = entry.value;
+        buffer.write('  ${entry.key}: \n    sdk: ${dep.sdk}');
+      } else if (entry.value is PathDependency) {
+        final PathDependency dep = entry.value;
+        buffer.write('  ${entry.key}: \n    path: ${dep.path}');
+      } else {
         throw UnimplementedError(
-          'Not available for type: ${next.value.runtimeType}',
+          'Not available for type: ${entry.value.runtimeType}',
         );
-      },
-    );
+      }
+    }
+
+    return buffer.toString();
   }
 }

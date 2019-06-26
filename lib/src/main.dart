@@ -15,6 +15,7 @@ import 'format_command.dart';
 import 'java_test_command.dart';
 import 'list_command.dart';
 import 'test_command.dart';
+import 'version_check_command.dart';
 
 void main(List<String> args) {
   Directory packagesDir =
@@ -38,6 +39,7 @@ void main(List<String> args) {
     ..addCommand(new BuildExamplesCommand(packagesDir))
     ..addCommand(new DriveExamplesCommand(packagesDir))
     ..addCommand(new JavaTestCommand(packagesDir))
+    ..addCommand(new ListCommand(packagesDir))
     ..addCommand(new ListCommand(packagesDir));
 
   commandRunner.run(args).catchError((Object e) {

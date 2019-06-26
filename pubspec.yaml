@@ -12,6 +12,9 @@ dependencies:
   async: "^2.0.7"
   yaml: "^2.1.15"
   quiver: "^2.0.2"
+  pub_semver: ^1.4.2
+  colorize: ^2.0.0
+  git: ^1.0.0
 
 environment:
   sdk: ">=1.8.0 <3.0.0"

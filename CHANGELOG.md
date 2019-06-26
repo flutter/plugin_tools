@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.0.16
+
+- Add a command for generating `pubspec.yaml` for All Plugins app.
+
 ## v0.0.15
 
 - Add a command for running driver tests of plugin examples.

@@ -12,6 +12,7 @@ import 'build_examples_command.dart';
 import 'common.dart';
 import 'drive_examples_command.dart';
 import 'format_command.dart';
+import 'gen_pubspec_command.dart';
 import 'java_test_command.dart';
 import 'list_command.dart';
 import 'test_command.dart';
@@ -41,6 +42,7 @@ void main(List<String> args) {
     ..addCommand(new JavaTestCommand(packagesDir))
     ..addCommand(new ListCommand(packagesDir))
     ..addCommand(new VersionCheckCommand(packagesDir));
+    ..addCommand(new GenPubspecCommand(packagesDir));
 
   commandRunner.run(args).catchError((Object e) {
     final ToolExit toolExit = e;

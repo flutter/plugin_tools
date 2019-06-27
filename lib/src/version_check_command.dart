@@ -43,7 +43,7 @@ class GitVersionFinder {
 
 class VersionCheckCommand extends PluginCommand {
   VersionCheckCommand(Directory packagesDir) : super(packagesDir) {
-    argParser.addFlag(_kBaseSha);
+    argParser.addOption(_kBaseSha);
   }
 
   @override

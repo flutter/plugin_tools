@@ -153,6 +153,12 @@ abstract class PluginCommand extends Command<Null> {
     }
   }
 
+  /// Returns directory containing the All Plugins flutter app. This app is used
+  /// to test that all plugins in this repo will compile into a single app.
+  Directory getAllPluginsApp() {
+    return Directory(p.join(packagesDir.path, '../examples/all_plugins'));
+  }
+
   /// Returns the files contained, recursively, within the plugins
   /// involved in this command execution.
   Stream<File> getFiles() {

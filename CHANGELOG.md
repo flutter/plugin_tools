@@ -1,8 +1,12 @@
 # CHANGELOG
 
-## v0.0.16
+## v0.0.17
 
 - Add a command for checking the version number
+
+## v0.0.16
+
+- Add a command for generating `pubspec.yaml` for All Plugins app.
 
 ## v0.0.15
 

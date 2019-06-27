@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.0.16
+
+- Add a command for checking the version number
+
 ## v0.0.15
 
 - Add a command for running driver tests of plugin examples.

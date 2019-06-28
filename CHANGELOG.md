@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.0.17+2
+
+- Fix exception handling for version checker
+
 ## v0.0.17+1
 
 - Fix bug where we used a flag instead of an option

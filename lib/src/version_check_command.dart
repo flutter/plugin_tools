@@ -94,7 +94,7 @@ class VersionCheckCommand extends PluginCommand {
           print(redError);
           throw new ToolExit(1);
         }
-      } catch (ProcessException) {
+      } on ProcessException {
         print('Unable to find pubspec in master for $pubspecPath.'
             ' Safe to ignore if the project is new.');
       }

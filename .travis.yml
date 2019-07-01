@@ -4,3 +4,4 @@ dart:
 dart_task:
 - dartanalyzer: --fatal-warnings --fatal-hints --fatal-lints --lints lib/ bin/
 - dartfmt
+- test: --platform vm

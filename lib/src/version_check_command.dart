@@ -86,6 +86,24 @@ class VersionCheckCommand extends PluginCommand {
           masterVersion.nextMinor: "MINOR",
           masterVersion.nextPatch: "PATCH",
         };
+
+        if (masterVersion.major < 1 && headVersion.major < 1) {
+          int nextBuildNumber = -1;
+          if (masterVersion.build.isEmpty) {
+            nextBuildNumber = 1;
+          } else {
+            final String currentBuildNumber = masterVersion.build.first;
+            nextBuildNumber = int.parse(currentBuildNumber) + 1;
+          }
+          final Version preReleaseVersion = Version(
+            masterVersion.major,
+            masterVersion.major,
+            masterVersion.patch,
+            build: nextBuildNumber.toString(),
+          );
+          allowedNextVersions[preReleaseVersion] = "PRE-1.0-PATCH";
+        }
+
         if (!allowedNextVersions.containsKey(headVersion)) {
           final String error = '$pubspecPath incorrectly updated version.\n'
               'HEAD: $headVersion, master: $masterVersion.\n'

@@ -81,8 +81,7 @@ class VersionCheckCommand extends PluginCommand {
             await gitVersionFinder.getPackageVersion(pubspecPath, 'HEAD');
 
         final Map<Version, String> allowedNextVersions = <Version, String>{
-          masterVersion.nextBreaking: "BREAKING",
-          masterVersion.nextMajor: "MAJOR",
+          masterVersion.nextMajor: "BREAKING / MAJOR",
           masterVersion.nextMinor: "MINOR",
           masterVersion.nextPatch: "PATCH",
         };
@@ -101,7 +100,11 @@ class VersionCheckCommand extends PluginCommand {
             masterVersion.patch,
             build: nextBuildNumber.toString(),
           );
-          allowedNextVersions[preReleaseVersion] = "PRE-1.0-PATCH";
+          allowedNextVersions.clear();
+          allowedNextVersions[masterVersion.nextMajor] = "RELEASE";
+          allowedNextVersions[masterVersion.nextMinor] = "BREAKING / MAJOR";
+          allowedNextVersions[masterVersion.nextPatch] = "MINOR";
+          allowedNextVersions[preReleaseVersion] = "PATCH";
         }
 
         if (!allowedNextVersions.containsKey(headVersion)) {

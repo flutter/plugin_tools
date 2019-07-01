@@ -97,7 +97,7 @@ class VersionCheckCommand extends PluginCommand {
           }
           final Version preReleaseVersion = Version(
             masterVersion.major,
-            masterVersion.major,
+            masterVersion.minor,
             masterVersion.patch,
             build: nextBuildNumber.toString(),
           );

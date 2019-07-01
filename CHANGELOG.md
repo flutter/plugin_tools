@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.0.17+3
+
+- version-check accounts for [pre-1.0 patch versions](https://github.com/flutter/flutter/issues/35412).
+
 ## v0.0.17+2
 
 - Fix exception handling for version checker

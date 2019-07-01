@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:colorize/colorize.dart';
 import 'package:git/git.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -39,6 +40,47 @@ class GitVersionFinder {
     final String versionString = loadYaml(fileContent)['version'];
     return Version.parse(versionString);
   }
+}
+
+enum NextVersionType {
+  BREAKING_MAJOR,
+  MINOR,
+  PATCH,
+  RELEASE,
+}
+
+@visibleForTesting
+Map<Version, NextVersionType> getAllowedNextVersions(
+    Version masterVersion, Version headVersion) {
+  final Map<Version, NextVersionType> allowedNextVersions =
+      <Version, NextVersionType>{
+    masterVersion.nextMajor: NextVersionType.BREAKING_MAJOR,
+    masterVersion.nextMinor: NextVersionType.MINOR,
+    masterVersion.nextPatch: NextVersionType.PATCH,
+  };
+
+  if (masterVersion.major < 1 && headVersion.major < 1) {
+    int nextBuildNumber = -1;
+    if (masterVersion.build.isEmpty) {
+      nextBuildNumber = 1;
+    } else {
+      final int currentBuildNumber = masterVersion.build.first;
+      nextBuildNumber = currentBuildNumber + 1;
+    }
+    final Version preReleaseVersion = Version(
+      masterVersion.major,
+      masterVersion.minor,
+      masterVersion.patch,
+      build: nextBuildNumber.toString(),
+    );
+    allowedNextVersions.clear();
+    allowedNextVersions[masterVersion.nextMajor] = NextVersionType.RELEASE;
+    allowedNextVersions[masterVersion.nextMinor] =
+        NextVersionType.BREAKING_MAJOR;
+    allowedNextVersions[masterVersion.nextPatch] = NextVersionType.MINOR;
+    allowedNextVersions[preReleaseVersion] = NextVersionType.PATCH;
+  }
+  return allowedNextVersions;
 }
 
 class VersionCheckCommand extends PluginCommand {
@@ -80,12 +122,9 @@ class VersionCheckCommand extends PluginCommand {
         final Version headVersion =
             await gitVersionFinder.getPackageVersion(pubspecPath, 'HEAD');
 
-        final Map<Version, String> allowedNextVersions = <Version, String>{
-          masterVersion.nextBreaking: "BREAKING",
-          masterVersion.nextMajor: "MAJOR",
-          masterVersion.nextMinor: "MINOR",
-          masterVersion.nextPatch: "PATCH",
-        };
+        final Map<Version, NextVersionType> allowedNextVersions =
+            getAllowedNextVersions(masterVersion, headVersion);
+
         if (!allowedNextVersions.containsKey(headVersion)) {
           final String error = '$pubspecPath incorrectly updated version.\n'
               'HEAD: $headVersion, master: $masterVersion.\n'

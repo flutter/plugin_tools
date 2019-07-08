@@ -121,7 +121,9 @@ class VersionCheckCommand extends PluginCommand {
             await gitVersionFinder.getPackageVersion(pubspecPath, baseSha);
         final Version headVersion =
             await gitVersionFinder.getPackageVersion(pubspecPath, 'HEAD');
-        if (headVersion == null) continue; // Example apps don't have versions
+        if (headVersion == null) {
+          continue; // Example apps don't have versions
+        }
 
         final Map<Version, NextVersionType> allowedNextVersions =
             getAllowedNextVersions(masterVersion, headVersion);

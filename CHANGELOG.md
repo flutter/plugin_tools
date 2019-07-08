@@ -1,4 +1,6 @@
-# CHANGELOG
+## v0.0.17+4
+
+- Avoid trying to version-check pubspecs that are missing a version.
 
 ## v0.0.17+3
 

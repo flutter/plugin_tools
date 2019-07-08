@@ -38,7 +38,7 @@ class GitVersionFinder {
         await baseGitDir.runCommand(<String>['show', '$gitRef:$pubspecPath']);
     final String fileContent = gitShow.stdout;
     final String versionString = loadYaml(fileContent)['version'];
-    return Version.parse(versionString);
+    return versionString == null ? null : Version.parse(versionString);
   }
 }
 
@@ -121,6 +121,8 @@ class VersionCheckCommand extends PluginCommand {
             await gitVersionFinder.getPackageVersion(pubspecPath, baseSha);
         final Version headVersion =
             await gitVersionFinder.getPackageVersion(pubspecPath, 'HEAD');
+        if (headVersion == null)
+            continue;  // Example apps don't have versions
 
         final Map<Version, NextVersionType> allowedNextVersions =
             getAllowedNextVersions(masterVersion, headVersion);

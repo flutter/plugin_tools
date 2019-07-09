@@ -71,8 +71,7 @@ class FormatCommand extends PluginCommand {
         'this command into your terminal:');
 
     print('patch -p1 <<DONE');
-    final ProcessResult diff = await runAndExitOnError(
-        'git', <String>['diff'],
+    final ProcessResult diff = await runAndExitOnError('git', <String>['diff'],
         workingDir: packagesDir);
     print(diff.stdout);
     print('DONE');

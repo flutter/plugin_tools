@@ -12,9 +12,16 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 import 'common.dart';
 
 class GenPubspecCommand extends PluginCommand {
-  GenPubspecCommand(Directory packagesDir) : super(packagesDir);
+  GenPubspecCommand(Directory packagesDir) : super(packagesDir) {
+    argParser.addMultiOption(
+      excludeOption,
+      abbr: 'e',
+      help: 'Exclude packages from the generated pubspec.yaml.',
+      defaultsTo: <String>[],
+    );
+  }
 
-  static const List<String> _excludedPackages = <String>['firebase_core'];
+  static const String excludeOption = 'exclude';
 
   @override
   String get description =>
@@ -53,7 +60,7 @@ class GenPubspecCommand extends PluginCommand {
 
     await for (Directory package in getPlugins()) {
       final String pluginName = package.path.split('/').last;
-      if (_excludedPackages.contains(pluginName)) {
+      if (argResults[excludeOption].contains(pluginName)) {
         continue;
       }
 

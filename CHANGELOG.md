@@ -1,3 +1,7 @@
+## v0.0.18
+
+- Add option to exclude packages from generated pubspec command.
+
 ## v0.0.17+4
 
 - Avoid trying to version-check pubspecs that are missing a version.

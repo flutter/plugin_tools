@@ -61,18 +61,20 @@ class FormatCommand extends PluginCommand {
       return false;
     }
 
-    final ProcessResult diff = await runAndExitOnError(
-        'git', <String>['diff', '--color'],
-        workingDir: packagesDir);
-    print(diff.stdout);
-
-    print('These files are not formatted correctly (see diff above):');
+    print('These files are not formatted correctly (see diff below):');
     LineSplitter.split(modifiedFiles.stdout)
         .map((String line) => '  $line')
         .forEach(print);
-    print('\nTo fix run "pub global activate flutter_plugin_tools && '
-        'pub global run flutter_plugin_tools format".');
 
+    print('\nTo fix run "pub global activate flutter_plugin_tools && '
+        'pub global run flutter_plugin_tools format" or copy-paste '
+        'this command into your terminal:');
+
+    print('patch -p1 <<DONE');
+    final ProcessResult diff = await runAndExitOnError('git', <String>['diff'],
+        workingDir: packagesDir);
+    print(diff.stdout);
+    print('DONE');
     return true;
   }
 

@@ -1,3 +1,7 @@
+## v0.0.18+1
+
+- Skip version check if it contains `publish_to: none`.
+
 ## v0.0.18
 
 - Add option to exclude packages from generated pubspec command.

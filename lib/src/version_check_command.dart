@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:colorize/colorize.dart';
 import 'package:git/git.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:yaml/yaml.dart';
 
 import 'common.dart';
@@ -117,6 +118,13 @@ class VersionCheckCommand extends PluginCommand {
 
     for (final String pubspecPath in changedPubspecs) {
       try {
+        final File pubspecFile = File(pubspecPath);
+        final Pubspec pubspec = Pubspec.parse(pubspecFile.readAsStringSync());
+
+        if (pubspec.publishTo == 'none') {
+          continue;
+        }
+
         final Version masterVersion =
             await gitVersionFinder.getPackageVersion(pubspecPath, baseSha);
         final Version headVersion =

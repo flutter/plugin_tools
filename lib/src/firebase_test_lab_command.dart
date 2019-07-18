@@ -9,15 +9,16 @@ import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
-class InstrumentationTestCommand extends PluginCommand {
-  InstrumentationTestCommand(Directory packagesDir) : super(packagesDir);
+class FirebaseTestLabCommand extends PluginCommand {
+  FirebaseTestLabCommand(Directory packagesDir) : super(packagesDir);
 
   @override
-  final String name = 'instrumentation-test';
+  final String name = 'firebase-test-lab';
 
   @override
-  final String description = 'Runs the instrumentation tests of the example apps.\n\n'
-      'Building the apks of the example apps is required before executing this'
+  final String description = 'Runs the instrumentation tests of the example '
+      'apps on Firebase Test Lab.\n\n'
+      'Building the apks of the example apps is required before executing this '
       'command.';
 
   static const String _gradleWrapper = 'gradlew';
@@ -36,7 +37,7 @@ class InstrumentationTestCommand extends PluginCommand {
     await for (Directory example in examplesWithTests) {
       final String packageName =
       p.relative(example.path, from: packagesDir.path);
-      print('\nRUNNING INSTRUMENTATION TESTS for $packageName');
+      print('\nRUNNING FIREBASE TEST LAB TESTS for $packageName');
 
       final Directory androidDirectory =
       new Directory(p.join(example.path, 'android'));
@@ -48,30 +49,30 @@ class InstrumentationTestCommand extends PluginCommand {
         continue;
       }
 
-      final int exitCode = await runAndStream(
+      int exitCode = await runAndStream(
           p.join(androidDirectory.path, _gradleWrapper),
           <String>[
-            'connectedAndroidTest',
-            '-Ptarget=${androidDirectory.path}/../test_live/adapter.dart',
+            'assembleAndroidTest',
             '-Pverbose=true', '-Ptrack-widget-creation=false',
             '-Pfilesystem-scheme=org-dartlang-root',
           ],
           workingDir: androidDirectory);
+
       if (exitCode != 0) {
         failingPackages.add(packageName);
         continue;
       }
 
-      // TODO(jackson): Switch to using assembleAndroidTest above and run on Firebase Test Lab
-      //    echo $GCLOUD_FIREBASE_TESTLAB_KEY > ${HOME}/gcloud-service-key.json
-      //    gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
-      //    gcloud --quiet config set project flutter-infra
-      //    gcloud firebase test android run --type instrumentation \
-      //    --app build/app/outputs/apk/app.apk \
-      //    --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk\
-      //    --timeout 2m \
-      //    --results-bucket=gs://flutter_firebase_testlab \
-      //    --results-dir=engine_android_test/$GIT_REVISION/$CIRRUS_BUILD_ID
+      String scriptDirectory = new Directory(p.join(packagesDir.path, '..', 'script'));
+      exitCode = await runAndStream(
+          p.join(scriptDirectory.path, 'firebase-test-lab.sh'),
+          workingDir: example.path);
+
+      if (exitCode != 0) {
+        failingPackages.add(packageName);
+        continue;
+      }
+
     }
 
     print('\n\n');
@@ -95,6 +96,6 @@ class InstrumentationTestCommand extends PluginCommand {
       throw new ToolExit(1);
     }
 
-    print('All instrumentation tests successful!');
+    print('All Firebase Test Lab tests successful!');
   }
 }

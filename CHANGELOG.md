@@ -1,3 +1,7 @@
+## v.0.0.18+2
+
+- Fix `.travis.yml` file name in `README.md`.
+
 ## v0.0.18+1
 
 - Skip version check if it contains `publish_to: none`.

@@ -39,20 +39,22 @@ class BuildExamplesCommand extends PluginCommand {
 
       if (argResults['ipa']) {
         print('\nBUILDING IPA for $packageName');
+        bool hasStderr = false;
         final int exitCode = await runAndStream(
             'flutter', <String>['build', 'ios', '--no-codesign'],
-            workingDir: example);
-        if (exitCode != 0) {
+            workingDir: example, onStderr: (_) => hasStderr = true);
+        if (exitCode != 0 || hasStderr) {
           failingPackages.add('$packageName (ipa)');
         }
       }
 
       if (argResults['apk']) {
         print('\nBUILDING APK for $packageName');
+        bool hasStderr = false;
         final int exitCode = await runAndStream(
             'flutter', <String>['build', 'apk'],
-            workingDir: example);
-        if (exitCode != 0) {
+            workingDir: example, onStderr: (_) => hasStderr = true);
+        if (exitCode != 0 || hasStderr) {
           failingPackages.add('$packageName (apk)');
         }
       }

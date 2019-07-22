@@ -200,7 +200,6 @@ Future<int> runAndStream(String executable, List<String> args,
   final Process process =
       await Process.start(executable, args, workingDirectory: workingDir?.path);
   stdout.addStream(process.stdout);
-  bool hasStderr = false;
   stderr.addStream(process.stderr.map((List<int> line) {
     onStderr(line);
     return line;

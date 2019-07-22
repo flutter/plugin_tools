@@ -201,7 +201,9 @@ Future<int> runAndStream(String executable, List<String> args,
       await Process.start(executable, args, workingDirectory: workingDir?.path);
   stdout.addStream(process.stdout);
   stderr.addStream(process.stderr.map((List<int> line) {
-    onStderr(line);
+    if (onStderr != null) {
+      onStderr(line);
+    }
     return line;
   }));
   if (exitOnError && (await process.exitCode != 0)) {

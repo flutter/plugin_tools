@@ -1,3 +1,7 @@
+## v.0.0.19
+
+- Add command to check all required files for license header.
+
 ## v.0.0.18+2
 
 - Fix `.travis.yml` file name in `README.md`.

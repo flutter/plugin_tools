@@ -14,7 +14,7 @@ import 'drive_examples_command.dart';
 import 'format_command.dart';
 import 'gen_pubspec_command.dart';
 import 'java_test_command.dart';
-import 'liscense_check_command.dart';
+import 'license_check_command.dart';
 import 'list_command.dart';
 import 'test_command.dart';
 import 'version_check_command.dart';

@@ -25,7 +25,7 @@ class LicenseCheckCommand extends PluginCommand {
       'Checks that all plugins correctly contains include licenses.\n'
       'This check enforces the following rules:\n'
       '1. Every plugin must contain a LICENSE file in root directory.\n'
-      "2. Every LICENSE file must contain the string 'Flutter' or 'Chromium' in the first line.\n"
+      "2. Every LICENSE file must contain the copyright license with 'Flutter' or 'Chromium' as the author.\n"
       '3. All code source files must contain a license header at the top.\n'
       '4. The license header for every source file must contain the same author name as the LICENSE file in the root directory.\n';
 
@@ -166,10 +166,16 @@ class LicenseCheckCommand extends PluginCommand {
     }
   }
 
-  String _parseAuthor(String string) {
-    for (String name in _validAuthorNames) {
-      if (string.contains(name)) {
-        return name;
+  String _parseAuthor(File licenseFile) {
+    final RegExp copyright = RegExp(r'Copyright 2\d{3}');
+
+    for (String line in licenseFile.readAsLinesSync()) {
+      if (line.contains(copyright)) {
+        for (String name in _validAuthorNames) {
+          if (line.contains(name)) {
+            return name;
+          }
+        }
       }
     }
 
@@ -191,8 +197,7 @@ class LicenseCheckCommand extends PluginCommand {
         continue;
       }
 
-      final String topLicenseLine = licenseFile.readAsLinesSync()[0];
-      final String author = _parseAuthor(topLicenseLine);
+      final String author = _parseAuthor(licenseFile);
 
       if (author == null) {
         pluginsWithoutLicenseFile.add(pluginDir);

@@ -22,7 +22,12 @@ class LicenseCheckCommand extends PluginCommand {
 
   @override
   final String description =
-      'Checks that all plugin java/dart/.m files include license at the top of the file.';
+      'Checks that all plugins correctly contains include licenses.\n'
+      'This check enforces the following rules:\n'
+      '1. Every plugin must contain a LICENSE file in root directory.\n'
+      "2. Every LICENSE file must contain the string 'Flutter' or 'Chromium' in the first line.\n"
+      '3. All code source files must contain a license header at the top.\n'
+      '4. The license header for every source file must contain the same author name as the LICENSE file in the root directory.\n';
 
   bool _isAndroidFile(FileSystemEntity entity) =>
       entity is File && entity.path.endsWith('.java');
@@ -57,7 +62,7 @@ class LicenseCheckCommand extends PluginCommand {
             r' Authors. All rights reserved.\s*\n'
             r'// Use of this source code is governed by a BSD-style license that can be\s*\n'
             r'// found in the LICENSE file.\s*\n'),
-        RegExp(r'// Copyright 2\d{3} The '
+        RegExp(r'// Copyright 2\d{3}, the '
             '$author'
             r' project authors.  Please see the AUTHORS file\s*\n'
             r'// for details. All rights reserved. Use of this source code is governed by a\s*\n'

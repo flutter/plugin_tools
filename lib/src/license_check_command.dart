@@ -22,7 +22,7 @@ class LicenseCheckCommand extends PluginCommand {
 
   @override
   final String description =
-      'Checks that all plugins correctly contains include licenses.\n'
+      'Checks that all plugins correctly includes licenses.\n'
       'This check enforces the following rules:\n'
       '1. Every plugin must contain a LICENSE file in root directory.\n'
       "2. Every LICENSE file must contain the copyright license with 'Flutter' or 'Chromium' as the author.\n"

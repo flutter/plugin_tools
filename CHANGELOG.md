@@ -1,6 +1,6 @@
 ## v.0.0.19
 
-- Add command to check all required files for license header.
+- Add command that checks and updates all plugins to correctly include licenses.
 
 ## v.0.0.18+2
 

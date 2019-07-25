@@ -6,22 +6,26 @@ import 'package:path/path.dart' as path;
 import 'common.dart';
 
 class LicenseCheckCommand extends PluginCommand {
-  LicenseCheckCommand(Directory packagesDir) : super(packagesDir);
-
-  // Update _license when this is updated.
-  static final RegExp _licenseRegExp = RegExp(
-    r'// Copyright 2\d{3} The Chromium Authors. All rights reserved.\n'
-    r'// Use of this source code is governed by a BSD-style license that can be\n'
-    r'// found in the LICENSE file.\n',
-  );
-
-  // Update _licenseRegExp when this is updated.
-  static String get _license {
-    final int year = DateTime.now().year;
-    return '// Copyright $year The Chromium Authors. All rights reserved.\n'
-        '// Use of this source code is governed by a BSD-style license that can be\n'
-        '// found in the LICENSE file.\n';
+  LicenseCheckCommand(Directory packagesDir) : super(packagesDir) {
+    argParser.addFlag(
+      'print',
+      help: 'Print out files without a valid license.',
+    );
+    argParser.addFlag(
+      'update',
+      help: 'Update all files without a valid license.',
+    );
   }
+
+  static final RegExp _licenseRegExp = RegExp(
+      r'// Copyright 2017 The Chromium Authors. All rights reserved.\n'
+      r'// Use of this source code is governed by a BSD-style license that can be\n'
+      r'// found in the LICENSE file.\n');
+
+  static final String _license =
+      '// Copyright 2017 The Chromium Authors. All rights reserved.\n'
+      '// Use of this source code is governed by a BSD-style license that can be\n'
+      '// found in the LICENSE file.\n';
 
   @override
   final String name = 'license-check';
@@ -50,6 +54,54 @@ class LicenseCheckCommand extends PluginCommand {
         .listSync(recursive: true, followLinks: false)
         .where(where)
         .cast<File>();
+  }
+
+  void printFiles(List<File> files) {
+    print('Some files don\'t contain a license.');
+    print(
+      'Please add the following license to the beginning of each file below: \n$_license',
+    );
+
+    for (File file in files) {
+      print(file.path);
+    }
+  }
+
+  void update(List<File> files) {
+    for (File file in files) {
+      final List<RegExp> licenseRegExps = <RegExp>[
+        RegExp(
+            r'// Copyright 2\d{3} The (Flutter|Chromium) Authors. All rights reserved.\s*\n'
+            r'// Use of this source code is governed by a BSD-style license that can be\s*\n'
+            r'// found in the LICENSE file.\s*\n'),
+        RegExp(
+            r'// Copyright 2\d{3}, the (Flutter|Chromium) project authors.  Please see the AUTHORS file\s*\n'
+            r'// for details. All rights reserved. Use of this source code is governed by a\s*\n'
+            r'// BSD-style license that can be found in the LICENSE file.\s*\n'),
+        RegExp(
+            r'// Copyright 2\d{3} The (Flutter|Chromium) Authors. All rights reserved.\s*\n'
+            r'// Use of this source code is governed by a BSD-style\s*\n'
+            r'// license that can be found in the LICENSE file.\s*\n'),
+      ];
+
+      final bool hasALicense = licenseRegExps.any(
+        (RegExp reg) => file.readAsStringSync().startsWith(reg),
+      );
+
+      if (hasALicense) {
+        final StringBuffer buffer = StringBuffer();
+        buffer.write(_license);
+
+        final List<String> lines = file.readAsLinesSync();
+        for (int i = 3; i < lines.length; i++) {
+          buffer.writeln(lines[i]);
+        }
+
+        file.writeAsStringSync(buffer.toString());
+      } else {
+        file.writeAsStringSync('$_license\n${file.readAsStringSync()}');
+      }
+    }
   }
 
   @override
@@ -84,16 +136,16 @@ class LicenseCheckCommand extends PluginCommand {
     }
 
     if (failingFiles.isNotEmpty) {
-      print('Some files don\'t contain a license.');
-      print(
-        'Please add the following license to the beginning of each file below: \n$_license',
-      );
-      for (File file in failingFiles) {
-        print(file.path);
+      if (argResults['print']) {
+        printFiles(failingFiles);
       }
+      if (argResults['update']) {
+        update(failingFiles);
+      }
+
       throw new ToolExit(1);
     }
 
-    print('All required files contain liscenses!');
+    print('All required files contain licenses!');
   }
 }

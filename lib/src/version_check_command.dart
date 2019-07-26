@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:colorize/colorize.dart';
 import 'package:git/git.dart';
+import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:yaml/yaml.dart';
@@ -140,6 +141,21 @@ class VersionCheckCommand extends PluginCommand {
           final String error = '$pubspecPath incorrectly updated version.\n'
               'HEAD: $headVersion, master: $masterVersion.\n'
               'Allowed versions: $allowedNextVersions';
+          final Colorize redError = Colorize(error)..red();
+          print(redError);
+          throw new ToolExit(1);
+        }
+
+        final changelogDir = Directory(p.dirname(pubspecPath));
+        print(changelogDir.toString());
+        final ProcessResult result = await runAndExitOnError(
+            'head', <String>['-n', '1', 'CHANGELOG.md'],
+            workingDir: changelogDir);
+        if (result.stdout != "## $headVersion") {
+          final String error =
+              'First line of CHANGELOG.md does not match version in pubspec.yaml.\n'
+              'Found: ${result.stdout}\n'
+              'Expected: ## $headVersion';
           final Colorize redError = Colorize(error)..red();
           print(redError);
           throw new ToolExit(1);

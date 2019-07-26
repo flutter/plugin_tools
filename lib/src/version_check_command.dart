@@ -107,7 +107,8 @@ class VersionCheckCommand extends PluginCommand {
 
   @override
   final String description =
-      'Checks if the versions of the plugins have been incremented per pub specification and match CHANGELOG.md..\n\n'
+      'Checks if the versions of the plugins have been incremented per pub'
+      'specification and match the change log.\n\n'
       'This command requires "pub" and "flutter" to be in your path.';
 
   void _validateChangelog(String changelogPath, Version headVersion) async {

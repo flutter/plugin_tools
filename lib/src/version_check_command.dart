@@ -43,7 +43,7 @@ class GitVersionFinder {
     final ProcessResult changedFilesCommand = await baseGitDir
         .runCommand(<String>['diff', '--name-only', '$baseSha']);
     final List<String> changedFiles =
-    changedFilesCommand.stdout.toString().split('\n');
+        changedFilesCommand.stdout.toString().split('\n');
     return changedFiles.where(isChangeLog).toList();
   }
 
@@ -111,16 +111,14 @@ class VersionCheckCommand extends PluginCommand {
       'This command requires "pub" and "flutter" to be in your path.';
 
   void _validateChangelog(String changelogPath, Version headVersion) async {
-    if (headVersion == null)
-      return;
-    final String firstLine = await File(changelogPath).readAsLinesSync().first;
+    if (headVersion == null) return;
+    final String firstLine = File(changelogPath).readAsLinesSync().first;
     if (firstLine != "## $headVersion") {
       final String error =
           'First line of CHANGELOG.md does not match version in pubspec.yaml.\n'
-          'Found: ${firstLine}\n'
+          'Found: $firstLine\n'
           'Expected: ## $headVersion';
-      final Colorize redError = Colorize(error)
-        ..red();
+      final Colorize redError = Colorize(error)..red();
       print(redError);
       throw new ToolExit(1);
     }
@@ -178,9 +176,7 @@ class VersionCheckCommand extends PluginCommand {
         }
 
         _validateChangelog(
-            p.join(p.dirname(pubspecPath), 'CHANGELOG.md'),
-            headVersion
-        );
+            p.join(p.dirname(pubspecPath), 'CHANGELOG.md'), headVersion);
       } on ProcessException {
         print('Unable to find pubspec in master for $pubspecPath.'
             ' Safe to ignore if the project is new.');
@@ -190,7 +186,8 @@ class VersionCheckCommand extends PluginCommand {
     // Find changelog changes where the pubspec.yaml hasn't changed and ensure
     // that the versions still match.
     for (final String changelogPath in changedChangelogs) {
-      String pubspecPath = p.join(p.dirname(changelogPath), 'pubspec.yaml');
+      final String pubspecPath =
+          p.join(p.dirname(changelogPath), 'pubspec.yaml');
       final Version headVersion =
           await gitVersionFinder.getPackageVersion(pubspecPath, 'HEAD');
       _validateChangelog(changelogPath, headVersion);

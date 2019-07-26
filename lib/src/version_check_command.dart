@@ -24,7 +24,11 @@ class GitVersionFinder {
   final String baseSha;
 
   static bool isPubspec(String file) {
-    return file.trim().endsWith('pubspec.yaml');
+    return p.basename(file) == 'pubspec.yaml';
+  }
+
+  static bool isChangeLog(String file) {
+    return p.basename(file) == 'CHANGELOG.md';
   }
 
   Future<List<String>> getChangedPubSpecs() async {
@@ -33,6 +37,14 @@ class GitVersionFinder {
     final List<String> changedFiles =
         changedFilesCommand.stdout.toString().split('\n');
     return changedFiles.where(isPubspec).toList();
+  }
+
+  Future<List<String>> getChangedChangeLogs() async {
+    final ProcessResult changedFilesCommand = await baseGitDir
+        .runCommand(<String>['diff', '--name-only', '$baseSha']);
+    final List<String> changedFiles =
+    changedFilesCommand.stdout.toString().split('\n');
+    return changedFiles.where(isChangeLog).toList();
   }
 
   Future<Version> getPackageVersion(String pubspecPath, String gitRef) async {
@@ -95,8 +107,24 @@ class VersionCheckCommand extends PluginCommand {
 
   @override
   final String description =
-      'Checks if the versions of the plugins have been incremented per pub specification.\n\n'
+      'Checks if the versions of the plugins have been incremented per pub specification and match CHANGELOG.md..\n\n'
       'This command requires "pub" and "flutter" to be in your path.';
+
+  void _validateChangelog(String changelogPath, Version headVersion) async {
+    if (headVersion == null)
+      return;
+    final String firstLine = await File(changelogPath).readAsLinesSync().first;
+    if (firstLine != "## $headVersion") {
+      final String error =
+          'First line of CHANGELOG.md does not match version in pubspec.yaml.\n'
+          'Found: ${firstLine}\n'
+          'Expected: ## $headVersion';
+      final Colorize redError = Colorize(error)
+        ..red();
+      print(redError);
+      throw new ToolExit(1);
+    }
+  }
 
   @override
   Future<Null> run() async {
@@ -113,6 +141,9 @@ class VersionCheckCommand extends PluginCommand {
     final GitDir baseGitDir = await GitDir.fromExisting(rootDir);
     final GitVersionFinder gitVersionFinder =
         GitVersionFinder(baseGitDir, baseSha);
+
+    final List<String> changedChangelogs =
+        await gitVersionFinder.getChangedChangeLogs();
 
     final List<String> changedPubspecs =
         await gitVersionFinder.getChangedPubSpecs();
@@ -146,24 +177,23 @@ class VersionCheckCommand extends PluginCommand {
           throw new ToolExit(1);
         }
 
-        final changelogDir = Directory(p.dirname(pubspecPath));
-        print(changelogDir.toString());
-        final ProcessResult result = await runAndExitOnError(
-            'head', <String>['-n', '1', 'CHANGELOG.md'],
-            workingDir: changelogDir);
-        if (result.stdout != "## $headVersion") {
-          final String error =
-              'First line of CHANGELOG.md does not match version in pubspec.yaml.\n'
-              'Found: ${result.stdout}\n'
-              'Expected: ## $headVersion';
-          final Colorize redError = Colorize(error)..red();
-          print(redError);
-          throw new ToolExit(1);
-        }
+        _validateChangelog(
+            p.join(p.dirname(pubspecPath), 'CHANGELOG.md'),
+            headVersion
+        );
       } on ProcessException {
         print('Unable to find pubspec in master for $pubspecPath.'
             ' Safe to ignore if the project is new.');
       }
+    }
+
+    // Find changelog changes where the pubspec.yaml hasn't changed and ensure
+    // that the versions still match.
+    for (final String changelogPath in changedChangelogs) {
+      String pubspecPath = p.join(p.dirname(changelogPath), 'pubspec.yaml');
+      final Version headVersion =
+          await gitVersionFinder.getPackageVersion(pubspecPath, 'HEAD');
+      _validateChangelog(changelogPath, headVersion);
     }
 
     print('No version check errors found!');

@@ -1,0 +1,1 @@
+This directory is needed to pass license_check_test.dart.

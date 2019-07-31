@@ -8,8 +8,8 @@ google-java-format-1.3-all-deps.jar
 .packages
 .project
 .pub/
+.dart_tool/
 build/
-**/packages/
 
 # Files created by dart2js
 # (Most Dart developers will use pub build to compile Dart, use/modify these 

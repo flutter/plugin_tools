@@ -182,6 +182,37 @@ class LicenseCheckCommand extends PluginCommand {
     return null;
   }
 
+  List<File> _sourceCodeFiles(Directory pluginDir) {
+    final List<File> sourceCodeFiles = <File>[];
+
+    final Directory androidDir = Directory(
+      path.join(pluginDir.path, 'android'),
+    );
+    final Directory iosDir = Directory(path.join(pluginDir.path, 'ios'));
+    final Directory dartDir = Directory(path.join(pluginDir.path, 'lib'));
+    final Directory testDir = Directory(path.join(pluginDir.path, 'test'));
+    final Directory exampleDir = Directory(
+      path.join(pluginDir.path, 'example/lib'),
+    );
+
+    if (androidDir.existsSync()) {
+      sourceCodeFiles.addAll(_getFilesWhere(androidDir, _isAndroidFile));
+    }
+
+    if (iosDir.existsSync()) {
+      sourceCodeFiles.addAll(_getFilesWhere(iosDir, _isIosFile));
+    }
+
+    if (testDir.existsSync()) {
+      sourceCodeFiles.addAll(_getFilesWhere(testDir, _isDartFile));
+    }
+
+    sourceCodeFiles.addAll(_getFilesWhere(dartDir, _isDartFile));
+    sourceCodeFiles.addAll(_getFilesWhere(exampleDir, _isDartFile));
+
+    return sourceCodeFiles;
+  }
+
   @override
   Future<Null> run() async {
     checkSharding();
@@ -189,8 +220,6 @@ class LicenseCheckCommand extends PluginCommand {
     final List<Directory> pluginsWithoutLicenseFile = <Directory>[];
     bool fail = false;
     await for (Directory pluginDir in getPlugins()) {
-      final List<File> pluginFiles = <File>[];
-
       final File licenseFile = File(path.join(pluginDir.path, 'LICENSE'));
       if (!licenseFile.existsSync()) {
         pluginsWithoutLicenseFile.add(pluginDir);
@@ -204,25 +233,8 @@ class LicenseCheckCommand extends PluginCommand {
         continue;
       }
 
-      final Directory androidDir =
-          Directory(path.join(pluginDir.path, 'android'));
-      final Directory iosDir = Directory(path.join(pluginDir.path, 'ios'));
-      final Directory dartDir = Directory(path.join(pluginDir.path, 'lib'));
-      final Directory testDir = Directory(path.join(pluginDir.path, 'test'));
-      final Directory exampleDir = Directory(
-        path.join(pluginDir.path, 'example/lib'),
-      );
-
-      pluginFiles.addAll(_getFilesWhere(androidDir, _isAndroidFile));
-      pluginFiles.addAll(_getFilesWhere(iosDir, _isIosFile));
-      pluginFiles.addAll(_getFilesWhere(dartDir, _isDartFile));
-      pluginFiles.addAll(_getFilesWhere(exampleDir, _isDartFile));
-      if (testDir.existsSync()) {
-        pluginFiles.addAll(_getFilesWhere(testDir, _isDartFile));
-      }
-
       final List<File> filesWithoutValidHeader = <File>[];
-      for (File file in pluginFiles) {
+      for (File file in _sourceCodeFiles(pluginDir)) {
         final bool hasValidLicense = _getValidLicenses(author).any(
           (RegExp reg) => file.readAsStringSync().startsWith(reg),
         );

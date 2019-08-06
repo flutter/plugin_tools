@@ -63,10 +63,11 @@ class FirebaseTestLabCommand extends PluginCommand {
         continue;
       }
 
-      String scriptDirectory = new Directory(p.join(packagesDir.path, '..', 'script'));
+      String scriptDirectory = p.join(packagesDir.path, '..', 'script');
       exitCode = await runAndStream(
-          p.join(scriptDirectory.path, 'firebase-test-lab.sh'),
-          workingDir: example.path);
+          p.join(scriptDirectory, 'firebase_test_lab.sh'),
+          <String>[],
+          workingDir: example);
 
       if (exitCode != 0) {
         failingPackages.add(packageName);

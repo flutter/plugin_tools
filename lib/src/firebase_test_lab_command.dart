@@ -26,21 +26,21 @@ class FirebaseTestLabCommand extends PluginCommand {
   @override
   Future<Null> run() async {
     checkSharding();
-    final Stream<Directory> examplesWithTests = getExamples().where(
-            (Directory d) =>
+    final Stream<Directory> examplesWithTests = getExamples().where((Directory
+            d) =>
         isFlutterPackage(d) &&
-            new Directory(p.join(d.path, 'android', 'app', 'src', 'androidTest'))
-                .existsSync());
+        new Directory(p.join(d.path, 'android', 'app', 'src', 'androidTest'))
+            .existsSync());
 
     final List<String> failingPackages = <String>[];
     final List<String> missingFlutterBuild = <String>[];
     await for (Directory example in examplesWithTests) {
       final String packageName =
-      p.relative(example.path, from: packagesDir.path);
+          p.relative(example.path, from: packagesDir.path);
       print('\nRUNNING FIREBASE TEST LAB TESTS for $packageName');
 
       final Directory androidDirectory =
-      new Directory(p.join(example.path, 'android'));
+          new Directory(p.join(example.path, 'android'));
       if (!new File(p.join(androidDirectory.path, _gradleWrapper))
           .existsSync()) {
         print('ERROR: Run "flutter build apk" on example app of $packageName'
@@ -53,7 +53,8 @@ class FirebaseTestLabCommand extends PluginCommand {
           p.join(androidDirectory.path, _gradleWrapper),
           <String>[
             'assembleAndroidTest',
-            '-Pverbose=true', '-Ptrack-widget-creation=false',
+            '-Pverbose=true',
+            '-Ptrack-widget-creation=false',
             '-Pfilesystem-scheme=org-dartlang-root',
           ],
           workingDir: androidDirectory);
@@ -63,24 +64,22 @@ class FirebaseTestLabCommand extends PluginCommand {
         continue;
       }
 
-      String scriptDirectory = p.join(packagesDir.path, '..', 'script');
+      final String scriptDirectory = p.join(packagesDir.path, '..', 'script');
       exitCode = await runAndStream(
-          p.join(scriptDirectory, 'firebase_test_lab.sh'),
-          <String>[],
+          p.join(scriptDirectory, 'firebase_test_lab.sh'), <String>[],
           workingDir: example);
 
       if (exitCode != 0) {
         failingPackages.add(packageName);
         continue;
       }
-
     }
 
     print('\n\n');
     if (failingPackages.isNotEmpty) {
       print(
           'The instrumentation tests for the following packages are failing (see above for'
-              'details):');
+          'details):');
       for (String package in failingPackages) {
         print(' * $package');
       }

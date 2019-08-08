@@ -64,15 +64,67 @@ class FirebaseTestLabCommand extends PluginCommand {
         continue;
       }
 
-      final String scriptDirectory = p.join(packagesDir.path, '..', 'script');
+      final File serviceKey = File(p.join(Platform.environment['HOME'], 'gcloud-service-key.json'));
+      serviceKey.writeAsString(Platform.environment['GCLOUD_FIREBASE_TESTLAB_KEY']);
+
       exitCode = await runAndStream(
-          p.join(scriptDirectory, 'firebase_test_lab.sh'), <String>[],
-          workingDir: example);
+          p.join(androidDirectory.path, _gradleWrapper),
+          <String>[
+            'gcloud',
+            'auth',
+            'activate-service-account',
+            '--key-file={serviceKey.path}',
+          ],
+          workingDir: androidDirectory);
 
       if (exitCode != 0) {
         failingPackages.add(packageName);
         continue;
       }
+
+      exitCode = await runAndStream(
+          p.join(androidDirectory.path, _gradleWrapper),
+          <String>[
+            'gcloud',
+            '--quiet',
+            'config',
+            'set',
+            'project',
+            'flutter-infra',  // TODO(jackson): Make this configurable
+          ],
+          workingDir: androidDirectory);
+
+      if (exitCode != 0) {
+        failingPackages.add(packageName);
+        continue;
+      }
+
+      // TODO(jackson): Make this configurable
+      final String gitRevision = Platform.environment['GIT_REVISION'];
+      final String buildId = Platform.environment['CIRRUS_BUILD_ID'];
+      exitCode = await runAndStream(
+          p.join(androidDirectory.path, _gradleWrapper),
+          <String>[
+            'gcloud',
+            'firebase',
+            'test',
+            'android',
+            'run',
+            '--type',
+            'instrumentation'
+            '--app', 'build/app/outputs/apk/debug/app-debug.apk',
+            '--test', 'build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk',
+            '--timeout', '2m',
+            '--results-bucket=gs://flutter_firebase_testlab',
+            '--results-dir=engine_android_test/$gitRevision/$buildId',
+          ],
+          workingDir: androidDirectory);
+
+      if (exitCode != 0) {
+        failingPackages.add(packageName);
+        continue;
+      }
+
     }
 
     print('\n\n');

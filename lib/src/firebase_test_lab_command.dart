@@ -10,7 +10,9 @@ import 'package:path/path.dart' as p;
 import 'common.dart';
 
 class FirebaseTestLabCommand extends PluginCommand {
-  FirebaseTestLabCommand(Directory packagesDir) : super(packagesDir);
+  FirebaseTestLabCommand(Directory packagesDir) : super(packagesDir) {
+    argParser.addOption('project', defaultsTo: 'flutter-infra');
+  }
 
   @override
   final String name = 'firebase-test-lab';
@@ -90,7 +92,7 @@ class FirebaseTestLabCommand extends PluginCommand {
             'config',
             'set',
             'project',
-            'flutter-infra',  // TODO(jackson): Make this configurable
+            '${argResults['project']}',
           ],
           workingDir: androidDirectory);
 

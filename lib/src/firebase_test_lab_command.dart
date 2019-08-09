@@ -70,7 +70,7 @@ class FirebaseTestLabCommand extends PluginCommand {
       serviceKey.writeAsString(Platform.environment['GCLOUD_FIREBASE_TESTLAB_KEY']);
 
       exitCode = await runAndStream(
-          p.join(androidDirectory.path, 'gcloud'),
+          'gcloud',
           <String>[
             'auth',
             'activate-service-account',
@@ -84,7 +84,7 @@ class FirebaseTestLabCommand extends PluginCommand {
       }
 
       exitCode = await runAndStream(
-          p.join(androidDirectory.path, 'gcloud'),
+          'gcloud',
           <String>[
             '--quiet',
             'config',
@@ -103,7 +103,7 @@ class FirebaseTestLabCommand extends PluginCommand {
       final String gitRevision = Platform.environment['GIT_REVISION'];
       final String buildId = Platform.environment['CIRRUS_BUILD_ID'];
       exitCode = await runAndStream(
-          p.join(androidDirectory.path, 'gcloud'),
+          'gcloud',
           <String>[
             'firebase',
             'test',

@@ -74,7 +74,7 @@ class FirebaseTestLabCommand extends PluginCommand {
           <String>[
             'auth',
             'activate-service-account',
-            '--key-file={serviceKey.path}',
+            '--key-file=${serviceKey.path}',
           ],
           workingDir: androidDirectory);
 

@@ -13,11 +13,10 @@ class FirebaseTestLabCommand extends PluginCommand {
   FirebaseTestLabCommand(Directory packagesDir) : super(packagesDir) {
     argParser.addOption('project', defaultsTo: 'flutter-infra');
     argParser.addOption('service-key', defaultsTo: p.join(Platform.environment['HOME'], 'gcloud-service-key.json'));
-    argParser.addOption('results-bucket', defaultsTo: 'gs://flutter_firebase_testlab')
-    argParser.addOption('results-bucket', defaultsTo: 'gs://flutter_firebase_testlab')
+    argParser.addOption('results-bucket', defaultsTo: 'gs://flutter_firebase_testlab');
     final String gitRevision = Platform.environment['GIT_REVISION'];
     final String buildId = Platform.environment['CIRRUS_BUILD_ID'];
-    argParser.addOption('results-dir', defaultsTo: 'plugins_android_test/$gitRevision/$buildId')
+    argParser.addOption('results-dir', defaultsTo: 'plugins_android_test/$gitRevision/$buildId');
   }
 
   @override
@@ -61,6 +60,21 @@ class FirebaseTestLabCommand extends PluginCommand {
           p.join(androidDirectory.path, _gradleWrapper),
           <String>[
             'assembleAndroidTest',
+            '-Pverbose=true',
+            '-Ptrack-widget-creation=false',
+            '-Pfilesystem-scheme=org-dartlang-root',
+          ],
+          workingDir: androidDirectory);
+
+      if (exitCode != 0) {
+        failingPackages.add(packageName);
+        continue;
+      }
+
+      exitCode = await runAndStream(
+          p.join(androidDirectory.path, _gradleWrapper),
+          <String>[
+            'assembleDebug',
             '-Pverbose=true',
             '-Ptrack-widget-creation=false',
             '-Pfilesystem-scheme=org-dartlang-root',

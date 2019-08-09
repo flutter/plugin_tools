@@ -42,6 +42,11 @@ class FirebaseTestLabCommand extends PluginCommand {
     final List<String> failingPackages = <String>[];
     final List<String> missingFlutterBuild = <String>[];
     await for (Directory example in examplesWithTests) {
+      // TODO(jackson): We should also support testing lib/main.dart
+      Directory testsDir = Directory(p.join(example.path, 'test_instrumentation'));
+      if (!testsDir.exists())
+        continue;
+
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
       print('\nRUNNING FIREBASE TEST LAB TESTS for $packageName');
@@ -101,8 +106,7 @@ class FirebaseTestLabCommand extends PluginCommand {
         continue;
       }
 
-      Directory tests = Directory(p.join(example.path, 'test_instrumentation'));
-      for(File test in tests.listSync()) {
+      for (File test in testsDir.listSync()) {
         exitCode = await runAndStream(
             p.join(androidDirectory.path, _gradleWrapper),
             <String>[

@@ -29,8 +29,8 @@ class FirebaseTestLabCommand extends PluginCommand {
   @override
   final String description = 'Runs the instrumentation tests of the example '
       'apps on Firebase Test Lab.\n\n'
-      'Building the apks of the example apps is required before executing this '
-      'command.';
+      'Runs tests in test_instrumentation folder using the '
+      'instrumentation_test package.';
 
   static const String _gradleWrapper = 'gradlew';
 

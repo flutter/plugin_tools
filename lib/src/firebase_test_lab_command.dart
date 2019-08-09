@@ -12,6 +12,7 @@ import 'common.dart';
 class FirebaseTestLabCommand extends PluginCommand {
   FirebaseTestLabCommand(Directory packagesDir) : super(packagesDir) {
     argParser.addOption('project', defaultsTo: 'flutter-infra');
+    argParser.addOption('service-key', defaultsTo: File(p.join(Platform.environment['HOME'], 'gcloud-service-key.json'));
   }
 
   @override
@@ -66,15 +67,12 @@ class FirebaseTestLabCommand extends PluginCommand {
         continue;
       }
 
-      final File serviceKey = File(p.join(Platform.environment['HOME'], 'gcloud-service-key.json'));
-      serviceKey.writeAsString(Platform.environment['GCLOUD_FIREBASE_TESTLAB_KEY']);
-
       exitCode = await runAndStream(
           'gcloud',
           <String>[
             'auth',
             'activate-service-account',
-            '--key-file=${serviceKey.path}',
+            '--key-file=${argResults['service-key']}',
           ],
           workingDir: androidDirectory);
 

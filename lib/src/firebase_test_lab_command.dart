@@ -44,7 +44,7 @@ class FirebaseTestLabCommand extends PluginCommand {
     await for (Directory example in examplesWithTests) {
       // TODO(jackson): We should also support testing lib/main.dart
       Directory testsDir = Directory(p.join(example.path, 'test_instrumentation'));
-      if (!testsDir.exists())
+      if (!testsDir.existsSync())
         continue;
 
       final String packageName =

@@ -12,7 +12,7 @@ import 'common.dart';
 class FirebaseTestLabCommand extends PluginCommand {
   FirebaseTestLabCommand(Directory packagesDir) : super(packagesDir) {
     argParser.addOption('project', defaultsTo: 'flutter-infra');
-    argParser.addOption('service-key', defaultsTo: File(p.join(Platform.environment['HOME'], 'gcloud-service-key.json'));
+    argParser.addOption('service-key', defaultsTo: p.join(Platform.environment['HOME'], 'gcloud-service-key.json'));
   }
 
   @override
@@ -74,7 +74,7 @@ class FirebaseTestLabCommand extends PluginCommand {
             'activate-service-account',
             '--key-file=${argResults['service-key']}',
           ],
-          workingDir: androidDirectory);
+          workingDir: example);
 
       if (exitCode != 0) {
         failingPackages.add(packageName);
@@ -90,7 +90,7 @@ class FirebaseTestLabCommand extends PluginCommand {
             'project',
             '${argResults['project']}',
           ],
-          workingDir: androidDirectory);
+          workingDir: example);
 
       if (exitCode != 0) {
         failingPackages.add(packageName);
@@ -108,14 +108,14 @@ class FirebaseTestLabCommand extends PluginCommand {
             'android',
             'run',
             '--type',
-            'instrumentation'
+            'instrumentation',
             '--app', 'build/app/outputs/apk/debug/app-debug.apk',
             '--test', 'build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk',
             '--timeout', '2m',
             '--results-bucket=gs://flutter_firebase_testlab',
             '--results-dir=engine_android_test/$gitRevision/$buildId',
           ],
-          workingDir: androidDirectory);
+          workingDir: example);
 
       if (exitCode != 0) {
         failingPackages.add(packageName);

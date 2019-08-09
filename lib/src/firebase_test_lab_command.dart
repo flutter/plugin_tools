@@ -13,6 +13,11 @@ class FirebaseTestLabCommand extends PluginCommand {
   FirebaseTestLabCommand(Directory packagesDir) : super(packagesDir) {
     argParser.addOption('project', defaultsTo: 'flutter-infra');
     argParser.addOption('service-key', defaultsTo: p.join(Platform.environment['HOME'], 'gcloud-service-key.json'));
+    argParser.addOption('results-bucket', defaultsTo: 'gs://flutter_firebase_testlab')
+    argParser.addOption('results-bucket', defaultsTo: 'gs://flutter_firebase_testlab')
+    final String gitRevision = Platform.environment['GIT_REVISION'];
+    final String buildId = Platform.environment['CIRRUS_BUILD_ID'];
+    argParser.addOption('results-dir', defaultsTo: 'plugins_android_test/$gitRevision/$buildId')
   }
 
   @override
@@ -88,7 +93,7 @@ class FirebaseTestLabCommand extends PluginCommand {
             'config',
             'set',
             'project',
-            '${argResults['project']}',
+            argResults['project'],
           ],
           workingDir: example);
 
@@ -97,9 +102,6 @@ class FirebaseTestLabCommand extends PluginCommand {
         continue;
       }
 
-      // TODO(jackson): Make this configurable
-      final String gitRevision = Platform.environment['GIT_REVISION'];
-      final String buildId = Platform.environment['CIRRUS_BUILD_ID'];
       exitCode = await runAndStream(
           'gcloud',
           <String>[
@@ -112,8 +114,8 @@ class FirebaseTestLabCommand extends PluginCommand {
             '--app', 'build/app/outputs/apk/debug/app-debug.apk',
             '--test', 'build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk',
             '--timeout', '2m',
-            '--results-bucket=gs://flutter_firebase_testlab',
-            '--results-dir=engine_android_test/$gitRevision/$buildId',
+            '--results-bucket=${argResults['results-bucket']}',
+            '--results-dir=${argResults['results-dir']}',
           ],
           workingDir: example);
 

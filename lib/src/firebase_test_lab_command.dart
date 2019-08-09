@@ -57,36 +57,6 @@ class FirebaseTestLabCommand extends PluginCommand {
       }
 
       int exitCode = await runAndStream(
-          p.join(androidDirectory.path, _gradleWrapper),
-          <String>[
-            'assembleAndroidTest',
-            '-Pverbose=true',
-            '-Ptrack-widget-creation=false',
-            '-Pfilesystem-scheme=org-dartlang-root',
-          ],
-          workingDir: androidDirectory);
-
-      if (exitCode != 0) {
-        failingPackages.add(packageName);
-        continue;
-      }
-
-      exitCode = await runAndStream(
-          p.join(androidDirectory.path, _gradleWrapper),
-          <String>[
-            'assembleDebug',
-            '-Pverbose=true',
-            '-Ptrack-widget-creation=false',
-            '-Pfilesystem-scheme=org-dartlang-root',
-          ],
-          workingDir: androidDirectory);
-
-      if (exitCode != 0) {
-        failingPackages.add(packageName);
-        continue;
-      }
-
-      exitCode = await runAndStream(
           'gcloud',
           <String>[
             'auth',
@@ -117,27 +87,60 @@ class FirebaseTestLabCommand extends PluginCommand {
       }
 
       exitCode = await runAndStream(
-          'gcloud',
+          p.join(androidDirectory.path, _gradleWrapper),
           <String>[
-            'firebase',
-            'test',
-            'android',
-            'run',
-            '--type',
-            'instrumentation',
-            '--app', 'build/app/outputs/apk/debug/app-debug.apk',
-            '--test', 'build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk',
-            '--timeout', '2m',
-            '--results-bucket=${argResults['results-bucket']}',
-            '--results-dir=${argResults['results-dir']}',
+            'assembleAndroidTest',
+            '-Pverbose=true',
+            '-Ptrack-widget-creation=false',
+            '-Pfilesystem-scheme=org-dartlang-root',
           ],
-          workingDir: example);
+          workingDir: androidDirectory);
 
       if (exitCode != 0) {
         failingPackages.add(packageName);
         continue;
       }
 
+      Directory tests = Directory(p.join(example.path, 'test_instrumentation'));
+      for(File test in tests.listSync()) {
+        exitCode = await runAndStream(
+            p.join(androidDirectory.path, _gradleWrapper),
+            <String>[
+              'assembleDebug',
+              '-Pverbose=true',
+              '-Ptrack-widget-creation=false',
+              '-Pfilesystem-scheme=org-dartlang-root',
+              '-Ptarget=${test.path}'
+            ],
+            workingDir: androidDirectory);
+
+        if (exitCode != 0) {
+          failingPackages.add(packageName);
+          continue;
+        }
+
+        exitCode = await runAndStream(
+            'gcloud',
+            <String>[
+              'firebase',
+              'test',
+              'android',
+              'run',
+              '--type',
+              'instrumentation',
+              '--app', 'build/app/outputs/apk/debug/app-debug.apk',
+              '--test', 'build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk',
+              '--timeout', '2m',
+              '--results-bucket=${argResults['results-bucket']}',
+              '--results-dir=${argResults['results-dir']}',
+            ],
+            workingDir: example);
+
+        if (exitCode != 0) {
+          failingPackages.add(packageName);
+          continue;
+        }
+      }
     }
 
     print('\n\n');

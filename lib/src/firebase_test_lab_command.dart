@@ -12,11 +12,15 @@ import 'common.dart';
 class FirebaseTestLabCommand extends PluginCommand {
   FirebaseTestLabCommand(Directory packagesDir) : super(packagesDir) {
     argParser.addOption('project', defaultsTo: 'flutter-infra');
-    argParser.addOption('service-key', defaultsTo: p.join(Platform.environment['HOME'], 'gcloud-service-key.json'));
-    argParser.addOption('results-bucket', defaultsTo: 'gs://flutter_firebase_testlab');
+    argParser.addOption('service-key',
+        defaultsTo:
+            p.join(Platform.environment['HOME'], 'gcloud-service-key.json'));
+    argParser.addOption('results-bucket',
+        defaultsTo: 'gs://flutter_firebase_testlab');
     final String gitRevision = Platform.environment['GIT_REVISION'];
     final String buildId = Platform.environment['CIRRUS_BUILD_ID'];
-    argParser.addOption('results-dir', defaultsTo: 'plugins_android_test/$gitRevision/$buildId');
+    argParser.addOption('results-dir',
+        defaultsTo: 'plugins_android_test/$gitRevision/$buildId');
   }
 
   @override
@@ -43,9 +47,9 @@ class FirebaseTestLabCommand extends PluginCommand {
     final List<String> missingFlutterBuild = <String>[];
     await for (Directory example in examplesWithTests) {
       // TODO(jackson): We should also support testing lib/main.dart
-      Directory testsDir = Directory(p.join(example.path, 'test_instrumentation'));
-      if (!testsDir.existsSync())
-        continue;
+      final Directory testsDir =
+          Directory(p.join(example.path, 'test_instrumentation'));
+      if (!testsDir.existsSync()) continue;
 
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
@@ -132,9 +136,12 @@ class FirebaseTestLabCommand extends PluginCommand {
               'run',
               '--type',
               'instrumentation',
-              '--app', 'build/app/outputs/apk/debug/app-debug.apk',
-              '--test', 'build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk',
-              '--timeout', '2m',
+              '--app',
+              'build/app/outputs/apk/debug/app-debug.apk',
+              '--test',
+              'build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk',
+              '--timeout',
+              '2m',
               '--results-bucket=${argResults['results-bucket']}',
               '--results-dir=${argResults['results-dir']}',
             ],

@@ -194,12 +194,19 @@ abstract class PluginCommand extends Command<Null> {
 }
 
 Future<int> runAndStream(String executable, List<String> args,
-    {Directory workingDir, bool exitOnError: false}) async {
+    {Directory workingDir,
+    bool exitOnError: false,
+    Function(List<int>) onStderr}) async {
   final Process process =
       await Process.start(executable, args, workingDirectory: workingDir?.path);
   stdout.addStream(process.stdout);
-  stderr.addStream(process.stderr);
-  if (exitOnError && await process.exitCode != 0) {
+  stderr.addStream(process.stderr.map((List<int> line) {
+    if (onStderr != null) {
+      onStderr(line);
+    }
+    return line;
+  }));
+  if (exitOnError && (await process.exitCode != 0)) {
     final String error =
         _getErrorString(executable, args, workingDir: workingDir);
     print('$error See above for details.');

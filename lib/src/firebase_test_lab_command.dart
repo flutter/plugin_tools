@@ -11,7 +11,9 @@ import 'common.dart';
 
 class FirebaseTestLabCommand extends PluginCommand {
   FirebaseTestLabCommand(Directory packagesDir) : super(packagesDir) {
-    argParser.addOption('project', defaultsTo: 'flutter-infra',
+    argParser.addOption(
+      'project',
+      defaultsTo: 'flutter-infra',
       help: 'The Firebase project name.',
     );
     argParser.addOption('service-key',
@@ -37,27 +39,23 @@ class FirebaseTestLabCommand extends PluginCommand {
   static const String _gradleWrapper = 'gradlew';
 
   Future<void> _configureFirebaseProject() async {
-    int exitCode = await runAndStream(
-        'gcloud',
-        <String>[
-          'auth',
-          'activate-service-account',
-          '--key-file=${argResults['service-key']}',
-        ]);
+    int exitCode = await runAndStream('gcloud', <String>[
+      'auth',
+      'activate-service-account',
+      '--key-file=${argResults['service-key']}',
+    ]);
 
     if (exitCode != 0) {
       throw new ToolExit(1);
     }
 
-    exitCode = await runAndStream(
-        'gcloud',
-        <String>[
-          '--quiet',
-          'config',
-          'set',
-          'project',
-          argResults['project'],
-        ]);
+    exitCode = await runAndStream('gcloud', <String>[
+      '--quiet',
+      'config',
+      'set',
+      'project',
+      argResults['project'],
+    ]);
 
     if (exitCode != 0) {
       throw new ToolExit(1);

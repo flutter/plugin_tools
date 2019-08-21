@@ -79,7 +79,9 @@ class FirebaseTestLabCommand extends PluginCommand {
       // See https://github.com/flutter/flutter/issues/38983
       final Directory testsDir =
           Directory(p.join(example.path, 'test_instrumentation'));
-      if (!testsDir.existsSync()) continue;
+      if (!testsDir.existsSync()) {
+        continue;
+      }
 
       final String packageName =
           p.relative(example.path, from: packagesDir.path);

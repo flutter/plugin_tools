@@ -80,9 +80,9 @@ class FirebaseTestLabCommand extends PluginCommand {
     final List<String> failingPackages = <String>[];
     final List<String> missingFlutterBuild = <String>[];
     await for (Directory example in examplesWithTests) {
-      // TODO(https://github.com/flutter/flutter/issues/38983):
-      // We should also support testing lib/main.dart for
-      // running non-Dart instrumentation tests
+      // TODO(jackson): We should also support testing lib/main.dart for
+      // running non-Dart instrumentation tests.
+      // See https://github.com/flutter/flutter/issues/38983
       final Directory testsDir =
           Directory(p.join(example.path, 'test_instrumentation'));
       if (!testsDir.existsSync()) continue;

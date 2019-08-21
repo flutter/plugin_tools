@@ -11,7 +11,9 @@ import 'common.dart';
 
 class FirebaseTestLabCommand extends PluginCommand {
   FirebaseTestLabCommand(Directory packagesDir) : super(packagesDir) {
-    argParser.addOption('project', defaultsTo: 'flutter-infra');
+    argParser.addOption('project', defaultsTo: 'flutter-infra',
+      help: 'The Firebase project name.',
+    );
     argParser.addOption('service-key',
         defaultsTo:
             p.join(Platform.environment['HOME'], 'gcloud-service-key.json'));
@@ -34,6 +36,38 @@ class FirebaseTestLabCommand extends PluginCommand {
 
   static const String _gradleWrapper = 'gradlew';
 
+  void _configureFirebaseProject() {
+    int exitCode = await runAndStream(
+        'gcloud',
+        <String>[
+          'auth',
+          'activate-service-account',
+          '--key-file=${argResults['service-key']}',
+        ],
+        workingDir: example);
+
+    if (exitCode != 0) {
+      throw new ToolExit(1);
+      continue;
+    }
+
+    exitCode = await runAndStream(
+        'gcloud',
+        <String>[
+          '--quiet',
+          'config',
+          'set',
+          'project',
+          argResults['project'],
+        ],
+        workingDir: example);
+
+    if (exitCode != 0) {
+      throw new ToolExit(1);
+      continue;
+    }
+  }
+
   @override
   Future<Null> run() async {
     checkSharding();
@@ -46,7 +80,9 @@ class FirebaseTestLabCommand extends PluginCommand {
     final List<String> failingPackages = <String>[];
     final List<String> missingFlutterBuild = <String>[];
     await for (Directory example in examplesWithTests) {
-      // TODO(jackson): We should also support testing lib/main.dart
+      // TODO(https://github.com/flutter/flutter/issues/38983):
+      // We should also support testing lib/main.dart for
+      // running non-Dart instrumentation tests
       final Directory testsDir =
           Directory(p.join(example.path, 'test_instrumentation'));
       if (!testsDir.existsSync()) continue;
@@ -66,36 +102,6 @@ class FirebaseTestLabCommand extends PluginCommand {
       }
 
       int exitCode = await runAndStream(
-          'gcloud',
-          <String>[
-            'auth',
-            'activate-service-account',
-            '--key-file=${argResults['service-key']}',
-          ],
-          workingDir: example);
-
-      if (exitCode != 0) {
-        failingPackages.add(packageName);
-        continue;
-      }
-
-      exitCode = await runAndStream(
-          'gcloud',
-          <String>[
-            '--quiet',
-            'config',
-            'set',
-            'project',
-            argResults['project'],
-          ],
-          workingDir: example);
-
-      if (exitCode != 0) {
-        failingPackages.add(packageName);
-        continue;
-      }
-
-      exitCode = await runAndStream(
           p.join(androidDirectory.path, _gradleWrapper),
           <String>[
             'assembleAndroidTest',

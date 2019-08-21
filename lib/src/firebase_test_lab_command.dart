@@ -36,19 +36,17 @@ class FirebaseTestLabCommand extends PluginCommand {
 
   static const String _gradleWrapper = 'gradlew';
 
-  void _configureFirebaseProject() {
+  Future<void> _configureFirebaseProject() async {
     int exitCode = await runAndStream(
         'gcloud',
         <String>[
           'auth',
           'activate-service-account',
           '--key-file=${argResults['service-key']}',
-        ],
-        workingDir: example);
+        ]);
 
     if (exitCode != 0) {
       throw new ToolExit(1);
-      continue;
     }
 
     exitCode = await runAndStream(
@@ -59,12 +57,10 @@ class FirebaseTestLabCommand extends PluginCommand {
           'set',
           'project',
           argResults['project'],
-        ],
-        workingDir: example);
+        ]);
 
     if (exitCode != 0) {
       throw new ToolExit(1);
-      continue;
     }
   }
 
@@ -100,6 +96,8 @@ class FirebaseTestLabCommand extends PluginCommand {
         missingFlutterBuild.add(packageName);
         continue;
       }
+
+      await _configureFirebaseProject();
 
       int exitCode = await runAndStream(
           p.join(androidDirectory.path, _gradleWrapper),

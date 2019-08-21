@@ -104,8 +104,6 @@ class FirebaseTestLabCommand extends PluginCommand {
           <String>[
             'assembleAndroidTest',
             '-Pverbose=true',
-            '-Ptrack-widget-creation=false',
-            '-Pfilesystem-scheme=org-dartlang-root',
           ],
           workingDir: androidDirectory);
 
@@ -120,8 +118,6 @@ class FirebaseTestLabCommand extends PluginCommand {
             <String>[
               'assembleDebug',
               '-Pverbose=true',
-              '-Ptrack-widget-creation=false',
-              '-Pfilesystem-scheme=org-dartlang-root',
               '-Ptarget=${test.path}'
             ],
             workingDir: androidDirectory);

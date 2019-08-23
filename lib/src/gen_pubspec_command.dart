@@ -39,8 +39,9 @@ class GenPubspecCommand extends PluginCommand {
 
     await Future.wait(<Future<void>>[
       _genPubspecWithAllPlugins(),
-      _updateGradle(),
+      _updateAppGradle(),
       _updateManifest(),
+      _updateProjectGradle(),
     ]);
   }
 
@@ -61,7 +62,24 @@ class GenPubspecCommand extends PluginCommand {
     return result.exitCode;
   }
 
-  Future<void> _updateGradle() async {
+  Future<void> _updateProjectGradle() async {
+    final File gradleFile = File(p.join(
+      'all_plugins',
+      'android',
+      'build.gradle',
+    ));
+    if (!gradleFile.existsSync()) {
+      throw ToolExit(64);
+    }
+
+    final String newGradle = gradleFile.readAsStringSync().replaceFirst(
+          RegExp(r"classpath \'com.android.tools.build:gradle:\d.\d.\d\'"),
+          'classpath \'com.android.tools.build:gradle:3.3.1\'',
+        );
+    gradleFile.writeAsStringSync(newGradle);
+  }
+
+  Future<void> _updateAppGradle() async {
     final File gradleFile = File(p.join(
       'all_plugins',
       'android',
@@ -95,7 +113,9 @@ class GenPubspecCommand extends PluginCommand {
       'main',
       'AndroidManifest.xml',
     ));
-    print(manifestFile.path);
+    if (!manifestFile.existsSync()) {
+      throw ToolExit(64);
+    }
 
     final StringBuffer newManifest = StringBuffer();
     for (String line in manifestFile.readAsLinesSync()) {
@@ -132,7 +152,7 @@ class GenPubspecCommand extends PluginCommand {
       },
     );
 
-    final File pubspecFile = new File('pubspec.yaml');
+    final File pubspecFile = new File(p.join('all_plugins', 'pubspec.yaml'));
     pubspecFile.writeAsStringSync(_pubspecToString(pubspec));
   }
 

@@ -32,6 +32,89 @@ class GenPubspecCommand extends PluginCommand {
 
   @override
   Future<Null> run() async {
+    final int exitCode = await _createPlugin();
+    if (exitCode != 0) {
+      throw ToolExit(exitCode);
+    }
+
+    await Future.wait(<Future<void>>[
+      _genPubspecWithAllPlugins(),
+      _updateGradle(),
+      _updateManifest(),
+    ]);
+  }
+
+  Future<int> _createPlugin() async {
+    final ProcessResult result = Process.runSync(
+      'flutter',
+      <String>[
+        'create',
+        '--template=app',
+        '--project-name=all_plugins',
+        '--androidx',
+        './all_plugins',
+      ],
+    );
+
+    print(result.stdout);
+    print(result.stderr);
+    return result.exitCode;
+  }
+
+  Future<void> _updateGradle() async {
+    final File gradleFile = File(p.join(
+      'all_plugins',
+      'android',
+      'app',
+      'build.gradle',
+    ));
+    if (!gradleFile.existsSync()) {
+      throw ToolExit(64);
+    }
+
+    final StringBuffer newGradle = StringBuffer();
+    for (String line in gradleFile.readAsLinesSync()) {
+      newGradle.writeln(line);
+      if (line.contains('defaultConfig {')) {
+        newGradle.writeln('        multiDexEnabled true');
+      } else if (line.contains('dependencies {')) {
+        newGradle.writeln(
+          '    implementation \'com.google.guava:guava:27.0.1-android\'',
+        );
+      }
+    }
+    gradleFile.writeAsStringSync(newGradle.toString());
+  }
+
+  Future<void> _updateManifest() async {
+    final File manifestFile = File(p.join(
+      'all_plugins',
+      'android',
+      'app',
+      'src',
+      'main',
+      'AndroidManifest.xml',
+    ));
+    print(manifestFile.path);
+
+    final StringBuffer newManifest = StringBuffer();
+    for (String line in manifestFile.readAsLinesSync()) {
+      if (line.contains('package="com.example.all_plugins"')) {
+        newManifest
+          ..writeln('package="com.example.all_plugins"')
+          ..writeln('xmlns:tools="http://schemas.android.com/tools">')
+          ..writeln()
+          ..writeln(
+            '<uses-sdk tools:overrideLibrary="io.flutter.plugins.camera"/>',
+          );
+      } else {
+        newManifest.writeln(line);
+      }
+    }
+    manifestFile.writeAsStringSync(newManifest.toString());
+  }
+
+  Future<void> _genPubspecWithAllPlugins() async {
     final Pubspec pubspec = Pubspec(
       'all_plugins',
       description: 'Flutter app containing all 1st party plugins.',
@@ -49,8 +132,7 @@ class GenPubspecCommand extends PluginCommand {
       },
     );
 
-    final File pubspecFile =
-        new File(p.join(getAllPluginsApp().path, 'pubspec.yaml'));
+    final File pubspecFile = new File('pubspec.yaml');
     pubspecFile.writeAsStringSync(_pubspecToString(pubspec));
   }
 

@@ -11,8 +11,8 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 
 import 'common.dart';
 
-class GenPubspecCommand extends PluginCommand {
-  GenPubspecCommand(Directory packagesDir) : super(packagesDir) {
+class CreateAllPluginsAppCommand extends PluginCommand {
+  CreateAllPluginsAppCommand(Directory packagesDir) : super(packagesDir) {
     argParser.addMultiOption(
       excludeOption,
       abbr: 'e',

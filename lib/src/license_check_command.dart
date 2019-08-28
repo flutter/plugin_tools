@@ -315,8 +315,8 @@ class LicenseCheckCommand extends PluginCommand {
 
     if (fail && !argResults['update']) {
       throw ToolExit(64);
+    } else if (!fail) {
+      print('All required files contain licenses!');
     }
-
-    print('All required files contain licenses!');
   }
 }

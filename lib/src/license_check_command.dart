@@ -1,3 +1,7 @@
+// Copyright 2019 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:io';
 
@@ -22,32 +26,23 @@ class LicenseCheckCommand extends PluginCommand {
 
   @override
   final String description =
-      'Checks and updates all plugins to correctly include licenses.\n'
-      'This check enforces the following rules:\n'
-      '1. Every plugin must contain a LICENSE file in root directory.\n'
-      "2. Every LICENSE file must contain the copyright license with 'Flutter' or 'Chromium' as the author.\n"
-      '3. All code source files must contain a license header at the top.\n'
-      '4. The license header for every source file must contain the same author name as the LICENSE file in the root directory.\n';
+      'Tests whether all plugins correctly include licenses.\n\n'
+      'This command will have a non-zero exit code if all plugins don\'t contain licenses with the following rules:\n'
+      '1. Every plugin must contain a LICENSE file in the root directory.\n'
+      '2. Every LICENSE file must contain the copyright license with \'Flutter\' or \'Chromium\' as the author.\n'
+      '3. All source code files must contain a license header at the top.\n'
+      '4. The license header for every source file must contain the same author name as the LICENSE file in the plugin root directory.\n\n';
 
-  bool _isAndroidFile(FileSystemEntity entity) =>
-      entity is File && entity.path.endsWith('.java');
-
-  bool _isDartFile(FileSystemEntity entity) =>
-      entity is File &&
-      !entity.path.endsWith('.g.dart') &&
-      entity.path.endsWith('.dart');
-
-  bool _isIosFile(FileSystemEntity entity) =>
-      entity is File &&
-      (entity.path.endsWith('.m') || entity.path.endsWith('.h'));
-
-  Iterable<File> _getFilesWhere(
-    Directory dir,
-    bool Function(FileSystemEntity entity) where,
-  ) {
+  static Iterable<File> _filterSourceCodeFiles(Directory dir) {
     return dir
         .listSync(recursive: true, followLinks: false)
-        .where(where)
+        .where((FileSystemEntity entity) => entity is File)
+        .where((FileSystemEntity entity) =>
+            entity.path.endsWith('.m') ||
+            entity.path.endsWith('.h') ||
+            entity.path.endsWith('.mm') ||
+            entity.path.endsWith('.java') ||
+            entity.path.endsWith('.dart') && !entity.path.endsWith('.g.dart'))
         .cast<File>();
   }
 
@@ -58,18 +53,18 @@ class LicenseCheckCommand extends PluginCommand {
 
   static List<RegExp> _getValidLicenses(String author) => <RegExp>[
         RegExp(r'// Copyright 2\d{3} The '
-            '$author'
-            r' Authors. All rights reserved.\s*\n'
+            '$author '
+            r'Authors. All rights reserved.\s*\n'
             r'// Use of this source code is governed by a BSD-style license that can be\s*\n'
             r'// found in the LICENSE file.\s*\n'),
         RegExp(r'// Copyright 2\d{3}, the '
-            '$author'
-            r' project authors.  Please see the AUTHORS file\s*\n'
+            '$author '
+            r'project authors.  Please see the AUTHORS file\s*\n'
             r'// for details. All rights reserved. Use of this source code is governed by a\s*\n'
             r'// BSD-style license that can be found in the LICENSE file.\s*\n'),
         RegExp(r'// Copyright 2\d{3} The '
-            '$author'
-            r' Authors. All rights reserved.\s*\n'
+            '$author '
+            r'Authors. All rights reserved.\s*\n'
             r'// Use of this source code is governed by a BSD-style\s*\n'
             r'// license that can be found in the LICENSE file.\s*\n'),
       ];
@@ -81,8 +76,7 @@ class LicenseCheckCommand extends PluginCommand {
         '// found in the LICENSE file.\n';
   }
 
-  static String _getLicenseFile(String author) {
-    final int year = DateTime.now().year;
+  static String _getLicenseFile(String year, String author) {
     return '// Copyright $year The $author Authors. All rights reserved.\n'
         '//\n'
         '// Redistribution and use in source and binary forms, with or without\n'
@@ -112,25 +106,35 @@ class LicenseCheckCommand extends PluginCommand {
         '// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n';
   }
 
-  void _outputNoLicenseError(List<Directory> pluginDirs, String license) {
-    print('The following plugins don\'t contain a valid LICENSE file.\n');
-
-    for (Directory dir in pluginDirs) {
-      print(dir.path.split('/').last);
-    }
-
-    print(
-        '\nPlease run `pub global run flutter_plugin_tools license-check --update`\n'
-        'or add a LICENSE file containing: \n$license');
+  static String _noLicenseError(Directory pluginDir, String license) {
+    return 'The following plugin doesn\'t contain a LICENSE file.\n'
+        '${pluginDir.path}\n\n'
+        'Please run `pub global run flutter_plugin_tools license-check --update`\n'
+        'or add a LICENSE file containing: \n$license';
   }
 
-  void _outputInvalidLicenseHeaderError(
-      Directory pluginDir, List<File> files, String license) {
-    print(
-      'The ${pluginDir.path.split('/').last} plugin contains source files without a valid license header.',
-    );
+  static String _invalidAuthorError(Directory pluginDir, String license) {
+    return 'The following plugin doesn\'t contain a valid author (${_validAuthorNames.join(' or ')}) in the LICENSE file.\n'
+        '${pluginDir.path}\n\n'
+        'To create a valid license file, please run `pub global run flutter_plugin_tools license-check --update`\n'
+        'or add a LICENSE file containing: \n$license';
+  }
 
+  static String _invalidLicenseError(Directory pluginDir, String license) {
+    return 'The following plugin doesn\'t contain a valid license in the root LICENSE file.\n'
+        '${pluginDir.path}\n\n'
+        'To create a valid license file, please run `pub global run flutter_plugin_tools license-check --update`\n'
+        'or add a LICENSE file containing: \n$license';
+  }
+
+  static void _outputInvalidLicenseHeaderError(
+    Directory pluginDir,
+    List<File> files,
+    String license,
+  ) {
     print(
+      'The following plugin contains source files without a valid license header.\n'
+      '${pluginDir.path.split('/').last}\n\n'
       'Please run `pub global run flutter_plugin_tools license-check --update`\n'
       'or add the following license to the beginning of each file below: \n\n$license',
     );
@@ -142,7 +146,7 @@ class LicenseCheckCommand extends PluginCommand {
     print('-' * 50);
   }
 
-  void _updateLicenseHeaders(List<File> files, String license) {
+  static void _updateLicenseHeaders(List<File> files, String license) {
     for (File file in files) {
       final List<RegExp> licenses = _getValidLicenses('(Flutter|Chromium)');
 
@@ -166,7 +170,11 @@ class LicenseCheckCommand extends PluginCommand {
     }
   }
 
-  String _parseAuthor(File licenseFile) {
+  static String _parseAuthor(File licenseFile) {
+    if (!licenseFile.existsSync()) {
+      return null;
+    }
+
     final RegExp copyright = RegExp(r'Copyright 2\d{3}');
 
     for (String line in licenseFile.readAsLinesSync()) {
@@ -182,7 +190,7 @@ class LicenseCheckCommand extends PluginCommand {
     return null;
   }
 
-  List<File> _sourceCodeFiles(Directory pluginDir) {
+  static List<File> _getSourceCodeFiles(Directory pluginDir) {
     final List<File> sourceCodeFiles = <File>[];
 
     final Directory androidDir = Directory(
@@ -196,91 +204,116 @@ class LicenseCheckCommand extends PluginCommand {
     );
 
     if (androidDir.existsSync()) {
-      sourceCodeFiles.addAll(_getFilesWhere(androidDir, _isAndroidFile));
+      sourceCodeFiles.addAll(_filterSourceCodeFiles(androidDir));
     }
 
     if (iosDir.existsSync()) {
-      sourceCodeFiles.addAll(_getFilesWhere(iosDir, _isIosFile));
+      sourceCodeFiles.addAll(_filterSourceCodeFiles(iosDir));
     }
 
     if (testDir.existsSync()) {
-      sourceCodeFiles.addAll(_getFilesWhere(testDir, _isDartFile));
+      sourceCodeFiles.addAll(_filterSourceCodeFiles(testDir));
     }
 
-    sourceCodeFiles.addAll(_getFilesWhere(dartDir, _isDartFile));
-    sourceCodeFiles.addAll(_getFilesWhere(exampleDir, _isDartFile));
+    sourceCodeFiles.addAll(_filterSourceCodeFiles(dartDir));
+    sourceCodeFiles.addAll(_filterSourceCodeFiles(exampleDir));
 
     return sourceCodeFiles;
+  }
+
+  // Returns whether root license is valid.
+  bool _validateOrUpdateRootLicense(File licenseFile) {
+    final String validLicenseFilePattern = _getLicenseFile(
+      r'2\d{3}',
+      '(${_validAuthorNames.join('|')})',
+    );
+
+    final String licenseFileAsString =
+        licenseFile.existsSync() ? licenseFile.readAsStringSync() : null;
+
+    if (licenseFile.existsSync() &&
+        licenseFileAsString.contains(validLicenseFilePattern) &&
+        _parseAuthor(licenseFile) != null) {
+      return true;
+    }
+
+    final String validLicenseFile = _getLicenseFile(
+      DateTime.now().year.toString(),
+      'Flutter',
+    );
+    final bool outputError = argResults['print'];
+
+    if (outputError && !licenseFile.existsSync()) {
+      print(_noLicenseError(licenseFile.parent, validLicenseFile));
+    } else if (outputError &&
+        !licenseFileAsString.contains(validLicenseFilePattern)) {
+      print(_invalidLicenseError(licenseFile.parent, validLicenseFile));
+    } else if (outputError && _parseAuthor(licenseFile) == null) {
+      print(_invalidAuthorError(licenseFile.parent, validLicenseFile));
+    }
+
+    if (argResults['update']) {
+      licenseFile.writeAsStringSync(validLicenseFile);
+    }
+
+    return false;
+  }
+
+  // Returns whether all license headers are valid.
+  bool _validateOrUpdateLicenseHeaders(Directory pluginDir, String author) {
+    final List<RegExp> validLicenses = _getValidLicenses(author);
+
+    final List<File> filesWithoutValidHeader = <File>[];
+    for (File file in _getSourceCodeFiles(pluginDir)) {
+      final bool hasValidLicense = validLicenses.any(
+        (RegExp reg) => file.readAsStringSync().startsWith(reg),
+      );
+
+      if (!hasValidLicense) {
+        filesWithoutValidHeader.add(file);
+      }
+    }
+
+    if (filesWithoutValidHeader.isEmpty) {
+      return true;
+    }
+
+    if (argResults['print']) {
+      _outputInvalidLicenseHeaderError(
+        pluginDir,
+        filesWithoutValidHeader,
+        _getLicenseHeader(author),
+      );
+    }
+
+    if (argResults['update']) {
+      _updateLicenseHeaders(filesWithoutValidHeader, _getLicenseHeader(author));
+    }
+
+    return false;
   }
 
   @override
   Future<Null> run() async {
     checkSharding();
 
-    final List<Directory> pluginsWithoutLicenseFile = <Directory>[];
     bool fail = false;
     await for (Directory pluginDir in getPlugins()) {
       final File licenseFile = File(path.join(pluginDir.path, 'LICENSE'));
-      if (!licenseFile.existsSync()) {
-        pluginsWithoutLicenseFile.add(pluginDir);
-        continue;
-      }
+      final String author = _parseAuthor(licenseFile) ?? 'Flutter';
 
-      final String author = _parseAuthor(licenseFile);
+      final bool hasValidRootLicense =
+          _validateOrUpdateRootLicense(licenseFile);
+      final bool hasValidLicenseHeaders =
+          _validateOrUpdateLicenseHeaders(pluginDir, author);
 
-      if (author == null) {
-        pluginsWithoutLicenseFile.add(pluginDir);
-        continue;
-      }
-
-      final List<File> filesWithoutValidHeader = <File>[];
-      for (File file in _sourceCodeFiles(pluginDir)) {
-        final bool hasValidLicense = _getValidLicenses(author).any(
-          (RegExp reg) => file.readAsStringSync().startsWith(reg),
-        );
-
-        if (!hasValidLicense) {
-          filesWithoutValidHeader.add(file);
-        }
-      }
-
-      if (filesWithoutValidHeader.isNotEmpty) {
+      if (!hasValidRootLicense || !hasValidLicenseHeaders) {
         fail = true;
-        if (argResults['print']) {
-          _outputInvalidLicenseHeaderError(
-            pluginDir,
-            filesWithoutValidHeader,
-            _getLicenseHeader(author),
-          );
-        }
-
-        if (argResults['update']) {
-          _updateLicenseHeaders(
-            filesWithoutValidHeader,
-            _getLicenseHeader(author),
-          );
-        }
       }
     }
 
-    if (pluginsWithoutLicenseFile.isNotEmpty) {
-      if (argResults['print']) {
-        _outputNoLicenseError(
-          pluginsWithoutLicenseFile,
-          _getLicenseFile('Flutter'),
-        );
-      }
-
-      if (argResults['update']) {
-        for (Directory dir in pluginsWithoutLicenseFile) {
-          final File licenseFile = File(path.join(dir.path, 'LICENSE'));
-          licenseFile.writeAsStringSync(_getLicenseFile('Flutter'));
-        }
-      }
-    }
-
-    if (pluginsWithoutLicenseFile.isNotEmpty || fail) {
-      throw ToolExit(1);
+    if (fail && !argResults['update']) {
+      throw ToolExit(64);
     }
 
     print('All required files contain licenses!');

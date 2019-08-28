@@ -34,6 +34,7 @@ class LicenseCheckCommand extends PluginCommand {
       '4. The license header for every source file must contain the same author name as the LICENSE file in the plugin root directory.\n\n';
 
   static Iterable<File> _filterSourceCodeFiles(Directory dir) {
+    // We don't add licenses to files with `.g.dart` because they are generated and don't require one.
     return dir
         .listSync(recursive: true, followLinks: false)
         .where((FileSystemEntity entity) => entity is File)

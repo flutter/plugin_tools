@@ -335,8 +335,10 @@ class LicenseTestCommand extends PluginCommand {
       throw ToolExit(64);
     } else if (!fail && !argResults['update']) {
       print(Colorize('All required files contain licenses!')..green());
-    } else if (argResults['update']) {
-      print('Updated files with licences!');
+    } else if (fail && argResults['update']) {
+      print('Updated files with correct licences!');
+    } else if (!fail && argResults['update']) {
+      print(Colorize('There were no files to update!')..green());
     }
   }
 }

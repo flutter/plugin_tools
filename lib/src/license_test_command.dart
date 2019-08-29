@@ -35,19 +35,13 @@ class LicenseTestCommand extends PluginCommand {
       '3. All source code files must contain a license header at the top.\n'
       '4. The license header for every source file must contain the same author name as the LICENSE file in the plugin root directory.\n\n';
 
-  static Iterable<File> _filterSourceCodeFiles(Directory dir) {
-    // We don't add licenses to files with `.g.dart` because they are generated and don't require one.
-    return dir
-        .listSync(recursive: true, followLinks: false)
-        .where((FileSystemEntity entity) => entity is File)
-        .where((FileSystemEntity entity) =>
-            entity.path.endsWith('.m') ||
-            entity.path.endsWith('.h') ||
-            entity.path.endsWith('.mm') ||
-            entity.path.endsWith('.java') ||
-            entity.path.endsWith('.dart') && !entity.path.endsWith('.g.dart'))
-        .cast<File>();
-  }
+  static final List<String> _sourceCodeDirectories = <String>[
+    'android',
+    'ios',
+    'lib',
+    'test',
+    'example/lib',
+  ];
 
   static const List<String> _validAuthorNames = const <String>[
     'Chromium',
@@ -211,38 +205,25 @@ class LicenseTestCommand extends PluginCommand {
     return null;
   }
 
-  static List<File> _getSourceCodeFiles(Directory pluginDir) {
-    final List<File> sourceCodeFiles = <File>[];
-
-    final Directory androidDir = Directory(
-      path.join(pluginDir.path, 'android'),
-    );
-    final Directory iosDir = Directory(path.join(pluginDir.path, 'ios'));
-    final Directory dartDir = Directory(path.join(pluginDir.path, 'lib'));
-    final Directory testDir = Directory(path.join(pluginDir.path, 'test'));
-    final Directory exampleDir = Directory(
-      path.join(pluginDir.path, 'example/lib'),
-    );
-
-    if (androidDir.existsSync()) {
-      sourceCodeFiles.addAll(_filterSourceCodeFiles(androidDir));
-    }
-
-    if (iosDir.existsSync()) {
-      sourceCodeFiles.addAll(_filterSourceCodeFiles(iosDir));
-    }
-
-    if (testDir.existsSync()) {
-      sourceCodeFiles.addAll(_filterSourceCodeFiles(testDir));
-    }
-
-    if (exampleDir.existsSync()) {
-      sourceCodeFiles.addAll(_filterSourceCodeFiles(exampleDir));
-    }
-
-    sourceCodeFiles.addAll(_filterSourceCodeFiles(dartDir));
-
-    return sourceCodeFiles;
+  static Iterable<File> _getSourceCodeFiles(Directory pluginDir) {
+    return _sourceCodeDirectories
+        .map<FileSystemEntity>(
+          (String dir) => Directory(path.join(pluginDir.path, dir)),
+        )
+        .where((FileSystemEntity entity) => entity.existsSync())
+        .expand<FileSystemEntity>((FileSystemEntity entity) {
+          final Directory dir = entity;
+          return dir.listSync(recursive: true, followLinks: false);
+        })
+        .where((FileSystemEntity entity) => entity is File)
+        .where((FileSystemEntity entity) =>
+            entity.path.endsWith('.m') ||
+            entity.path.endsWith('.h') ||
+            entity.path.endsWith('.mm') ||
+            entity.path.endsWith('.java') ||
+            // We don't add licenses to files with `.g.dart` because they are generated and don't require one.
+            entity.path.endsWith('.dart') && !entity.path.endsWith('.g.dart'))
+        .cast<File>();
   }
 
   // Returns whether root license is valid.

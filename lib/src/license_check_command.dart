@@ -53,21 +53,30 @@ class LicenseCheckCommand extends PluginCommand {
   ];
 
   static List<RegExp> _getValidLicenses(String author) => <RegExp>[
-        RegExp(r'// Copyright 2\d{3} The '
+        RegExp(
+            r'// Copyright 2\d{3} The '
             '$author '
-            r'Authors. All rights reserved.\s*\n'
-            r'// Use of this source code is governed by a BSD-style license that can be\s*\n'
-            r'// found in the LICENSE file.\s*\n'),
-        RegExp(r'// Copyright 2\d{3}, the '
+            r'Authors. All rights reserved.\s*.'
+            r'// Use of this source code is governed by a BSD-style license that can be\s*.'
+            r'// found in the LICENSE file.\s*.',
+            multiLine: true,
+            dotAll: true),
+        RegExp(
+            r'// Copyright 2\d{3}, the '
             '$author '
-            r'project authors.  Please see the AUTHORS file\s*\n'
-            r'// for details. All rights reserved. Use of this source code is governed by a\s*\n'
-            r'// BSD-style license that can be found in the LICENSE file.\s*\n'),
-        RegExp(r'// Copyright 2\d{3} The '
+            r'project authors.  Please see the AUTHORS file\s*.'
+            r'// for details. All rights reserved. Use of this source code is governed by a\s*.'
+            r'// BSD-style license that can be found in the LICENSE file.\s*.',
+            multiLine: true,
+            dotAll: true),
+        RegExp(
+            r'// Copyright 2\d{3} The '
             '$author '
-            r'Authors. All rights reserved.\s*\n'
-            r'// Use of this source code is governed by a BSD-style\s*\n'
-            r'// license that can be found in the LICENSE file.\s*\n'),
+            r'Authors. All rights reserved.\s*.'
+            r'// Use of this source code is governed by a BSD-style\s*.'
+            r'// license that can be found in the LICENSE file.\s*.',
+            multiLine: true,
+            dotAll: true),
       ];
 
   static String _getLicenseHeader(String author) {
@@ -224,10 +233,18 @@ class LicenseCheckCommand extends PluginCommand {
 
   // Returns whether root license is valid.
   bool _validateOrUpdateRootLicense(File licenseFile) {
-    final String validLicenseFilePattern = _getLicenseFile(
-      r'2\d{3}',
-      '(${_validAuthorNames.join('|')})',
-    );
+    final RegExp validLicenseFilePattern = RegExp(
+        _getLicenseFile(
+          r'2\d{3}',
+          '__author__',
+        )
+            .replaceAll('(', r'\(')
+            .replaceAll(')', r'\)')
+            .replaceAll('*', r'\*')
+            .replaceAll('\n', '.')
+            .replaceAll('__author__', '(${_validAuthorNames.join('|')})'),
+        multiLine: true,
+        dotAll: true);
 
     final String licenseFileAsString =
         licenseFile.existsSync() ? licenseFile.readAsStringSync() : null;

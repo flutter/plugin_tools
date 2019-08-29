@@ -42,10 +42,10 @@ void main() async {
 
     test('correct license', () async {
       expect(
-        () => commandRunner.run(
+        commandRunner.run(
           <String>['license-check', '--plugins', 'correct_license'],
         ),
-        returnsNormally,
+        completes,
       );
     });
   });

@@ -226,8 +226,11 @@ class LicenseCheckCommand extends PluginCommand {
       sourceCodeFiles.addAll(_filterSourceCodeFiles(testDir));
     }
 
+    if (exampleDir.existsSync()) {
+      sourceCodeFiles.addAll(_filterSourceCodeFiles(exampleDir));
+    }
+
     sourceCodeFiles.addAll(_filterSourceCodeFiles(dartDir));
-    sourceCodeFiles.addAll(_filterSourceCodeFiles(exampleDir));
 
     return sourceCodeFiles;
   }

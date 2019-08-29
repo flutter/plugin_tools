@@ -64,16 +64,20 @@ class DriveExamplesCommand extends PluginCommand {
           <String>['drive', deviceTestPath],
           workingDirectory: example.path,
         );
+        bool testsPassed = false;
         process.stdout.transform(utf8.decoder).listen((String data) {
           // We treat a run as a failure even if flutter_driver thinks the
           // test run was successful if the app contained tests that failed.
           if (data.contains('Some tests failed.')) {
             failingTests.add(p.join(packageName, deviceTestPath));
           }
+          if (data.contains('All tests passed!')) {
+            testsPassed = true;
+          }
           stdout.write(data);
         });
         stderr.addStream(process.stderr);
-        if (await process.exitCode != 0) {
+        if (await process.exitCode != 0 || !testsPassed) {
           failingTests.add(p.join(packageName, deviceTestPath));
         }
       }

@@ -11,6 +11,7 @@ import 'analyze_command.dart';
 import 'build_examples_command.dart';
 import 'common.dart';
 import 'drive_examples_command.dart';
+import 'firebase_test_lab_command.dart';
 import 'format_command.dart';
 import 'gen_pubspec_command.dart';
 import 'java_test_command.dart';
@@ -40,6 +41,7 @@ void main(List<String> args) {
     ..addCommand(new FormatCommand(packagesDir))
     ..addCommand(new BuildExamplesCommand(packagesDir))
     ..addCommand(new DriveExamplesCommand(packagesDir))
+    ..addCommand(new FirebaseTestLabCommand(packagesDir))
     ..addCommand(new JavaTestCommand(packagesDir))
     ..addCommand(new ListCommand(packagesDir))
     ..addCommand(new VersionCheckCommand(packagesDir))

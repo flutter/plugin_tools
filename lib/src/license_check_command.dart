@@ -80,6 +80,15 @@ class LicenseCheckCommand extends PluginCommand {
             dotAll: true),
       ];
 
+  static final List<RegExp> _validRootLicenses = <RegExp>[
+    RegExp(
+      r'// Copyright 2\d{3} The (Flutter|Chromium) Authors. All rights reserved.',
+    ),
+    RegExp(
+      r'Copyright 2\d{3}, the (Flutter|Chromium) project authors. All rights reserved.',
+    ),
+  ];
+
   static String _getLicenseHeader(String author) {
     final int year = DateTime.now().year;
     return '// Copyright $year The $author Authors. All rights reserved.\n'
@@ -237,24 +246,11 @@ class LicenseCheckCommand extends PluginCommand {
 
   // Returns whether root license is valid.
   bool _validateOrUpdateRootLicense(File licenseFile) {
-    final RegExp validLicenseFilePattern = RegExp(
-        _getLicenseFile(
-          r'2\d{3}',
-          '__author__',
-        )
-            .replaceAll('(', r'\(')
-            .replaceAll(')', r'\)')
-            .replaceAll('*', r'\*')
-            .replaceAll('\n', '.')
-            .replaceAll('__author__', '(${_validAuthorNames.join('|')})'),
-        multiLine: true,
-        dotAll: true);
-
     final String licenseFileAsString =
         licenseFile.existsSync() ? licenseFile.readAsStringSync() : null;
 
     if (licenseFile.existsSync() &&
-        licenseFileAsString.contains(validLicenseFilePattern) &&
+        _validRootLicenses.any((_) => licenseFileAsString.contains(_)) &&
         _parseAuthor(licenseFile) != null) {
       return true;
     }
@@ -268,7 +264,7 @@ class LicenseCheckCommand extends PluginCommand {
     if (outputError && !licenseFile.existsSync()) {
       print(_noLicenseError(licenseFile.parent, validLicenseFile));
     } else if (outputError &&
-        !licenseFileAsString.contains(validLicenseFilePattern)) {
+        !_validRootLicenses.any((_) => licenseFileAsString.contains(_))) {
       print(_invalidLicenseError(licenseFile.parent, validLicenseFile));
     } else if (outputError && _parseAuthor(licenseFile) == null) {
       print(_invalidAuthorError(licenseFile.parent, validLicenseFile));

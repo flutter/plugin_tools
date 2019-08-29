@@ -15,7 +15,7 @@ import 'firebase_test_lab_command.dart';
 import 'format_command.dart';
 import 'gen_pubspec_command.dart';
 import 'java_test_command.dart';
-import 'license_check_command.dart';
+import 'license_test_command.dart';
 import 'list_command.dart';
 import 'test_command.dart';
 import 'version_check_command.dart';
@@ -46,7 +46,7 @@ void main(List<String> args) {
     ..addCommand(new ListCommand(packagesDir))
     ..addCommand(new VersionCheckCommand(packagesDir))
     ..addCommand(new GenPubspecCommand(packagesDir))
-    ..addCommand(new LicenseCheckCommand(packagesDir));
+    ..addCommand(new LicenseTestCommand(packagesDir));
 
   commandRunner.run(args).catchError((Object e) {
     final ToolExit toolExit = e;

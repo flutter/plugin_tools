@@ -2,21 +2,21 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_plugin_tools/src/common.dart';
-import 'package:flutter_plugin_tools/src/license_check_command.dart';
+import 'package:flutter_plugin_tools/src/license_test_command.dart';
 import 'package:test/test.dart';
 
 void main() async {
   final CommandRunner<Null> commandRunner =
       CommandRunner<Null>('pub global run flutter_plugin_tools', '')
         ..addCommand(
-          LicenseCheckCommand(Directory('test/test_plugins_dir/packages')),
+          LicenseTestCommand(Directory('test/test_plugins_dir/packages')),
         );
 
-  group('license-check command', () {
+  group('license-test command', () {
     test('no license header', () async {
       expect(
         () => commandRunner.run(
-          <String>['license-check', '--plugins', 'no_header'],
+          <String>['license-test', '--plugins', 'no_header'],
         ),
         throwsA(const TypeMatcher<ToolExit>()),
       );
@@ -25,7 +25,7 @@ void main() async {
     test('no LICENSE', () async {
       expect(
         () => commandRunner.run(
-          <String>['license-check', '--plugins', 'no_license'],
+          <String>['license-test', '--plugins', 'no_license'],
         ),
         throwsA(const TypeMatcher<ToolExit>()),
       );
@@ -34,7 +34,7 @@ void main() async {
     test('invalid author', () async {
       expect(
         () => commandRunner.run(
-          <String>['license-check', '--plugins', 'invalid_author'],
+          <String>['license-test', '--plugins', 'invalid_author'],
         ),
         throwsA(const TypeMatcher<ToolExit>()),
       );
@@ -43,7 +43,7 @@ void main() async {
     test('correct license', () async {
       expect(
         commandRunner.run(
-          <String>['license-check', '--plugins', 'correct_license'],
+          <String>['license-test', '--plugins', 'correct_license'],
         ),
         completes,
       );

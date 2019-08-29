@@ -10,10 +10,11 @@ import 'package:path/path.dart' as path;
 
 import 'common.dart';
 
-class LicenseCheckCommand extends PluginCommand {
-  LicenseCheckCommand(Directory packagesDir) : super(packagesDir) {
+class LicenseTestCommand extends PluginCommand {
+  LicenseTestCommand(Directory packagesDir) : super(packagesDir) {
     argParser.addFlag(
-      'print',
+      'verbose',
+      abbr: 'v',
       help: 'Print out files without a valid license.',
     );
     argParser.addFlag(
@@ -23,7 +24,7 @@ class LicenseCheckCommand extends PluginCommand {
   }
 
   @override
-  final String name = 'license-check';
+  final String name = 'license-test';
 
   @override
   final String description =
@@ -259,7 +260,7 @@ class LicenseCheckCommand extends PluginCommand {
       DateTime.now().year.toString(),
       'Flutter',
     );
-    final bool outputError = argResults['print'];
+    final bool outputError = argResults['verbose'];
 
     if (outputError && !licenseFile.existsSync()) {
       print(_noLicenseError(licenseFile.parent, validLicenseFile));
@@ -296,7 +297,7 @@ class LicenseCheckCommand extends PluginCommand {
       return true;
     }
 
-    if (argResults['print']) {
+    if (argResults['verbose']) {
       _outputInvalidLicenseHeaderError(
         pluginDir,
         filesWithoutValidHeader,
@@ -332,8 +333,10 @@ class LicenseCheckCommand extends PluginCommand {
 
     if (fail && !argResults['update']) {
       throw ToolExit(64);
-    } else if (!fail) {
+    } else if (!fail && !argResults['update']) {
       print(Colorize('All required files contain licenses!')..green());
+    } else if (argResults['update']) {
+      print('Updated files with licences!');
     }
   }
 }

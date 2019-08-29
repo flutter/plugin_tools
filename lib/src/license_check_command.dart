@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:colorize/colorize.dart';
 import 'package:path/path.dart' as path;
 
 import 'common.dart';
@@ -333,7 +334,7 @@ class LicenseCheckCommand extends PluginCommand {
     if (fail && !argResults['update']) {
       throw ToolExit(64);
     } else if (!fail) {
-      print('All required files contain licenses!');
+      print(Colorize('All required files contain licenses!')..green());
     }
   }
 }

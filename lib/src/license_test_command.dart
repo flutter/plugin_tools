@@ -15,11 +15,11 @@ class LicenseTestCommand extends PluginCommand {
     argParser.addFlag(
       'verbose',
       abbr: 'v',
-      help: 'Print out files without a valid license.',
+      help: 'Output files with an invalid licenses to console.',
     );
     argParser.addFlag(
       'update',
-      help: 'Update all files without a valid license.',
+      help: 'Automatically update all files that don\t have a valid license.',
     );
   }
 
@@ -29,7 +29,7 @@ class LicenseTestCommand extends PluginCommand {
   @override
   final String description =
       'Tests whether all plugins correctly include licenses.\n\n'
-      'This command will have a non-zero exit code if all plugins don\'t contain licenses with the following rules:\n'
+      'This command will exit with a non-zero exit code if any plugin doesn\'t contain licenses that follow the rules below:\n'
       '1. Every plugin must contain a LICENSE file in the root directory.\n'
       '2. Every LICENSE file must contain the copyright license with \'Flutter\' or \'Chromium\' as the author.\n'
       '3. All source code files must contain a license header at the top.\n'
@@ -48,31 +48,34 @@ class LicenseTestCommand extends PluginCommand {
     'Flutter',
   ];
 
-  static List<RegExp> _getValidLicenses(String author) => <RegExp>[
+  static List<RegExp> _getValidHeaderLicenses(String author) => <RegExp>[
         RegExp(
-            r'// Copyright 2\d{3} The '
-            '$author '
-            r'Authors. All rights reserved.\s*.'
-            r'// Use of this source code is governed by a BSD-style license that can be\s*.'
-            r'// found in the LICENSE file.\s*.',
-            multiLine: true,
-            dotAll: true),
+          r'// Copyright 2\d{3} The '
+          '$author '
+          r'Authors. All rights reserved.\s*.'
+          r'// Use of this source code is governed by a BSD-style license that can be\s*.'
+          r'// found in the LICENSE file.\s*.',
+          multiLine: true,
+          dotAll: true,
+        ),
         RegExp(
-            r'// Copyright 2\d{3}, the '
-            '$author '
-            r'project authors.  Please see the AUTHORS file\s*.'
-            r'// for details. All rights reserved. Use of this source code is governed by a\s*.'
-            r'// BSD-style license that can be found in the LICENSE file.\s*.',
-            multiLine: true,
-            dotAll: true),
+          r'// Copyright 2\d{3}, the '
+          '$author '
+          r'project authors.  Please see the AUTHORS file\s*.'
+          r'// for details. All rights reserved. Use of this source code is governed by a\s*.'
+          r'// BSD-style license that can be found in the LICENSE file.\s*.',
+          multiLine: true,
+          dotAll: true,
+        ),
         RegExp(
-            r'// Copyright 2\d{3} The '
-            '$author '
-            r'Authors. All rights reserved.\s*.'
-            r'// Use of this source code is governed by a BSD-style\s*.'
-            r'// license that can be found in the LICENSE file.\s*.',
-            multiLine: true,
-            dotAll: true),
+          r'// Copyright 2\d{3} The '
+          '$author '
+          r'Authors. All rights reserved.\s*.'
+          r'// Use of this source code is governed by a BSD-style\s*.'
+          r'// license that can be found in the LICENSE file.\s*.',
+          multiLine: true,
+          dotAll: true,
+        ),
       ];
 
   static final List<RegExp> _validRootLicenses = <RegExp>[
@@ -163,7 +166,8 @@ class LicenseTestCommand extends PluginCommand {
 
   static void _updateLicenseHeaders(List<File> files, String license) {
     for (File file in files) {
-      final List<RegExp> licenses = _getValidLicenses('(Flutter|Chromium)');
+      final List<RegExp> licenses =
+          _getValidHeaderLicenses('(Flutter|Chromium)');
 
       final bool hasALicense = licenses.any(
         (RegExp reg) => file.readAsStringSync().startsWith(reg),
@@ -221,13 +225,13 @@ class LicenseTestCommand extends PluginCommand {
             entity.path.endsWith('.h') ||
             entity.path.endsWith('.mm') ||
             entity.path.endsWith('.java') ||
-            // We don't add licenses to files with `.g.dart` because they are generated and don't require one.
+            // We don't add licenses to files that end with `.g.dart` because they are generated.
             entity.path.endsWith('.dart') && !entity.path.endsWith('.g.dart'))
         .cast<File>();
   }
 
   // Returns whether root license is valid.
-  bool _validateOrUpdateRootLicense(File licenseFile) {
+  bool _outputOrUpdateRootLicense(File licenseFile) {
     final String licenseFileAsString =
         licenseFile.existsSync() ? licenseFile.readAsStringSync() : null;
 
@@ -260,8 +264,8 @@ class LicenseTestCommand extends PluginCommand {
   }
 
   // Returns whether all license headers are valid.
-  bool _validateOrUpdateLicenseHeaders(Directory pluginDir, String author) {
-    final List<RegExp> validLicenses = _getValidLicenses(author);
+  bool _outputOrUpdateLicenseHeaders(Directory pluginDir, String author) {
+    final List<RegExp> validLicenses = _getValidHeaderLicenses(author);
 
     final List<File> filesWithoutValidHeader = <File>[];
     for (File file in _getSourceCodeFiles(pluginDir)) {
@@ -302,10 +306,9 @@ class LicenseTestCommand extends PluginCommand {
       final File licenseFile = File(path.join(pluginDir.path, 'LICENSE'));
       final String author = _parseAuthor(licenseFile) ?? 'Flutter';
 
-      final bool hasValidRootLicense =
-          _validateOrUpdateRootLicense(licenseFile);
+      final bool hasValidRootLicense = _outputOrUpdateRootLicense(licenseFile);
       final bool hasValidLicenseHeaders =
-          _validateOrUpdateLicenseHeaders(pluginDir, author);
+          _outputOrUpdateLicenseHeaders(pluginDir, author);
 
       if (!hasValidRootLicense || !hasValidLicenseHeaders) {
         fail = true;

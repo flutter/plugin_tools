@@ -304,6 +304,8 @@ class LicenseTestCommand extends PluginCommand {
     bool fail = false;
     await for (Directory pluginDir in getPlugins()) {
       final File licenseFile = File(path.join(pluginDir.path, 'LICENSE'));
+
+      // If we can't find a valid author, we use Flutter as the default. This is so we can still update/print files that need a license header.
       final String author = _parseAuthor(licenseFile) ?? 'Flutter';
 
       final bool hasValidRootLicense = _outputOrUpdateRootLicense(licenseFile);

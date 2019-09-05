@@ -13,7 +13,6 @@
 ## v.0.0.19
 
 - Use flutter create to build app testing plugin compilation.
->>>>>>> ab4eeb5944ceaa694cbcb8ed1af106e265952b6c
 
 ## v.0.0.18+2
 

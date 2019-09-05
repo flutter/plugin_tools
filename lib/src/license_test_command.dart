@@ -15,7 +15,7 @@ class LicenseTestCommand extends PluginCommand {
     argParser.addFlag(
       'verbose',
       abbr: 'v',
-      help: 'Output files with an invalid licenses to console.',
+      help: 'Output files with an invalid license to console.',
     );
     argParser.addFlag(
       'update',

@@ -127,21 +127,21 @@ class LicenseTestCommand extends PluginCommand {
   static String _noLicenseError(Directory pluginDir, String license) {
     return 'The following plugin doesn\'t contain a LICENSE file.\n'
         '${pluginDir.path}\n\n'
-        'Please run `pub global run flutter_plugin_tools license-check --update`\n'
+        'Please run `flutter packages pub global run flutter_plugin_tools license-test --update`\n'
         'or add a LICENSE file containing: \n$license';
   }
 
   static String _invalidAuthorError(Directory pluginDir, String license) {
     return 'The following plugin doesn\'t contain a valid author (${_validAuthorNames.join(' or ')}) in the LICENSE file.\n'
         '${pluginDir.path}\n\n'
-        'To create a valid license file, please run `pub global run flutter_plugin_tools license-check --update`\n'
+        'To create a valid license file, please run `flutter packages pub global run flutter_plugin_tools license-test --update`\n'
         'or add a LICENSE file containing: \n$license';
   }
 
   static String _invalidLicenseError(Directory pluginDir, String license) {
     return 'The following plugin doesn\'t contain a valid license in the root LICENSE file.\n'
         '${pluginDir.path}\n\n'
-        'To create a valid license file, please run `pub global run flutter_plugin_tools license-check --update`\n'
+        'To create a valid license file, please run `flutter packages pub global run flutter_plugin_tools license-test --update`\n'
         'or add a LICENSE file containing: \n$license';
   }
 
@@ -153,7 +153,7 @@ class LicenseTestCommand extends PluginCommand {
     print(
       'The following plugin contains source files without a valid license header.\n'
       '${pluginDir.path.split('/').last}\n\n'
-      'Please run `pub global run flutter_plugin_tools license-check --update`\n'
+      'Please run `flutter packages pub global run flutter_plugin_tools license-test --update`\n'
       'or add the following license to the beginning of each file below: \n\n$license',
     );
 

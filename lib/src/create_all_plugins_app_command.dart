@@ -25,10 +25,10 @@ class CreateAllPluginsAppCommand extends PluginCommand {
 
   @override
   String get description =>
-      'Generate `pubspec.yaml` that includes all plugins in packages';
+      'Generate Flutter app that includes all plugins in packages.';
 
   @override
-  String get name => 'gen-pubspec';
+  String get name => 'all-plugins-app';
 
   @override
   Future<Null> run() async {

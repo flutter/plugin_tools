@@ -1,3 +1,7 @@
+## v.0.0.19+1
+
+- Rename command for `CreateAllPluginsAppCommand`.
+
 ## v.0.0.19
 
 - Use flutter create to build app testing plugin compilation.

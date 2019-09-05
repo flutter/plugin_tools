@@ -1,3 +1,7 @@
+## v.0.0.19+2
+
+- Use java as language when calling `flutter create`.
+
 ## v.0.0.19+1
 
 - Rename command for `CreateAllPluginsAppCommand`.

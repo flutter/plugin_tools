@@ -318,6 +318,11 @@ class LicenseTestCommand extends PluginCommand {
     }
 
     if (fail && !argResults['update']) {
+      print(Colorize(
+        'Test failed! Please run `flutter packages pub global run '
+        'flutter_plugin_tools license-test --update` in root directory of '
+        'the plugins repo.',
+      )..red());
       throw ToolExit(64);
     } else if (!fail && !argResults['update']) {
       print(Colorize('All required files contain licenses!')..green());

@@ -1,3 +1,7 @@
+## v.0.0.19
+
+- Use flutter create to build app testing plugin compilation.
+
 ## v.0.0.18+2
 
 - Fix `.travis.yml` file name in `README.md`.

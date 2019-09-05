@@ -1,6 +1,19 @@
+## v.0.0.20
+
+- Add test command that verifies whether all plugins have valid licenses.
+
+## v.0.0.19+2
+
+- Use java as language when calling `flutter create`.
+
+## v.0.0.19+1
+
+- Rename command for `CreateAllPluginsAppCommand`.
+
 ## v.0.0.19
 
-- Add command that checks and updates all plugins to correctly include licenses.
+- Use flutter create to build app testing plugin compilation.
+>>>>>>> ab4eeb5944ceaa694cbcb8ed1af106e265952b6c
 
 ## v.0.0.18+2
 

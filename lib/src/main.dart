@@ -10,10 +10,10 @@ import 'package:path/path.dart' as p;
 import 'analyze_command.dart';
 import 'build_examples_command.dart';
 import 'common.dart';
+import 'create_all_plugins_app_command.dart';
 import 'drive_examples_command.dart';
 import 'firebase_test_lab_command.dart';
 import 'format_command.dart';
-import 'gen_pubspec_command.dart';
 import 'java_test_command.dart';
 import 'license_test_command.dart';
 import 'list_command.dart';
@@ -45,7 +45,7 @@ void main(List<String> args) {
     ..addCommand(new JavaTestCommand(packagesDir))
     ..addCommand(new ListCommand(packagesDir))
     ..addCommand(new VersionCheckCommand(packagesDir))
-    ..addCommand(new GenPubspecCommand(packagesDir))
+    ..addCommand(new CreateAllPluginsAppCommand(packagesDir))
     ..addCommand(new LicenseTestCommand(packagesDir));
 
   commandRunner.run(args).catchError((Object e) {

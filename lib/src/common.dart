@@ -3,28 +3,30 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 import 'dart:math';
 
 import 'package:args/command_runner.dart';
+import 'package:file/file.dart' as fs;
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
 /// Returns whether the given directory contains a Flutter package.
-bool isFlutterPackage(FileSystemEntity entity) {
-  if (entity == null || entity is! Directory) {
+bool isFlutterPackage(fs.FileSystemEntity entity, fs.FileSystem fileSystem) {
+  if (entity == null || entity is! fs.Directory) {
     return false;
   }
 
   try {
-    final File pubspecFile = new File(p.join(entity.path, 'pubspec.yaml'));
+    final fs.File pubspecFile =
+        fileSystem.file(p.join(entity.path, 'pubspec.yaml'));
     final YamlMap pubspecYaml = loadYaml(pubspecFile.readAsStringSync());
     final YamlMap dependencies = pubspecYaml['dependencies'];
     if (dependencies == null) {
       return false;
     }
     return dependencies.containsKey('flutter');
-  } on FileSystemException {
+  } on fs.FileSystemException {
     return false;
   } on YamlException {
     return false;
@@ -39,7 +41,7 @@ class ToolExit extends Error {
 }
 
 abstract class PluginCommand extends Command<Null> {
-  PluginCommand(this.packagesDir) {
+  PluginCommand(this.packagesDir, this.fileSystem) {
     argParser.addMultiOption(
       _pluginsArg,
       splitCommas: true,
@@ -65,7 +67,15 @@ abstract class PluginCommand extends Command<Null> {
   static const String _pluginsArg = 'plugins';
   static const String _shardIndexArg = 'shardIndex';
   static const String _shardCountArg = 'shardCount';
-  final Directory packagesDir;
+
+  /// The directory containing the plugin packages.
+  final fs.Directory packagesDir;
+
+  /// The file system.
+  ///
+  /// This can be overridden for testing.
+  final fs.FileSystem fileSystem;
+
   int _shardIndex;
   int _shardCount;
 
@@ -105,13 +115,14 @@ abstract class PluginCommand extends Command<Null> {
 
   /// Returns the root Dart package folders of the plugins involved in this
   /// command execution.
-  Stream<Directory> getPlugins() async* {
+  Stream<fs.Directory> getPlugins() async* {
     // To avoid assuming consistency of `Directory.list` across command
     // invocations, we collect and sort the plugin folders before sharding.
     // This is considered an implementation detail which is why the API still
     // uses streams.
-    final List<Directory> allPlugins = await _getAllPlugins().toList();
-    allPlugins.sort((Directory d1, Directory d2) => d1.path.compareTo(d2.path));
+    final List<fs.Directory> allPlugins = await _getAllPlugins().toList();
+    allPlugins
+        .sort((fs.Directory d1, fs.Directory d2) => d1.path.compareTo(d2.path));
     // Sharding 10 elements into 3 shards should yield shard sizes 4, 4, 2.
     // Sharding  9 elements into 3 shards should yield shard sizes 3, 3, 3.
     // Sharding  2 elements into 3 shards should yield shard sizes 1, 1, 0.
@@ -119,80 +130,110 @@ abstract class PluginCommand extends Command<Null> {
         (allPlugins.length % shardCount == 0 ? 0 : 1);
     final int start = min(shardIndex * shardSize, allPlugins.length);
     final int end = min(start + shardSize, allPlugins.length);
-    for (Directory plugin in allPlugins.sublist(start, end)) {
+    for (fs.Directory plugin in allPlugins.sublist(start, end)) {
       yield plugin;
     }
   }
 
   /// Returns the root Dart package folders of the plugins involved in this
   /// command execution, assuming there is only one shard.
-  Stream<Directory> _getAllPlugins() {
+  ///
+  /// Plugin packages can exist in one of two places relative to the packages
+  /// directory.
+  ///
+  /// 1. As a Dart package in a directory which is a direct child of the
+  ///    packages directory. This is a plugin where all of the implementations
+  ///    exist in a single Dart package.
+  /// 2. Several plugin packages may live in a directory which is a direct
+  ///    child of the packages directory. This directory groups several Dart
+  ///    packages which implement a single plugin. This directory contains a
+  ///    "client library" package, which declares the API for the plugin, as
+  ///    well as one or more platform-specific implementations.
+  Stream<fs.Directory> _getAllPlugins() async* {
     final Set<String> packages = new Set<String>.from(argResults[_pluginsArg]);
-    return packagesDir
-        .list(followLinks: false)
-        .where(_isDartPackage)
-        .where((FileSystemEntity entity) =>
-            packages.isEmpty || packages.contains(p.basename(entity.path)))
-        .cast<Directory>();
+    await for (fs.FileSystemEntity entity
+        in packagesDir.list(followLinks: false)) {
+      // A top-level Dart package is a plugin package.
+      if (_isDartPackage(entity)) {
+        if (packages.isEmpty || packages.contains(p.basename(entity.path))) {
+          yield entity;
+        }
+      } else if (entity is fs.Directory) {
+        // Look for Dart packages under this top-level directory.
+        await for (fs.FileSystemEntity subdir
+            in entity.list(followLinks: false)) {
+          if (_isDartPackage(subdir)) {
+            if (packages.isEmpty ||
+                packages.contains(p.basename(subdir.path))) {
+              yield subdir;
+            }
+          }
+        }
+      }
+    }
   }
 
   /// Returns the example Dart package folders of the plugins involved in this
   /// command execution.
-  Stream<Directory> getExamples() =>
-      getPlugins().expand<Directory>(_getExamplesForPlugin);
+  Stream<fs.Directory> getExamples() =>
+      getPlugins().expand<fs.Directory>(_getExamplesForPlugin);
 
   /// Returns all Dart package folders (typically, plugin + example) of the
   /// plugins involved in this command execution.
-  Stream<Directory> getPackages() async* {
-    await for (Directory plugin in getPlugins()) {
+  Stream<fs.Directory> getPackages() async* {
+    await for (fs.Directory plugin in getPlugins()) {
       yield plugin;
       yield* plugin
           .list(recursive: true, followLinks: false)
           .where(_isDartPackage)
-          .cast<Directory>();
+          .cast<fs.Directory>();
     }
   }
 
   /// Returns the files contained, recursively, within the plugins
   /// involved in this command execution.
-  Stream<File> getFiles() {
-    return getPlugins().asyncExpand<File>((Directory folder) => folder
+  Stream<fs.File> getFiles() {
+    return getPlugins().asyncExpand<fs.File>((fs.Directory folder) => folder
         .list(recursive: true, followLinks: false)
-        .where((FileSystemEntity entity) => entity is File)
-        .cast<File>());
+        .where((fs.FileSystemEntity entity) => entity is fs.File)
+        .cast<fs.File>());
   }
 
   /// Returns whether the specified entity is a directory containing a
   /// `pubspec.yaml` file.
-  bool _isDartPackage(FileSystemEntity entity) {
-    return entity is Directory &&
-        new File(p.join(entity.path, 'pubspec.yaml')).existsSync();
+  bool _isDartPackage(fs.FileSystemEntity entity) {
+    return entity is fs.Directory &&
+        fileSystem.file(p.join(entity.path, 'pubspec.yaml')).existsSync();
   }
 
   /// Returns the example Dart packages contained in the specified plugin, or
   /// an empty List, if the plugin has no examples.
-  Iterable<Directory> _getExamplesForPlugin(Directory plugin) {
-    final Directory exampleFolder =
-        new Directory(p.join(plugin.path, 'example'));
+  Iterable<fs.Directory> _getExamplesForPlugin(fs.Directory plugin) {
+    final fs.Directory exampleFolder =
+        fileSystem.directory(p.join(plugin.path, 'example'));
     if (!exampleFolder.existsSync()) {
-      return <Directory>[];
+      return <fs.Directory>[];
     }
-    if (isFlutterPackage(exampleFolder)) {
-      return <Directory>[exampleFolder];
+    if (isFlutterPackage(exampleFolder, fileSystem)) {
+      return <fs.Directory>[exampleFolder];
     }
     // Only look at the subdirectories of the example directory if the example
     // directory itself is not a Dart package, and only look one level below the
     // example directory for other dart packages.
-    return exampleFolder.listSync().where(isFlutterPackage).cast<Directory>();
+    return exampleFolder
+        .listSync()
+        .where((fs.FileSystemEntity entity) =>
+            isFlutterPackage(entity, fileSystem))
+        .cast<fs.Directory>();
   }
 }
 
 Future<int> runAndStream(String executable, List<String> args,
-    {Directory workingDir, bool exitOnError: false}) async {
-  final Process process =
-      await Process.start(executable, args, workingDirectory: workingDir?.path);
-  stdout.addStream(process.stdout);
-  stderr.addStream(process.stderr);
+    {fs.Directory workingDir, bool exitOnError: false}) async {
+  final io.Process process = await io.Process.start(executable, args,
+      workingDirectory: workingDir?.path);
+  io.stdout.addStream(process.stdout);
+  io.stderr.addStream(process.stderr);
   if (exitOnError && await process.exitCode != 0) {
     final String error =
         _getErrorString(executable, args, workingDir: workingDir);
@@ -202,10 +243,10 @@ Future<int> runAndStream(String executable, List<String> args,
   return process.exitCode;
 }
 
-Future<ProcessResult> runAndExitOnError(String executable, List<String> args,
-    {Directory workingDir, bool exitOnError: false}) async {
-  final ProcessResult result =
-      await Process.run(executable, args, workingDirectory: workingDir?.path);
+Future<io.ProcessResult> runAndExitOnError(String executable, List<String> args,
+    {fs.Directory workingDir, bool exitOnError: false}) async {
+  final io.ProcessResult result = await io.Process.run(executable, args,
+      workingDirectory: workingDir?.path);
   if (result.exitCode != 0) {
     final String error =
         _getErrorString(executable, args, workingDir: workingDir);
@@ -216,7 +257,7 @@ Future<ProcessResult> runAndExitOnError(String executable, List<String> args,
 }
 
 String _getErrorString(String executable, List<String> args,
-    {Directory workingDir}) {
+    {fs.Directory workingDir}) {
   final String workdir = workingDir == null ? '' : ' in ${workingDir.path}';
   return 'ERROR: Unable to execute "$executable ${args.join(' ')}"$workdir.';
 }

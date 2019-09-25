@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
+import 'package:file/file.dart' as fs;
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
 class JavaTestCommand extends PluginCommand {
-  JavaTestCommand(Directory packagesDir) : super(packagesDir);
+  JavaTestCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+      : super(packagesDir, fileSystem);
 
   @override
   final String name = 'java-test';
@@ -25,22 +26,24 @@ class JavaTestCommand extends PluginCommand {
   @override
   Future<Null> run() async {
     checkSharding();
-    final Stream<Directory> examplesWithTests = getExamples().where(
-        (Directory d) =>
-            isFlutterPackage(d) &&
-            new Directory(p.join(d.path, 'android', 'app', 'src', 'test'))
+    final Stream<fs.Directory> examplesWithTests = getExamples().where(
+        (fs.Directory d) =>
+            isFlutterPackage(d, fileSystem) &&
+            fileSystem
+                .directory(p.join(d.path, 'android', 'app', 'src', 'test'))
                 .existsSync());
 
     final List<String> failingPackages = <String>[];
     final List<String> missingFlutterBuild = <String>[];
-    await for (Directory example in examplesWithTests) {
+    await for (fs.Directory example in examplesWithTests) {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
       print('\nRUNNING JAVA TESTS for $packageName');
 
-      final Directory androidDirectory =
-          new Directory(p.join(example.path, 'android'));
-      if (!new File(p.join(androidDirectory.path, _gradleWrapper))
+      final fs.Directory androidDirectory =
+          fileSystem.directory(p.join(example.path, 'android'));
+      if (!fileSystem
+          .file(p.join(androidDirectory.path, _gradleWrapper))
           .existsSync()) {
         print('ERROR: Run "flutter build apk" on example app of $packageName'
             'before executing tests.');

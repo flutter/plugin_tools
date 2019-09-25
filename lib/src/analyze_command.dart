@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
+import 'package:file/file.dart' as fs;
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
 class AnalyzeCommand extends PluginCommand {
-  AnalyzeCommand(Directory packagesDir) : super(packagesDir);
+  AnalyzeCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+      : super(packagesDir, fileSystem);
 
   @override
   final String name = 'analyze';
@@ -26,8 +27,8 @@ class AnalyzeCommand extends PluginCommand {
     await runAndStream('pub', <String>['global', 'activate', 'tuneup'],
         workingDir: packagesDir, exitOnError: true);
 
-    await for (Directory package in getPackages()) {
-      if (isFlutterPackage(package)) {
+    await for (fs.Directory package in getPackages()) {
+      if (isFlutterPackage(package, fileSystem)) {
         await runAndStream('flutter', <String>['packages', 'get'],
             workingDir: package, exitOnError: true);
       } else {
@@ -37,7 +38,7 @@ class AnalyzeCommand extends PluginCommand {
     }
 
     final List<String> failingPackages = <String>[];
-    await for (Directory package in getPlugins()) {
+    await for (fs.Directory package in getPlugins()) {
       final int exitCode = await runAndStream(
           'pub', <String>['global', 'run', 'tuneup', 'check'],
           workingDir: package);

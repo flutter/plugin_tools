@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 import 'package:colorize/colorize.dart';
+import 'package:file/file.dart' as fs;
 import 'package:git/git.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
@@ -27,7 +28,7 @@ class GitVersionFinder {
   }
 
   Future<List<String>> getChangedPubSpecs() async {
-    final ProcessResult changedFilesCommand = await baseGitDir
+    final io.ProcessResult changedFilesCommand = await baseGitDir
         .runCommand(<String>['diff', '--name-only', '$baseSha']);
     final List<String> changedFiles =
         changedFilesCommand.stdout.toString().split('\n');
@@ -35,7 +36,7 @@ class GitVersionFinder {
   }
 
   Future<Version> getPackageVersion(String pubspecPath, String gitRef) async {
-    final ProcessResult gitShow =
+    final io.ProcessResult gitShow =
         await baseGitDir.runCommand(<String>['show', '$gitRef:$pubspecPath']);
     final String fileContent = gitShow.stdout;
     final String versionString = loadYaml(fileContent)['version'];
@@ -85,7 +86,8 @@ Map<Version, NextVersionType> getAllowedNextVersions(
 }
 
 class VersionCheckCommand extends PluginCommand {
-  VersionCheckCommand(Directory packagesDir) : super(packagesDir) {
+  VersionCheckCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+      : super(packagesDir, fileSystem) {
     argParser.addOption(_kBaseSha);
   }
 
@@ -118,7 +120,7 @@ class VersionCheckCommand extends PluginCommand {
 
     for (final String pubspecPath in changedPubspecs) {
       try {
-        final File pubspecFile = File(pubspecPath);
+        final fs.File pubspecFile = fileSystem.file(pubspecPath);
         final Pubspec pubspec = Pubspec.parse(pubspecFile.readAsStringSync());
 
         if (pubspec.publishTo == 'none') {
@@ -144,7 +146,7 @@ class VersionCheckCommand extends PluginCommand {
           print(redError);
           throw new ToolExit(1);
         }
-      } on ProcessException {
+      } on io.ProcessException {
         print('Unable to find pubspec in master for $pubspecPath.'
             ' Safe to ignore if the project is new.');
       }

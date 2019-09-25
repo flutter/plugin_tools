@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+
+import 'package:file/file.dart' as fs;
 
 import 'common.dart';
 
 class ListCommand extends PluginCommand {
-  ListCommand(Directory packagesDir) : super(packagesDir) {
+  ListCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+      : super(packagesDir, fileSystem) {
     argParser.addOption(
       _type,
       defaultsTo: _plugin,
@@ -34,22 +36,22 @@ class ListCommand extends PluginCommand {
     checkSharding();
     switch (argResults[_type]) {
       case _plugin:
-        await for (Directory package in getPlugins()) {
+        await for (fs.Directory package in getPlugins()) {
           print(package.path);
         }
         break;
       case _example:
-        await for (Directory package in getExamples()) {
+        await for (fs.Directory package in getExamples()) {
           print(package.path);
         }
         break;
       case _package:
-        await for (Directory package in getPackages()) {
+        await for (fs.Directory package in getPackages()) {
           print(package.path);
         }
         break;
       case _file:
-        await for (File file in getFiles()) {
+        await for (fs.File file in getFiles()) {
           print(file.path);
         }
         break;

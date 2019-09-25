@@ -4,8 +4,9 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
+import 'package:file/file.dart' as fs;
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:quiver/iterables.dart';
@@ -16,7 +17,8 @@ const String _googleFormatterUrl =
     'https://github.com/google/google-java-format/releases/download/google-java-format-1.3/google-java-format-1.3-all-deps.jar';
 
 class FormatCommand extends PluginCommand {
-  FormatCommand(Directory packagesDir) : super(packagesDir) {
+  FormatCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+      : super(packagesDir, fileSystem) {
     argParser.addFlag('travis', hide: true);
     argParser.addOption('clang-format',
         defaultsTo: 'clang-format',
@@ -50,7 +52,7 @@ class FormatCommand extends PluginCommand {
   }
 
   Future<bool> _didModifyAnything() async {
-    final ProcessResult modifiedFiles = await runAndExitOnError(
+    final io.ProcessResult modifiedFiles = await runAndExitOnError(
         'git', <String>['ls-files', '--modified'],
         workingDir: packagesDir);
 
@@ -71,7 +73,8 @@ class FormatCommand extends PluginCommand {
         'this command into your terminal:');
 
     print('patch -p1 <<DONE');
-    final ProcessResult diff = await runAndExitOnError('git', <String>['diff'],
+    final io.ProcessResult diff = await runAndExitOnError(
+        'git', <String>['diff'],
         workingDir: packagesDir);
     print(diff.stdout);
     print('DONE');
@@ -114,15 +117,15 @@ class FormatCommand extends PluginCommand {
 
   Future<List<String>> _getFilesWithExtension(String extension) async =>
       getFiles()
-          .where((File file) => p.extension(file.path) == extension)
-          .map((File file) => file.path)
+          .where((fs.File file) => p.extension(file.path) == extension)
+          .map((fs.File file) => file.path)
           .toList();
 
   Future<String> _getGoogleFormatterPath() async {
     final String javaFormatterPath = p.join(
-        p.dirname(p.fromUri(Platform.script)),
+        p.dirname(p.fromUri(io.Platform.script)),
         'google-java-format-1.3-all-deps.jar');
-    final File javaFormatterFile = new File(javaFormatterPath);
+    final fs.File javaFormatterFile = fileSystem.file(javaFormatterPath);
 
     if (!javaFormatterFile.existsSync()) {
       print('Downloading Google Java Format...');

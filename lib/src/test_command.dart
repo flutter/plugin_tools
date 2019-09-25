@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
+import 'package:file/file.dart' as fs;
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
 class TestCommand extends PluginCommand {
-  TestCommand(Directory packagesDir) : super(packagesDir);
+  TestCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+      : super(packagesDir, fileSystem);
 
   @override
   final String name = 'test';
@@ -23,10 +24,10 @@ class TestCommand extends PluginCommand {
   Future<Null> run() async {
     checkSharding();
     final List<String> failingPackages = <String>[];
-    await for (Directory packageDir in getPackages()) {
+    await for (fs.Directory packageDir in getPackages()) {
       final String packageName =
           p.relative(packageDir.path, from: packagesDir.path);
-      if (!new Directory(p.join(packageDir.path, 'test')).existsSync()) {
+      if (!fileSystem.directory(p.join(packageDir.path, 'test')).existsSync()) {
         print('SKIPPING $packageName - no test subdirectory');
         continue;
       }
@@ -34,7 +35,7 @@ class TestCommand extends PluginCommand {
       print('RUNNING $packageName tests...');
       // `flutter test` automatically gets packages.  `pub run test` does not.  :(
       int exitCode = 0;
-      if (isFlutterPackage(packageDir)) {
+      if (isFlutterPackage(packageDir, fileSystem)) {
         exitCode = await runAndStream(
           'flutter',
           <String>['test', '--color'],

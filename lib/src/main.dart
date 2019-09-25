@@ -22,10 +22,10 @@ import 'test_command.dart';
 import 'version_check_command.dart';
 
 void main(List<String> args) {
-  final fs.FileSystem fileSystem = LocalFileSystem();
+  final fs.FileSystem fileSystem = const LocalFileSystem();
 
-  fs.Directory packagesDir =
-      fileSystem.directory(p.join(fileSystem.currentDirectory.path, 'packages'));
+  fs.Directory packagesDir = fileSystem
+      .directory(p.join(fileSystem.currentDirectory.path, 'packages'));
 
   if (!packagesDir.existsSync()) {
     if (p.basename(fileSystem.currentDirectory.path) == 'packages') {

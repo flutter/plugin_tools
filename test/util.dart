@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
-import 'package:file/file.dart' as fs;
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 
-fs.FileSystem mockFileSystem = MemoryFileSystem();
-fs.Directory mockPackagesDir;
+final FileSystem mockFileSystem = MemoryFileSystem();
+Directory mockPackagesDir;
 
 /// Creates a mock packages directory in the mock file system.
 void initializeFakePackages() {
@@ -24,19 +24,19 @@ void createFakePlugin(
   assert(!(withSingleExample && withExamples.isNotEmpty),
       'cannot pass withSingleExample and withExamples simultaneously');
 
-  final fs.Directory pluginDirectory = mockPackagesDir.childDirectory(name)
+  final Directory pluginDirectory = mockPackagesDir.childDirectory(name)
     ..createSync();
   _createFakePubspec(pluginDirectory);
 
   if (withSingleExample) {
-    final fs.Directory exampleDir = pluginDirectory.childDirectory('example')
+    final Directory exampleDir = pluginDirectory.childDirectory('example')
       ..createSync();
     _createFakePubspec(exampleDir);
   } else if (withExamples.isNotEmpty) {
-    final fs.Directory exampleDir = pluginDirectory.childDirectory('example')
+    final Directory exampleDir = pluginDirectory.childDirectory('example')
       ..createSync();
     for (String example in withExamples) {
-      final fs.Directory currentExample = exampleDir.childDirectory(example)
+      final Directory currentExample = exampleDir.childDirectory(example)
         ..createSync();
       _createFakePubspec(currentExample);
     }
@@ -44,7 +44,7 @@ void createFakePlugin(
 }
 
 /// Creates a `pubspec.yaml` file with a flutter dependency.
-void _createFakePubspec(fs.Directory parent) {
+void _createFakePubspec(Directory parent) {
   parent.childFile('pubspec.yaml').createSync();
   parent.childFile('pubspec.yaml').writeAsStringSync('''
 name: fake_package
@@ -56,7 +56,7 @@ dependencies:
 
 /// Cleans up the mock packages directory, making it an empty directory again.
 void cleanupPackages() {
-  mockPackagesDir.listSync().forEach((fs.FileSystemEntity entity) {
+  mockPackagesDir.listSync().forEach((FileSystemEntity entity) {
     entity.deleteSync(recursive: true);
   });
 }

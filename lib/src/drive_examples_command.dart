@@ -6,13 +6,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
-import 'package:file/file.dart' as fs;
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
 class DriveExamplesCommand extends PluginCommand {
-  DriveExamplesCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+  DriveExamplesCommand(Directory packagesDir, FileSystem fileSystem)
       : super(packagesDir, fileSystem);
 
   @override
@@ -29,17 +29,17 @@ class DriveExamplesCommand extends PluginCommand {
   Future<Null> run() async {
     checkSharding();
     final List<String> failingTests = <String>[];
-    await for (fs.Directory example in getExamples()) {
+    await for (Directory example in getExamples()) {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
-      final fs.Directory driverTests =
+      final Directory driverTests =
           fileSystem.directory(p.join(example.path, 'test_driver'));
       if (!driverTests.existsSync()) {
         // No driver tests available for this example
         continue;
       }
       // Look for driver tests ending in _test.dart in test_driver/
-      await for (fs.FileSystemEntity test in driverTests.list()) {
+      await for (FileSystemEntity test in driverTests.list()) {
         final String driverTestName =
             p.relative(test.path, from: driverTests.path);
         if (!driverTestName.endsWith("_test.dart")) {

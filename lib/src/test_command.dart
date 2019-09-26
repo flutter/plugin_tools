@@ -4,13 +4,13 @@
 
 import 'dart:async';
 
-import 'package:file/file.dart' as fs;
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
 class TestCommand extends PluginCommand {
-  TestCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+  TestCommand(Directory packagesDir, FileSystem fileSystem)
       : super(packagesDir, fileSystem);
 
   @override
@@ -24,7 +24,7 @@ class TestCommand extends PluginCommand {
   Future<Null> run() async {
     checkSharding();
     final List<String> failingPackages = <String>[];
-    await for (fs.Directory packageDir in getPackages()) {
+    await for (Directory packageDir in getPackages()) {
       final String packageName =
           p.relative(packageDir.path, from: packagesDir.path);
       if (!fileSystem.directory(p.join(packageDir.path, 'test')).existsSync()) {

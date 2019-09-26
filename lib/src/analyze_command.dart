@@ -4,13 +4,13 @@
 
 import 'dart:async';
 
-import 'package:file/file.dart' as fs;
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
 class AnalyzeCommand extends PluginCommand {
-  AnalyzeCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+  AnalyzeCommand(Directory packagesDir, FileSystem fileSystem)
       : super(packagesDir, fileSystem);
 
   @override
@@ -27,7 +27,7 @@ class AnalyzeCommand extends PluginCommand {
     await runAndStream('pub', <String>['global', 'activate', 'tuneup'],
         workingDir: packagesDir, exitOnError: true);
 
-    await for (fs.Directory package in getPackages()) {
+    await for (Directory package in getPackages()) {
       if (isFlutterPackage(package, fileSystem)) {
         await runAndStream('flutter', <String>['packages', 'get'],
             workingDir: package, exitOnError: true);
@@ -38,7 +38,7 @@ class AnalyzeCommand extends PluginCommand {
     }
 
     final List<String> failingPackages = <String>[];
-    await for (fs.Directory package in getPlugins()) {
+    await for (Directory package in getPlugins()) {
       final int exitCode = await runAndStream(
           'pub', <String>['global', 'run', 'tuneup', 'check'],
           workingDir: package);

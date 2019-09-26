@@ -5,13 +5,13 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:file/file.dart' as fs;
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
 class FirebaseTestLabCommand extends PluginCommand {
-  FirebaseTestLabCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+  FirebaseTestLabCommand(Directory packagesDir, FileSystem fileSystem)
       : super(packagesDir, fileSystem) {
     argParser.addOption(
       'project',
@@ -67,8 +67,8 @@ class FirebaseTestLabCommand extends PluginCommand {
   @override
   Future<Null> run() async {
     checkSharding();
-    final Stream<fs.Directory> examplesWithTests = getExamples().where(
-        (fs.Directory d) =>
+    final Stream<Directory> examplesWithTests = getExamples().where(
+        (Directory d) =>
             isFlutterPackage(d, fileSystem) &&
             fileSystem
                 .directory(
@@ -77,11 +77,11 @@ class FirebaseTestLabCommand extends PluginCommand {
 
     final List<String> failingPackages = <String>[];
     final List<String> missingFlutterBuild = <String>[];
-    await for (fs.Directory example in examplesWithTests) {
+    await for (Directory example in examplesWithTests) {
       // TODO(jackson): We should also support testing lib/main.dart for
       // running non-Dart instrumentation tests.
       // See https://github.com/flutter/flutter/issues/38983
-      final fs.Directory testsDir =
+      final Directory testsDir =
           fileSystem.directory(p.join(example.path, 'test_instrumentation'));
       if (!testsDir.existsSync()) {
         continue;
@@ -91,7 +91,7 @@ class FirebaseTestLabCommand extends PluginCommand {
           p.relative(example.path, from: packagesDir.path);
       print('\nRUNNING FIREBASE TEST LAB TESTS for $packageName');
 
-      final fs.Directory androidDirectory =
+      final Directory androidDirectory =
           fileSystem.directory(p.join(example.path, 'android'));
       if (!fileSystem
           .file(p.join(androidDirectory.path, _gradleWrapper))
@@ -117,7 +117,7 @@ class FirebaseTestLabCommand extends PluginCommand {
         continue;
       }
 
-      for (fs.File test in testsDir.listSync()) {
+      for (File test in testsDir.listSync()) {
         exitCode = await runAndStream(
             p.join(androidDirectory.path, _gradleWrapper),
             <String>[

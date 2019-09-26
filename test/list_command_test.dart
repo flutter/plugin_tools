@@ -1,12 +1,6 @@
-import 'package:test/test.dart';
-
-import 'dart:async';
-import 'dart:io' as io;
-
 import 'package:args/command_runner.dart';
-import 'package:file/file.dart' as fs;
-import 'package:file/memory.dart';
 import 'package:flutter_plugin_tools/src/list_command.dart';
+import 'package:test/test.dart';
 
 import 'util.dart';
 

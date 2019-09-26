@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:file/file.dart' as fs;
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
@@ -13,7 +13,7 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 import 'common.dart';
 
 class CreateAllPluginsAppCommand extends PluginCommand {
-  CreateAllPluginsAppCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+  CreateAllPluginsAppCommand(Directory packagesDir, FileSystem fileSystem)
       : super(packagesDir, fileSystem) {
     argParser.addMultiOption(
       excludeOption,
@@ -66,7 +66,7 @@ class CreateAllPluginsAppCommand extends PluginCommand {
   }
 
   Future<void> _updateProjectGradle() async {
-    final fs.File gradleFile = fileSystem.file(p.join(
+    final File gradleFile = fileSystem.file(p.join(
       'all_plugins',
       'android',
       'build.gradle',
@@ -83,7 +83,7 @@ class CreateAllPluginsAppCommand extends PluginCommand {
   }
 
   Future<void> _updateAppGradle() async {
-    final fs.File gradleFile = fileSystem.file(p.join(
+    final File gradleFile = fileSystem.file(p.join(
       'all_plugins',
       'android',
       'app',
@@ -108,7 +108,7 @@ class CreateAllPluginsAppCommand extends PluginCommand {
   }
 
   Future<void> _updateManifest() async {
-    final fs.File manifestFile = fileSystem.file(p.join(
+    final File manifestFile = fileSystem.file(p.join(
       'all_plugins',
       'android',
       'app',
@@ -155,7 +155,7 @@ class CreateAllPluginsAppCommand extends PluginCommand {
       },
     );
 
-    final fs.File pubspecFile =
+    final File pubspecFile =
         fileSystem.file(p.join('all_plugins', 'pubspec.yaml'));
     pubspecFile.writeAsStringSync(_pubspecToString(pubspec));
   }
@@ -164,13 +164,13 @@ class CreateAllPluginsAppCommand extends PluginCommand {
     final Map<String, PathDependency> pathDependencies =
         <String, PathDependency>{};
 
-    await for (fs.Directory package in getPlugins()) {
+    await for (Directory package in getPlugins()) {
       final String pluginName = package.path.split('/').last;
       if (argResults[excludeOption].contains(pluginName)) {
         continue;
       }
 
-      final fs.File pubspecFile =
+      final File pubspecFile =
           fileSystem.file(p.join(package.path, 'pubspec.yaml'));
       final Pubspec pubspec = Pubspec.parse(pubspecFile.readAsStringSync());
 

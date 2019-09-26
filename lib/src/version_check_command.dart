@@ -7,7 +7,7 @@ import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 import 'package:colorize/colorize.dart';
-import 'package:file/file.dart' as fs;
+import 'package:file/file.dart';
 import 'package:git/git.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
@@ -86,7 +86,7 @@ Map<Version, NextVersionType> getAllowedNextVersions(
 }
 
 class VersionCheckCommand extends PluginCommand {
-  VersionCheckCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+  VersionCheckCommand(Directory packagesDir, FileSystem fileSystem)
       : super(packagesDir, fileSystem) {
     argParser.addOption(_kBaseSha);
   }
@@ -120,7 +120,7 @@ class VersionCheckCommand extends PluginCommand {
 
     for (final String pubspecPath in changedPubspecs) {
       try {
-        final fs.File pubspecFile = fileSystem.file(pubspecPath);
+        final File pubspecFile = fileSystem.file(pubspecPath);
         final Pubspec pubspec = Pubspec.parse(pubspecFile.readAsStringSync());
 
         if (pubspec.publishTo == 'none') {

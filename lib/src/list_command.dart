@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
-import 'package:file/file.dart' as fs;
+import 'package:file/file.dart';
 
 import 'common.dart';
 
 class ListCommand extends PluginCommand {
-  ListCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+  ListCommand(Directory packagesDir, FileSystem fileSystem)
       : super(packagesDir, fileSystem) {
     argParser.addOption(
       _type,
@@ -36,22 +36,22 @@ class ListCommand extends PluginCommand {
     checkSharding();
     switch (argResults[_type]) {
       case _plugin:
-        await for (fs.Directory package in getPlugins()) {
+        await for (Directory package in getPlugins()) {
           print(package.path);
         }
         break;
       case _example:
-        await for (fs.Directory package in getExamples()) {
+        await for (Directory package in getExamples()) {
           print(package.path);
         }
         break;
       case _package:
-        await for (fs.Directory package in getPackages()) {
+        await for (Directory package in getPackages()) {
           print(package.path);
         }
         break;
       case _file:
-        await for (fs.File file in getFiles()) {
+        await for (File file in getFiles()) {
           print(file.path);
         }
         break;

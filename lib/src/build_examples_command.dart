@@ -5,13 +5,13 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:file/file.dart' as fs;
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
 class BuildExamplesCommand extends PluginCommand {
-  BuildExamplesCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+  BuildExamplesCommand(Directory packagesDir, FileSystem fileSystem)
       : super(packagesDir, fileSystem) {
     argParser.addFlag('ipa', defaultsTo: io.Platform.isMacOS);
     argParser.addFlag('apk');

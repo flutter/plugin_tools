@@ -4,13 +4,13 @@
 
 import 'dart:async';
 
-import 'package:file/file.dart' as fs;
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
 class JavaTestCommand extends PluginCommand {
-  JavaTestCommand(fs.Directory packagesDir, fs.FileSystem fileSystem)
+  JavaTestCommand(Directory packagesDir, FileSystem fileSystem)
       : super(packagesDir, fileSystem);
 
   @override
@@ -26,8 +26,8 @@ class JavaTestCommand extends PluginCommand {
   @override
   Future<Null> run() async {
     checkSharding();
-    final Stream<fs.Directory> examplesWithTests = getExamples().where(
-        (fs.Directory d) =>
+    final Stream<Directory> examplesWithTests = getExamples().where(
+        (Directory d) =>
             isFlutterPackage(d, fileSystem) &&
             fileSystem
                 .directory(p.join(d.path, 'android', 'app', 'src', 'test'))
@@ -35,12 +35,12 @@ class JavaTestCommand extends PluginCommand {
 
     final List<String> failingPackages = <String>[];
     final List<String> missingFlutterBuild = <String>[];
-    await for (fs.Directory example in examplesWithTests) {
+    await for (Directory example in examplesWithTests) {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
       print('\nRUNNING JAVA TESTS for $packageName');
 
-      final fs.Directory androidDirectory =
+      final Directory androidDirectory =
           fileSystem.directory(p.join(example.path, 'android'));
       if (!fileSystem
           .file(p.join(androidDirectory.path, _gradleWrapper))

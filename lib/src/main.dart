@@ -5,7 +5,7 @@
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
-import 'package:file/file.dart' as fs;
+import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as p;
 
@@ -22,9 +22,9 @@ import 'test_command.dart';
 import 'version_check_command.dart';
 
 void main(List<String> args) {
-  final fs.FileSystem fileSystem = const LocalFileSystem();
+  final FileSystem fileSystem = const LocalFileSystem();
 
-  fs.Directory packagesDir = fileSystem
+  Directory packagesDir = fileSystem
       .directory(p.join(fileSystem.currentDirectory.path, 'packages'));
 
   if (!packagesDir.existsSync()) {

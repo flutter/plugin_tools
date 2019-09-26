@@ -104,25 +104,39 @@ void main() {
       cleanupPackages();
     });
 
-    test('lists plugins using multi-plugin layout', () async {
+    test('lists plugins using federated plugin layout', () async {
       createFakePlugin('plugin1');
 
-      // Create a multi-plugin by creating a directory under the packages
+      // Create a federated plugin by creating a directory under the packages
       // directory with several packages underneath.
-      final Directory multiPluginDir =
+      final Directory federatedPlugin =
           mockPackagesDir.childDirectory('my_plugin')..createSync();
-      final Directory clientLibrary = multiPluginDir.childDirectory('my_plugin')
-        ..createSync();
+      final Directory clientLibrary =
+          federatedPlugin.childDirectory('my_plugin')..createSync();
       createFakePubspec(clientLibrary);
       final Directory webLibrary =
-          multiPluginDir.childDirectory('my_plugin_web')..createSync();
+          federatedPlugin.childDirectory('my_plugin_web')..createSync();
       createFakePubspec(webLibrary);
       final Directory macLibrary =
-          multiPluginDir.childDirectory('my_plugin_macos')..createSync();
+          federatedPlugin.childDirectory('my_plugin_macos')..createSync();
       createFakePubspec(macLibrary);
 
+      // Test without specifying `--type`.
       List<String> plugins = await runCapturingPrint(runner, <String>['list']);
 
+      expect(
+        plugins,
+        unorderedEquals(<String>[
+          '/packages/plugin1',
+          '/packages/my_plugin/my_plugin',
+          '/packages/my_plugin/my_plugin_web',
+          '/packages/my_plugin/my_plugin_macos',
+        ]),
+      );
+
+      // Test specifying `--type=plugin`.
+      plugins =
+          await runCapturingPrint(runner, <String>['list', '--type=plugin']);
       expect(
         plugins,
         unorderedEquals(<String>[

@@ -1,6 +1,6 @@
 ## v.0.0.20
 
-- Support for finding "multi-package" plugins, where one directory contains
+- Support for finding federated plugins, where one directory contains
   multiple packages for different platform implementations.
 
 ## v.0.0.19+3

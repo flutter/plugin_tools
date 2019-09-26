@@ -134,14 +134,41 @@ abstract class PluginCommand extends Command<Null> {
     }
   }
 
-  Stream<Directory> _getAllPlugins() {
+  /// Returns the root Dart package folders of the plugins involved in this
+  /// command execution, assuming there is only one shard.
+  ///
+  /// Plugin packages can exist in one of two places relative to the packages
+  /// directory.
+  ///
+  /// 1. As a Dart package in a directory which is a direct child of the
+  ///    packages directory. This is a plugin where all of the implementations
+  ///    exist in a single Dart package.
+  /// 2. Several plugin packages may live in a directory which is a direct
+  ///    child of the packages directory. This directory groups several Dart
+  ///    packages which implement a single plugin. This directory contains a
+  ///    "client library" package, which declares the API for the plugin, as
+  ///    well as one or more platform-specific implementations.
+  Stream<Directory> _getAllPlugins() async* {
     final Set<String> packages = new Set<String>.from(argResults[_pluginsArg]);
-    return packagesDir
-        .list(followLinks: false)
-        .where(_isDartPackage)
-        .where((FileSystemEntity entity) =>
-            packages.isEmpty || packages.contains(p.basename(entity.path)))
-        .cast<Directory>();
+    await for (FileSystemEntity entity
+        in packagesDir.list(followLinks: false)) {
+      // A top-level Dart package is a plugin package.
+      if (_isDartPackage(entity)) {
+        if (packages.isEmpty || packages.contains(p.basename(entity.path))) {
+          yield entity;
+        }
+      } else if (entity is Directory) {
+        // Look for Dart packages under this top-level directory.
+        await for (FileSystemEntity subdir in entity.list(followLinks: false)) {
+          if (_isDartPackage(subdir)) {
+            if (packages.isEmpty ||
+                packages.contains(p.basename(subdir.path))) {
+              yield subdir;
+            }
+          }
+        }
+      }
+    }
   }
 
   /// Returns the example Dart package folders of the plugins involved in this

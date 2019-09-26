@@ -26,25 +26,25 @@ void createFakePlugin(
 
   final Directory pluginDirectory = mockPackagesDir.childDirectory(name)
     ..createSync();
-  _createFakePubspec(pluginDirectory);
+  createFakePubspec(pluginDirectory);
 
   if (withSingleExample) {
     final Directory exampleDir = pluginDirectory.childDirectory('example')
       ..createSync();
-    _createFakePubspec(exampleDir);
+    createFakePubspec(exampleDir);
   } else if (withExamples.isNotEmpty) {
     final Directory exampleDir = pluginDirectory.childDirectory('example')
       ..createSync();
     for (String example in withExamples) {
       final Directory currentExample = exampleDir.childDirectory(example)
         ..createSync();
-      _createFakePubspec(currentExample);
+      createFakePubspec(currentExample);
     }
   }
 }
 
 /// Creates a `pubspec.yaml` file with a flutter dependency.
-void _createFakePubspec(Directory parent) {
+void createFakePubspec(Directory parent) {
   parent.childFile('pubspec.yaml').createSync();
   parent.childFile('pubspec.yaml').writeAsStringSync('''
 name: fake_package

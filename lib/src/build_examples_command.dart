@@ -3,15 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
 class BuildExamplesCommand extends PluginCommand {
-  BuildExamplesCommand(Directory packagesDir) : super(packagesDir) {
-    argParser.addFlag('ipa', defaultsTo: Platform.isMacOS);
+  BuildExamplesCommand(Directory packagesDir, FileSystem fileSystem)
+      : super(packagesDir, fileSystem) {
+    argParser.addFlag('ipa', defaultsTo: io.Platform.isMacOS);
     argParser.addFlag('apk');
   }
 
@@ -33,7 +35,7 @@ class BuildExamplesCommand extends PluginCommand {
 
     checkSharding();
     final List<String> failingPackages = <String>[];
-    await for (Directory example in getExamples()) {
+    await for (io.Directory example in getExamples()) {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
 

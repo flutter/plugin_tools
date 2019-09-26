@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+
+import 'package:file/file.dart';
 
 import 'common.dart';
 
 class ListCommand extends PluginCommand {
-  ListCommand(Directory packagesDir) : super(packagesDir) {
+  ListCommand(Directory packagesDir, FileSystem fileSystem)
+      : super(packagesDir, fileSystem) {
     argParser.addOption(
       _type,
       defaultsTo: _plugin,

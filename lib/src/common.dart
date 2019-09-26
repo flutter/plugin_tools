@@ -3,21 +3,23 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 import 'dart:math';
 
 import 'package:args/command_runner.dart';
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
 /// Returns whether the given directory contains a Flutter package.
-bool isFlutterPackage(FileSystemEntity entity) {
+bool isFlutterPackage(FileSystemEntity entity, FileSystem fileSystem) {
   if (entity == null || entity is! Directory) {
     return false;
   }
 
   try {
-    final File pubspecFile = new File(p.join(entity.path, 'pubspec.yaml'));
+    final File pubspecFile =
+        fileSystem.file(p.join(entity.path, 'pubspec.yaml'));
     final YamlMap pubspecYaml = loadYaml(pubspecFile.readAsStringSync());
     final YamlMap dependencies = pubspecYaml['dependencies'];
     if (dependencies == null) {
@@ -39,7 +41,7 @@ class ToolExit extends Error {
 }
 
 abstract class PluginCommand extends Command<Null> {
-  PluginCommand(this.packagesDir) {
+  PluginCommand(this.packagesDir, this.fileSystem) {
     argParser.addMultiOption(
       _pluginsArg,
       splitCommas: true,
@@ -65,7 +67,15 @@ abstract class PluginCommand extends Command<Null> {
   static const String _pluginsArg = 'plugins';
   static const String _shardIndexArg = 'shardIndex';
   static const String _shardCountArg = 'shardCount';
+
+  /// The directory containing the plugin packages.
   final Directory packagesDir;
+
+  /// The file system.
+  ///
+  /// This can be overridden for testing.
+  final FileSystem fileSystem;
+
   int _shardIndex;
   int _shardCount;
 
@@ -124,8 +134,6 @@ abstract class PluginCommand extends Command<Null> {
     }
   }
 
-  /// Returns the root Dart package folders of the plugins involved in this
-  /// command execution, assuming there is only one shard.
   Stream<Directory> _getAllPlugins() {
     final Set<String> packages = new Set<String>.from(argResults[_pluginsArg]);
     return packagesDir
@@ -166,33 +174,37 @@ abstract class PluginCommand extends Command<Null> {
   /// `pubspec.yaml` file.
   bool _isDartPackage(FileSystemEntity entity) {
     return entity is Directory &&
-        new File(p.join(entity.path, 'pubspec.yaml')).existsSync();
+        fileSystem.file(p.join(entity.path, 'pubspec.yaml')).existsSync();
   }
 
   /// Returns the example Dart packages contained in the specified plugin, or
   /// an empty List, if the plugin has no examples.
   Iterable<Directory> _getExamplesForPlugin(Directory plugin) {
     final Directory exampleFolder =
-        new Directory(p.join(plugin.path, 'example'));
+        fileSystem.directory(p.join(plugin.path, 'example'));
     if (!exampleFolder.existsSync()) {
       return <Directory>[];
     }
-    if (isFlutterPackage(exampleFolder)) {
+    if (isFlutterPackage(exampleFolder, fileSystem)) {
       return <Directory>[exampleFolder];
     }
     // Only look at the subdirectories of the example directory if the example
     // directory itself is not a Dart package, and only look one level below the
     // example directory for other dart packages.
-    return exampleFolder.listSync().where(isFlutterPackage).cast<Directory>();
+    return exampleFolder
+        .listSync()
+        .where(
+            (FileSystemEntity entity) => isFlutterPackage(entity, fileSystem))
+        .cast<Directory>();
   }
 }
 
 Future<int> runAndStream(String executable, List<String> args,
     {Directory workingDir, bool exitOnError: false}) async {
-  final Process process =
-      await Process.start(executable, args, workingDirectory: workingDir?.path);
-  stdout.addStream(process.stdout);
-  stderr.addStream(process.stderr);
+  final io.Process process = await io.Process.start(executable, args,
+      workingDirectory: workingDir?.path);
+  io.stdout.addStream(process.stdout);
+  io.stderr.addStream(process.stderr);
   if (exitOnError && await process.exitCode != 0) {
     final String error =
         _getErrorString(executable, args, workingDir: workingDir);
@@ -202,10 +214,10 @@ Future<int> runAndStream(String executable, List<String> args,
   return process.exitCode;
 }
 
-Future<ProcessResult> runAndExitOnError(String executable, List<String> args,
+Future<io.ProcessResult> runAndExitOnError(String executable, List<String> args,
     {Directory workingDir, bool exitOnError: false}) async {
-  final ProcessResult result =
-      await Process.run(executable, args, workingDirectory: workingDir?.path);
+  final io.ProcessResult result = await io.Process.run(executable, args,
+      workingDirectory: workingDir?.path);
   if (result.exitCode != 0) {
     final String error =
         _getErrorString(executable, args, workingDir: workingDir);

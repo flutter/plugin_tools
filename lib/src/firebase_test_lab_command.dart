@@ -3,14 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
 class FirebaseTestLabCommand extends PluginCommand {
-  FirebaseTestLabCommand(Directory packagesDir) : super(packagesDir) {
+  FirebaseTestLabCommand(Directory packagesDir, FileSystem fileSystem)
+      : super(packagesDir, fileSystem) {
     argParser.addOption(
       'project',
       defaultsTo: 'flutter-infra',
@@ -18,11 +20,11 @@ class FirebaseTestLabCommand extends PluginCommand {
     );
     argParser.addOption('service-key',
         defaultsTo:
-            p.join(Platform.environment['HOME'], 'gcloud-service-key.json'));
+            p.join(io.Platform.environment['HOME'], 'gcloud-service-key.json'));
     argParser.addOption('results-bucket',
         defaultsTo: 'gs://flutter_firebase_testlab');
-    final String gitRevision = Platform.environment['GIT_REVISION'];
-    final String buildId = Platform.environment['CIRRUS_BUILD_ID'];
+    final String gitRevision = io.Platform.environment['GIT_REVISION'];
+    final String buildId = io.Platform.environment['CIRRUS_BUILD_ID'];
     argParser.addOption('results-dir',
         defaultsTo: 'plugins_android_test/$gitRevision/$buildId');
   }
@@ -65,11 +67,13 @@ class FirebaseTestLabCommand extends PluginCommand {
   @override
   Future<Null> run() async {
     checkSharding();
-    final Stream<Directory> examplesWithTests = getExamples().where((Directory
-            d) =>
-        isFlutterPackage(d) &&
-        new Directory(p.join(d.path, 'android', 'app', 'src', 'androidTest'))
-            .existsSync());
+    final Stream<Directory> examplesWithTests = getExamples().where(
+        (Directory d) =>
+            isFlutterPackage(d, fileSystem) &&
+            fileSystem
+                .directory(
+                    p.join(d.path, 'android', 'app', 'src', 'androidTest'))
+                .existsSync());
 
     final List<String> failingPackages = <String>[];
     final List<String> missingFlutterBuild = <String>[];
@@ -78,7 +82,7 @@ class FirebaseTestLabCommand extends PluginCommand {
       // running non-Dart instrumentation tests.
       // See https://github.com/flutter/flutter/issues/38983
       final Directory testsDir =
-          Directory(p.join(example.path, 'test_instrumentation'));
+          fileSystem.directory(p.join(example.path, 'test_instrumentation'));
       if (!testsDir.existsSync()) {
         continue;
       }
@@ -88,8 +92,9 @@ class FirebaseTestLabCommand extends PluginCommand {
       print('\nRUNNING FIREBASE TEST LAB TESTS for $packageName');
 
       final Directory androidDirectory =
-          new Directory(p.join(example.path, 'android'));
-      if (!new File(p.join(androidDirectory.path, _gradleWrapper))
+          fileSystem.directory(p.join(example.path, 'android'));
+      if (!fileSystem
+          .file(p.join(androidDirectory.path, _gradleWrapper))
           .existsSync()) {
         print('ERROR: Run "flutter build apk" on example app of $packageName'
             'before executing tests.');

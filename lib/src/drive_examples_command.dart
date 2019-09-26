@@ -4,14 +4,16 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
 class DriveExamplesCommand extends PluginCommand {
-  DriveExamplesCommand(Directory packagesDir) : super(packagesDir);
+  DriveExamplesCommand(Directory packagesDir, FileSystem fileSystem)
+      : super(packagesDir, fileSystem);
 
   @override
   final String name = 'drive-examples';
@@ -31,7 +33,7 @@ class DriveExamplesCommand extends PluginCommand {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
       final Directory driverTests =
-          Directory(p.join(example.path, 'test_driver'));
+          fileSystem.directory(p.join(example.path, 'test_driver'));
       if (!driverTests.existsSync()) {
         // No driver tests available for this example
         continue;
@@ -49,17 +51,21 @@ class DriveExamplesCommand extends PluginCommand {
           '.dart',
         );
         String deviceTestPath = p.join('test', deviceTestName);
-        if (!File(p.join(example.path, deviceTestPath)).existsSync()) {
+        if (!fileSystem
+            .file(p.join(example.path, deviceTestPath))
+            .existsSync()) {
           // If the app isn't in test/ folder, look in test_driver/ instead.
           deviceTestPath = p.join('test_driver', deviceTestName);
         }
-        if (!File(p.join(example.path, deviceTestPath)).existsSync()) {
+        if (!fileSystem
+            .file(p.join(example.path, deviceTestPath))
+            .existsSync()) {
           print('Unable to find an application for $driverTestName to drive');
           failingTests.add(p.join(example.path, driverTestName));
           continue;
         }
         print('RUNNING DRIVER TEST for ${p.join(packageName, deviceTestPath)}');
-        final Process process = await Process.start(
+        final io.Process process = await io.Process.start(
           'flutter',
           <String>['drive', deviceTestPath],
           workingDirectory: example.path,
@@ -74,9 +80,9 @@ class DriveExamplesCommand extends PluginCommand {
           if (data.contains('All tests passed!')) {
             testsPassed = true;
           }
-          stdout.write(data);
+          io.stdout.write(data);
         });
-        stderr.addStream(process.stderr);
+        io.stderr.addStream(process.stderr);
         if (await process.exitCode != 0 || !testsPassed) {
           failingTests.add(p.join(packageName, deviceTestPath));
         }

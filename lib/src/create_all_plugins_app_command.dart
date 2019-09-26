@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
@@ -12,7 +13,8 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 import 'common.dart';
 
 class CreateAllPluginsAppCommand extends PluginCommand {
-  CreateAllPluginsAppCommand(Directory packagesDir) : super(packagesDir) {
+  CreateAllPluginsAppCommand(Directory packagesDir, FileSystem fileSystem)
+      : super(packagesDir, fileSystem) {
     argParser.addMultiOption(
       excludeOption,
       abbr: 'e',
@@ -46,7 +48,7 @@ class CreateAllPluginsAppCommand extends PluginCommand {
   }
 
   Future<int> _createPlugin() async {
-    final ProcessResult result = Process.runSync(
+    final io.ProcessResult result = io.Process.runSync(
       'flutter',
       <String>[
         'create',
@@ -64,7 +66,7 @@ class CreateAllPluginsAppCommand extends PluginCommand {
   }
 
   Future<void> _updateProjectGradle() async {
-    final File gradleFile = File(p.join(
+    final File gradleFile = fileSystem.file(p.join(
       'all_plugins',
       'android',
       'build.gradle',
@@ -81,7 +83,7 @@ class CreateAllPluginsAppCommand extends PluginCommand {
   }
 
   Future<void> _updateAppGradle() async {
-    final File gradleFile = File(p.join(
+    final File gradleFile = fileSystem.file(p.join(
       'all_plugins',
       'android',
       'app',
@@ -106,7 +108,7 @@ class CreateAllPluginsAppCommand extends PluginCommand {
   }
 
   Future<void> _updateManifest() async {
-    final File manifestFile = File(p.join(
+    final File manifestFile = fileSystem.file(p.join(
       'all_plugins',
       'android',
       'app',
@@ -153,7 +155,8 @@ class CreateAllPluginsAppCommand extends PluginCommand {
       },
     );
 
-    final File pubspecFile = new File(p.join('all_plugins', 'pubspec.yaml'));
+    final File pubspecFile =
+        fileSystem.file(p.join('all_plugins', 'pubspec.yaml'));
     pubspecFile.writeAsStringSync(_pubspecToString(pubspec));
   }
 
@@ -167,7 +170,8 @@ class CreateAllPluginsAppCommand extends PluginCommand {
         continue;
       }
 
-      final File pubspecFile = File(p.join(package.path, 'pubspec.yaml'));
+      final File pubspecFile =
+          fileSystem.file(p.join(package.path, 'pubspec.yaml'));
       final Pubspec pubspec = Pubspec.parse(pubspecFile.readAsStringSync());
 
       if (pubspec.publishTo != 'none') {

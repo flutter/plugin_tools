@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
 class AnalyzeCommand extends PluginCommand {
-  AnalyzeCommand(Directory packagesDir) : super(packagesDir);
+  AnalyzeCommand(Directory packagesDir, FileSystem fileSystem)
+      : super(packagesDir, fileSystem);
 
   @override
   final String name = 'analyze';
@@ -27,7 +28,7 @@ class AnalyzeCommand extends PluginCommand {
         workingDir: packagesDir, exitOnError: true);
 
     await for (Directory package in getPackages()) {
-      if (isFlutterPackage(package)) {
+      if (isFlutterPackage(package, fileSystem)) {
         await runAndStream('flutter', <String>['packages', 'get'],
             workingDir: package, exitOnError: true);
       } else {

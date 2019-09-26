@@ -3,14 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
 class JavaTestCommand extends PluginCommand {
-  JavaTestCommand(Directory packagesDir) : super(packagesDir);
+  JavaTestCommand(Directory packagesDir, FileSystem fileSystem)
+      : super(packagesDir, fileSystem);
 
   @override
   final String name = 'java-test';
@@ -27,8 +28,9 @@ class JavaTestCommand extends PluginCommand {
     checkSharding();
     final Stream<Directory> examplesWithTests = getExamples().where(
         (Directory d) =>
-            isFlutterPackage(d) &&
-            new Directory(p.join(d.path, 'android', 'app', 'src', 'test'))
+            isFlutterPackage(d, fileSystem) &&
+            fileSystem
+                .directory(p.join(d.path, 'android', 'app', 'src', 'test'))
                 .existsSync());
 
     final List<String> failingPackages = <String>[];
@@ -39,8 +41,9 @@ class JavaTestCommand extends PluginCommand {
       print('\nRUNNING JAVA TESTS for $packageName');
 
       final Directory androidDirectory =
-          new Directory(p.join(example.path, 'android'));
-      if (!new File(p.join(androidDirectory.path, _gradleWrapper))
+          fileSystem.directory(p.join(example.path, 'android'));
+      if (!fileSystem
+          .file(p.join(androidDirectory.path, _gradleWrapper))
           .existsSync()) {
         print('ERROR: Run "flutter build apk" on example app of $packageName'
             'before executing tests.');

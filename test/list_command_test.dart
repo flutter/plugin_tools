@@ -1,4 +1,5 @@
 import 'package:args/command_runner.dart';
+import 'package:file/file.dart';
 import 'package:flutter_plugin_tools/src/list_command.dart';
 import 'package:test/test.dart';
 
@@ -79,7 +80,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('lists file', () async {
+    test('lists files', () async {
       createFakePlugin('plugin1', withSingleExample: true);
       createFakePlugin('plugin2',
           withExamples: <String>['example1', 'example2']);
@@ -97,6 +98,38 @@ void main() {
           '/packages/plugin2/example/example1/pubspec.yaml',
           '/packages/plugin2/example/example2/pubspec.yaml',
           '/packages/plugin3/pubspec.yaml',
+        ]),
+      );
+
+      cleanupPackages();
+    });
+
+    test('lists plugins using multi-plugin layout', () async {
+      createFakePlugin('plugin1');
+
+      // Create a multi-plugin by creating a directory under the packages
+      // directory with several packages underneath.
+      final Directory multiPluginDir =
+          mockPackagesDir.childDirectory('my_plugin')..createSync();
+      final Directory clientLibrary = multiPluginDir.childDirectory('my_plugin')
+        ..createSync();
+      createFakePubspec(clientLibrary);
+      final Directory webLibrary =
+          multiPluginDir.childDirectory('my_plugin_web')..createSync();
+      createFakePubspec(webLibrary);
+      final Directory macLibrary =
+          multiPluginDir.childDirectory('my_plugin_macos')..createSync();
+      createFakePubspec(macLibrary);
+
+      List<String> plugins = await runCapturingPrint(runner, <String>['list']);
+
+      expect(
+        plugins,
+        unorderedEquals(<String>[
+          '/packages/plugin1',
+          '/packages/my_plugin/my_plugin',
+          '/packages/my_plugin/my_plugin_web',
+          '/packages/my_plugin/my_plugin_macos',
         ]),
       );
 

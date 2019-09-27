@@ -134,20 +134,64 @@ void main() {
         ]),
       );
 
-      // Test specifying `--type=plugin`.
-      plugins =
-          await runCapturingPrint(runner, <String>['list', '--type=plugin']);
+      cleanupPackages();
+    });
+
+    test('can filter plugins with the --plugins argument', () async {
+      createFakePlugin('plugin1');
+
+      // Create a federated plugin by creating a directory under the packages
+      // directory with several packages underneath.
+      final Directory federatedPlugin =
+          mockPackagesDir.childDirectory('my_plugin')..createSync();
+      final Directory clientLibrary =
+          federatedPlugin.childDirectory('my_plugin')..createSync();
+      createFakePubspec(clientLibrary);
+      final Directory webLibrary =
+          federatedPlugin.childDirectory('my_plugin_web')..createSync();
+      createFakePubspec(webLibrary);
+      final Directory macLibrary =
+          federatedPlugin.childDirectory('my_plugin_macos')..createSync();
+      createFakePubspec(macLibrary);
+
+      List<String> plugins = await runCapturingPrint(
+          runner, <String>['list', '--plugins=plugin1']);
       expect(
         plugins,
         unorderedEquals(<String>[
           '/packages/plugin1',
+        ]),
+      );
+
+      plugins = await runCapturingPrint(
+          runner, <String>['list', '--plugins=my_plugin']);
+      expect(
+        plugins,
+        unorderedEquals(<String>[
           '/packages/my_plugin/my_plugin',
           '/packages/my_plugin/my_plugin_web',
           '/packages/my_plugin/my_plugin_macos',
         ]),
       );
 
-      cleanupPackages();
+      plugins = await runCapturingPrint(
+          runner, <String>['list', '--plugins=my_plugin/my_plugin_web']);
+      expect(
+        plugins,
+        unorderedEquals(<String>[
+          '/packages/my_plugin/my_plugin_web',
+        ]),
+      );
+
+      plugins = await runCapturingPrint(runner,
+          <String>['list', '--plugins=my_plugin/my_plugin_web,plugin1']);
+      expect(
+        plugins,
+        unorderedEquals(<String>[
+          '/packages/plugin1',
+          '/packages/my_plugin/my_plugin_web',
+        ]),
+      );
     });
   });
 }

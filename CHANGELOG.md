@@ -1,3 +1,7 @@
+## v.0.0.21
+
+- Support the `--plugins` argument for federated plugins.
+
 ## v.0.0.20
 
 - Support for finding federated plugins, where one directory contains

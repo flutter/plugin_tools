@@ -183,8 +183,8 @@ void main() {
         ]),
       );
 
-      plugins = await runCapturingPrint(
-          runner, <String>['list', '--plugins=my_plugin/my_plugin_web,plugin1']);
+      plugins = await runCapturingPrint(runner,
+          <String>['list', '--plugins=my_plugin/my_plugin_web,plugin1']);
       expect(
         plugins,
         unorderedEquals(<String>[

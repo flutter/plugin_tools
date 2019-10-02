@@ -10,8 +10,11 @@ import 'package:path/path.dart' as p;
 import 'common.dart';
 
 class JavaTestCommand extends PluginCommand {
-  JavaTestCommand(Directory packagesDir, FileSystem fileSystem)
-      : super(packagesDir, fileSystem);
+  JavaTestCommand(
+    Directory packagesDir,
+    FileSystem fileSystem, {
+    ProcessRunner processRunner = const ProcessRunner(),
+  }) : super(packagesDir, fileSystem, processRunner: processRunner);
 
   @override
   final String name = 'java-test';
@@ -51,7 +54,7 @@ class JavaTestCommand extends PluginCommand {
         continue;
       }
 
-      final int exitCode = await runAndStream(
+      final int exitCode = await processRunner.runAndStream(
           p.join(androidDirectory.path, _gradleWrapper),
           <String>['testDebugUnitTest', '--info'],
           workingDir: androidDirectory);

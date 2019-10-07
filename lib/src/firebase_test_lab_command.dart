@@ -67,38 +67,47 @@ class FirebaseTestLabCommand extends PluginCommand {
   @override
   Future<Null> run() async {
     checkSharding();
-    final Stream<Directory> examplesWithTests = getExamples().where(
+    final Stream<Directory> packagesWithTests = getPackages().where(
         (Directory d) =>
             isFlutterPackage(d, fileSystem) &&
             fileSystem
                 .directory(
-                    p.join(d.path, 'android', 'app', 'src', 'androidTest'))
+                    p.join(d.path, 'example', 'android', 'app', 'src', 'androidTest'))
                 .existsSync());
 
     final List<String> failingPackages = <String>[];
     final List<String> missingFlutterBuild = <String>[];
-    await for (Directory example in examplesWithTests) {
-      // TODO(jackson): We should also support testing lib/main.dart for
-      // running non-Dart instrumentation tests.
+    await for (Directory package in packagesWithTests) {
       // See https://github.com/flutter/flutter/issues/38983
-      final Directory testsDir =
-          fileSystem.directory(p.join(example.path, 'test_instrumentation'));
-      if (!testsDir.existsSync()) {
-        continue;
-      }
 
+      final Directory exampleDirectory =
+        fileSystem.directory(p.join(package.path, 'example'));
+      final Directory testsDir =
+        fileSystem.directory(p.join(exampleDirectory.path, 'test'));
       final String packageName =
-          p.relative(example.path, from: packagesDir.path);
+          p.relative(package.path, from: packagesDir.path);
       print('\nRUNNING FIREBASE TEST LAB TESTS for $packageName');
 
       final Directory androidDirectory =
-          fileSystem.directory(p.join(example.path, 'android'));
+          fileSystem.directory(p.join(exampleDirectory.path, 'android'));
+
+      // Ensures that gradle wrapper exists
       if (!fileSystem
           .file(p.join(androidDirectory.path, _gradleWrapper))
           .existsSync()) {
-        print('ERROR: Run "flutter build apk" on example app of $packageName'
-            'before executing tests.');
-        missingFlutterBuild.add(packageName);
+        int exitCode = await runAndStream(
+            p.join(androidDirectory.path, _gradleWrapper),
+            <String>[
+              'flutter',
+              'build',
+              'apk',
+            ],
+            workingDir: androidDirectory);
+
+        if (exitCode != 0) {
+          failingPackages.add(packageName);
+          continue;
+        }
         continue;
       }
 
@@ -117,13 +126,18 @@ class FirebaseTestLabCommand extends PluginCommand {
         continue;
       }
 
-      for (File test in testsDir.listSync()) {
+      List<FileSystemEntity> entities = package.listSync(recursive: true, followLinks: true).toList();
+      for(FileSystemEntity entity in entities) {
+        if (!entity.path.endsWith('_e2e.dart')) {
+          continue;
+        }
+
         exitCode = await runAndStream(
             p.join(androidDirectory.path, _gradleWrapper),
             <String>[
               'assembleDebug',
               '-Pverbose=true',
-              '-Ptarget=${test.path}'
+              '-Ptarget=${entity.path}'
             ],
             workingDir: androidDirectory);
 
@@ -150,7 +164,7 @@ class FirebaseTestLabCommand extends PluginCommand {
               '--results-bucket=${argResults['results-bucket']}',
               '--results-dir=${argResults['results-dir']}',
             ],
-            workingDir: example);
+            workingDir: exampleDirectory);
 
         if (exitCode != 0) {
           failingPackages.add(packageName);

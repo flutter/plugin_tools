@@ -108,7 +108,7 @@ class RecordingProcessRunner extends ProcessRunner {
     Directory workingDir,
     bool exitOnError = false,
   }) {
-    recordedCalls.add(ProcessCall(executable, args, workingDir.path));
+    recordedCalls.add(ProcessCall(executable, args, workingDir?.path));
     return Future<int>.value(0);
   }
 

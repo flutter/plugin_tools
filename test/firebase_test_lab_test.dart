@@ -11,27 +11,39 @@ void main() {
 
     setUp(() {
       initializeFakePackages();
-      final FirebaseTestLabCommand command = FirebaseTestLabCommand(mockPackagesDir, mockFileSystem, processRunner: RecordingProcessRunner());
+      final FirebaseTestLabCommand command = FirebaseTestLabCommand(
+          mockPackagesDir, mockFileSystem,
+          processRunner: RecordingProcessRunner());
 
-      runner = CommandRunner<Null>('firebase_test_lab_command', 'Test for $FirebaseTestLabCommand');
+      runner = CommandRunner<Null>(
+          'firebase_test_lab_command', 'Test for $FirebaseTestLabCommand');
       runner.addCommand(command);
     });
 
     test('runs e2e tests', () async {
-      createFakePlugin('plugin', withExtraFiles: <List<String>>[ 
+      createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test', 'plugin_e2e.dart'],
         <String>['example', 'test_driver', 'plugin_e2e_test.dart'],
         <String>['example', 'android', 'gradlew'],
-        <String>['example', 'android', 'app', 'src', 'androidTest', 'MainActivityTest.java'],
+        <String>[
+          'example',
+          'android',
+          'app',
+          'src',
+          'androidTest',
+          'MainActivityTest.java'
+        ],
       ]);
 
-      List<String> plugins =
+      List<String> output =
           await runCapturingPrint(runner, <String>['firebase-test-lab']);
 
       expect(
-        plugins,
+        output,
         orderedEquals(<String>[
-          'All Firebase Test Lab tests successful!'
+          '\nRUNNING FIREBASE TEST LAB TESTS for plugin',
+          '\n\n',
+          'All Firebase Test Lab tests successful!',
         ]),
       );
 

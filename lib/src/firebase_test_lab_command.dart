@@ -11,8 +11,11 @@ import 'package:path/path.dart' as p;
 import 'common.dart';
 
 class FirebaseTestLabCommand extends PluginCommand {
-  FirebaseTestLabCommand(Directory packagesDir, FileSystem fileSystem)
-      : super(packagesDir, fileSystem) {
+  FirebaseTestLabCommand(
+    Directory packagesDir,
+    FileSystem fileSystem, {
+    ProcessRunner processRunner = const ProcessRunner(),
+  }) : super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addOption(
       'project',
       defaultsTo: 'flutter-infra',
@@ -41,7 +44,7 @@ class FirebaseTestLabCommand extends PluginCommand {
   static const String _gradleWrapper = 'gradlew';
 
   Future<void> _configureFirebaseProject() async {
-    int exitCode = await runAndStream('gcloud', <String>[
+    int exitCode = await processRunner.runAndStream('gcloud', <String>[
       'auth',
       'activate-service-account',
       '--key-file=${argResults['service-key']}',
@@ -51,7 +54,7 @@ class FirebaseTestLabCommand extends PluginCommand {
       throw new ToolExit(1);
     }
 
-    exitCode = await runAndStream('gcloud', <String>[
+    exitCode = await processRunner.runAndStream('gcloud', <String>[
       '--quiet',
       'config',
       'set',
@@ -112,7 +115,7 @@ class FirebaseTestLabCommand extends PluginCommand {
 
       await _configureFirebaseProject();
 
-      int exitCode = await runAndStream(
+      int exitCode = await processRunner.runAndStream(
           p.join(androidDirectory.path, _gradleWrapper),
           <String>[
             'assembleAndroidTest',
@@ -131,7 +134,7 @@ class FirebaseTestLabCommand extends PluginCommand {
           continue;
         }
 
-        exitCode = await runAndStream(
+        exitCode = await processRunner.runAndStream(
             p.join(androidDirectory.path, _gradleWrapper),
             <String>[
               'assembleDebug',
@@ -145,7 +148,7 @@ class FirebaseTestLabCommand extends PluginCommand {
           continue;
         }
 
-        exitCode = await runAndStream(
+        exitCode = await processRunner.runAndStream(
             'gcloud',
             <String>[
               'firebase',

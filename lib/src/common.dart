@@ -41,7 +41,11 @@ class ToolExit extends Error {
 }
 
 abstract class PluginCommand extends Command<Null> {
-  PluginCommand(this.packagesDir, this.fileSystem) {
+  PluginCommand(
+    this.packagesDir,
+    this.fileSystem, {
+    this.processRunner = const ProcessRunner(),
+  }) {
     argParser.addMultiOption(
       _pluginsArg,
       splitCommas: true,
@@ -75,6 +79,11 @@ abstract class PluginCommand extends Command<Null> {
   ///
   /// This can be overridden for testing.
   final FileSystem fileSystem;
+
+  /// The process runner.
+  ///
+  /// This can be overridden for testing.
+  final ProcessRunner processRunner;
 
   int _shardIndex;
   int _shardCount;
@@ -231,36 +240,69 @@ abstract class PluginCommand extends Command<Null> {
   }
 }
 
-Future<int> runAndStream(String executable, List<String> args,
-    {Directory workingDir, bool exitOnError: false}) async {
-  final io.Process process = await io.Process.start(executable, args,
-      workingDirectory: workingDir?.path);
-  io.stdout.addStream(process.stdout);
-  io.stderr.addStream(process.stderr);
-  if (exitOnError && await process.exitCode != 0) {
-    final String error =
-        _getErrorString(executable, args, workingDir: workingDir);
-    print('$error See above for details.');
-    throw new ToolExit(await process.exitCode);
-  }
-  return process.exitCode;
-}
+/// A class used to run processes.
+///
+/// We use this instead of directly running the process so it can be overridden
+/// in tests.
+class ProcessRunner {
+  const ProcessRunner();
 
-Future<io.ProcessResult> runAndExitOnError(String executable, List<String> args,
-    {Directory workingDir, bool exitOnError: false}) async {
-  final io.ProcessResult result = await io.Process.run(executable, args,
-      workingDirectory: workingDir?.path);
-  if (result.exitCode != 0) {
-    final String error =
-        _getErrorString(executable, args, workingDir: workingDir);
-    print('$error Stderr:\n${result.stdout}');
-    throw new ToolExit(result.exitCode);
+  /// Run the [executable] with [args] and stream output to stderr and stdout.
+  ///
+  /// The current working directory of [executable] can be overridden by
+  /// passing [workingDir].
+  ///
+  /// If [exitOnError] is set to `true`, then this will throw an error if
+  /// the [executable] terminates with a non-zero exit code.
+  ///
+  /// Returns the exit code of the [executable].
+  Future<int> runAndStream(
+    String executable,
+    List<String> args, {
+    Directory workingDir,
+    bool exitOnError: false,
+  }) async {
+    final io.Process process = await io.Process.start(executable, args,
+        workingDirectory: workingDir?.path);
+    io.stdout.addStream(process.stdout);
+    io.stderr.addStream(process.stderr);
+    if (exitOnError && await process.exitCode != 0) {
+      final String error =
+          _getErrorString(executable, args, workingDir: workingDir);
+      print('$error See above for details.');
+      throw new ToolExit(await process.exitCode);
+    }
+    return process.exitCode;
   }
-  return result;
-}
 
-String _getErrorString(String executable, List<String> args,
-    {Directory workingDir}) {
-  final String workdir = workingDir == null ? '' : ' in ${workingDir.path}';
-  return 'ERROR: Unable to execute "$executable ${args.join(' ')}"$workdir.';
+  /// Run the [executable] with [args], throwing an error on non-zero exit code.
+  ///
+  /// Unlike [runAndStream], this does not stream the process output to stdout.
+  /// It also unconditionally throws an error on a non-zero exit code.
+  ///
+  /// The current working directory of [executable] can be overridden by
+  /// passing [workingDir].
+  ///
+  /// Returns the [io.ProcessResult] of running the [executable].
+  Future<io.ProcessResult> runAndExitOnError(
+    String executable,
+    List<String> args, {
+    Directory workingDir,
+  }) async {
+    final io.ProcessResult result = await io.Process.run(executable, args,
+        workingDirectory: workingDir?.path);
+    if (result.exitCode != 0) {
+      final String error =
+          _getErrorString(executable, args, workingDir: workingDir);
+      print('$error Stderr:\n${result.stdout}');
+      throw new ToolExit(result.exitCode);
+    }
+    return result;
+  }
+
+  String _getErrorString(String executable, List<String> args,
+      {Directory workingDir}) {
+    final String workdir = workingDir == null ? '' : ' in ${workingDir.path}';
+    return 'ERROR: Unable to execute "$executable ${args.join(' ')}"$workdir.';
+  }
 }

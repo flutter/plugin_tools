@@ -22,7 +22,7 @@ Directory createFakePlugin(
   String name, {
   bool withSingleExample: false,
   List<String> withExamples: const <String>[],
-  bool withTestDir: false,
+  List<List<String>> withExtraFiles: const <List<String>>[],
   bool isFlutter: true,
 }) {
   assert(!(withSingleExample && withExamples.isNotEmpty),
@@ -46,9 +46,13 @@ Directory createFakePlugin(
     }
   }
 
-  if (withTestDir) {
-    pluginDirectory.childDirectory('test').createSync();
+  for (List<String> file in withExtraFiles) {
+    final List<String> newFilePath = [pluginDirectory.path]..addAll(file);
+    final File newFile =
+        mockFileSystem.file(mockFileSystem.path.joinAll(newFilePath));
+    newFile.createSync(recursive: true);
   }
+
   return pluginDirectory;
 }
 

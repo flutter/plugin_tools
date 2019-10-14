@@ -20,8 +20,14 @@ void main() {
     });
 
     test('runs flutter test on each plugin', () async {
-      Directory plugin1Dir = createFakePlugin('plugin1', withTestDir: true);
-      Directory plugin2Dir = createFakePlugin('plugin2', withTestDir: true);
+      Directory plugin1Dir =
+          createFakePlugin('plugin1', withExtraFiles: <List<String>>[
+        <String>['test', 'empty_test.dart'],
+      ]);
+      Directory plugin2Dir =
+          createFakePlugin('plugin2', withExtraFiles: <List<String>>[
+        <String>['test', 'empty_test.dart'],
+      ]);
       processRunner.recordedCalls.clear();
 
       await runner.run(<String>['test']);
@@ -38,8 +44,11 @@ void main() {
     });
 
     test('skips testing plugins without test directory', () async {
-      Directory plugin1Dir = createFakePlugin('plugin1', withTestDir: false);
-      Directory plugin2Dir = createFakePlugin('plugin2', withTestDir: true);
+      Directory plugin1Dir = createFakePlugin('plugin1');
+      Directory plugin2Dir =
+          createFakePlugin('plugin2', withExtraFiles: <List<String>>[
+        <String>['test', 'empty_test.dart'],
+      ]);
       processRunner.recordedCalls.clear();
 
       await runner.run(<String>['test']);
@@ -55,10 +64,16 @@ void main() {
     });
 
     test('runs pub run test on non-Flutter packages', () async {
-      Directory plugin1Dir =
-          createFakePlugin('plugin1', withTestDir: true, isFlutter: true);
-      Directory plugin2Dir =
-          createFakePlugin('plugin2', withTestDir: true, isFlutter: false);
+      Directory plugin1Dir = createFakePlugin('plugin1',
+          isFlutter: true,
+          withExtraFiles: <List<String>>[
+            <String>['test', 'empty_test.dart'],
+          ]);
+      Directory plugin2Dir = createFakePlugin('plugin2',
+          isFlutter: false,
+          withExtraFiles: <List<String>>[
+            <String>['test', 'empty_test.dart'],
+          ]);
       processRunner.recordedCalls.clear();
 
       await runner.run(<String>['test']);

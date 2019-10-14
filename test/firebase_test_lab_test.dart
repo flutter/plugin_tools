@@ -19,14 +19,14 @@ void main() {
 
     test('runs e2e tests', () async {
       createFakePlugin('plugin', withExtraFiles: [
-        <String>['example', 'test', 'plugin_e2e.dart']
-        <String>['example', 'test_driver', 'plugin_e2e_test.dart']
+        <String>['example', 'test', 'plugin_e2e.dart'],
+        <String>['example', 'test_driver', 'plugin_e2e_test.dart'],
         <String>['example', 'android', 'gradlew'],
         <String>['example', 'android', 'app', 'src', 'androidTest', 'MainActivityTest.java'],
       ];
 
       List<String> plugins =
-      await runCapturingPrint(runner, <String>['firebase-test-lab']);
+          await runCapturingPrint(runner, <String>['firebase-test-lab']);
 
       expect(
         plugins,

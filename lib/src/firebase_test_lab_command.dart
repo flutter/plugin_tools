@@ -98,7 +98,7 @@ class FirebaseTestLabCommand extends PluginCommand {
       if (!fileSystem
           .file(p.join(androidDirectory.path, _gradleWrapper))
           .existsSync()) {
-        int exitCode = await runAndStream(
+        int exitCode = await processRunner.runAndStream(
             'flutter',
             <String>[
               'build',

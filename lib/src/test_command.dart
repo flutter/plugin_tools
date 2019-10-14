@@ -10,8 +10,11 @@ import 'package:path/path.dart' as p;
 import 'common.dart';
 
 class TestCommand extends PluginCommand {
-  TestCommand(Directory packagesDir, FileSystem fileSystem)
-      : super(packagesDir, fileSystem);
+  TestCommand(
+    Directory packagesDir,
+    FileSystem fileSystem, {
+    ProcessRunner processRunner = const ProcessRunner(),
+  }) : super(packagesDir, fileSystem, processRunner: processRunner);
 
   @override
   final String name = 'test';
@@ -36,19 +39,19 @@ class TestCommand extends PluginCommand {
       // `flutter test` automatically gets packages.  `pub run test` does not.  :(
       int exitCode = 0;
       if (isFlutterPackage(packageDir, fileSystem)) {
-        exitCode = await runAndStream(
+        exitCode = await processRunner.runAndStream(
           'flutter',
           <String>['test', '--color'],
           workingDir: packageDir,
         );
       } else {
-        exitCode = await runAndStream(
+        exitCode = await processRunner.runAndStream(
           'pub',
           <String>['get'],
           workingDir: packageDir,
         );
         if (exitCode == 0) {
-          exitCode = await runAndStream(
+          exitCode = await processRunner.runAndStream(
             'pub',
             <String>['run', 'test'],
             workingDir: packageDir,

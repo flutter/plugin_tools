@@ -11,8 +11,11 @@ import 'package:path/path.dart' as p;
 import 'common.dart';
 
 class BuildExamplesCommand extends PluginCommand {
-  BuildExamplesCommand(Directory packagesDir, FileSystem fileSystem)
-      : super(packagesDir, fileSystem) {
+  BuildExamplesCommand(
+    Directory packagesDir,
+    FileSystem fileSystem, {
+    ProcessRunner processRunner = const ProcessRunner(),
+  }) : super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addFlag('ipa', defaultsTo: io.Platform.isMacOS);
     argParser.addFlag('apk');
   }
@@ -41,7 +44,7 @@ class BuildExamplesCommand extends PluginCommand {
 
       if (argResults['ipa']) {
         print('\nBUILDING IPA for $packageName');
-        final int exitCode = await runAndStream(
+        final int exitCode = await processRunner.runAndStream(
             'flutter', <String>['build', 'ios', '--no-codesign'],
             workingDir: example);
         if (exitCode != 0) {
@@ -51,7 +54,7 @@ class BuildExamplesCommand extends PluginCommand {
 
       if (argResults['apk']) {
         print('\nBUILDING APK for $packageName');
-        final int exitCode = await runAndStream(
+        final int exitCode = await processRunner.runAndStream(
             'flutter', <String>['build', 'apk'],
             workingDir: example);
         if (exitCode != 0) {

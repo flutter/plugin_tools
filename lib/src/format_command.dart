@@ -17,8 +17,11 @@ const String _googleFormatterUrl =
     'https://github.com/google/google-java-format/releases/download/google-java-format-1.3/google-java-format-1.3-all-deps.jar';
 
 class FormatCommand extends PluginCommand {
-  FormatCommand(Directory packagesDir, FileSystem fileSystem)
-      : super(packagesDir, fileSystem) {
+  FormatCommand(
+    Directory packagesDir,
+    FileSystem fileSystem, {
+    ProcessRunner processRunner = const ProcessRunner(),
+  }) : super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addFlag('travis', hide: true);
     argParser.addOption('clang-format',
         defaultsTo: 'clang-format',
@@ -52,9 +55,9 @@ class FormatCommand extends PluginCommand {
   }
 
   Future<bool> _didModifyAnything() async {
-    final io.ProcessResult modifiedFiles = await runAndExitOnError(
-        'git', <String>['ls-files', '--modified'],
-        workingDir: packagesDir);
+    final io.ProcessResult modifiedFiles = await processRunner
+        .runAndExitOnError('git', <String>['ls-files', '--modified'],
+            workingDir: packagesDir);
 
     print('\n\n');
 
@@ -73,9 +76,8 @@ class FormatCommand extends PluginCommand {
         'this command into your terminal:');
 
     print('patch -p1 <<DONE');
-    final io.ProcessResult diff = await runAndExitOnError(
-        'git', <String>['diff'],
-        workingDir: packagesDir);
+    final io.ProcessResult diff = await processRunner
+        .runAndExitOnError('git', <String>['diff'], workingDir: packagesDir);
     print(diff.stdout);
     print('DONE');
     return true;
@@ -92,7 +94,7 @@ class FormatCommand extends PluginCommand {
       ..addAll(mFiles);
     final Iterable<List<String>> batches = partition(allFiles, 100);
     for (List<String> batch in batches) {
-      await runAndStream(argResults['clang-format'],
+      await processRunner.runAndStream(argResults['clang-format'],
           <String>['-i', '--style=Google']..addAll(batch),
           workingDir: packagesDir, exitOnError: true);
     }
@@ -101,7 +103,7 @@ class FormatCommand extends PluginCommand {
   Future<Null> _formatJava(String googleFormatterPath) async {
     print('Formatting all .java files...');
     final Iterable<String> javaFiles = await _getFilesWithExtension('.java');
-    await runAndStream('java',
+    await processRunner.runAndStream('java',
         <String>['-jar', googleFormatterPath, '--replace']..addAll(javaFiles),
         workingDir: packagesDir, exitOnError: true);
   }
@@ -111,7 +113,8 @@ class FormatCommand extends PluginCommand {
     // specifically shell out to dartfmt -w in that case.
     print('Formatting all .dart files...');
     final Iterable<String> dartFiles = await _getFilesWithExtension('.dart');
-    await runAndStream('flutter', <String>['format']..addAll(dartFiles),
+    await processRunner.runAndStream(
+        'flutter', <String>['format']..addAll(dartFiles),
         workingDir: packagesDir, exitOnError: true);
   }
 

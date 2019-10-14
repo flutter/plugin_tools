@@ -1,3 +1,7 @@
+## v.0.0.22
+
+- Add ProcessRunner to mock running processes for testing.
+
 ## v.0.0.21
 
 - Support the `--plugins` argument for federated plugins.

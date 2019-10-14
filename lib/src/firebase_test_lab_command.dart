@@ -118,7 +118,7 @@ class FirebaseTestLabCommand extends PluginCommand {
       int exitCode = await processRunner.runAndStream(
           p.join(androidDirectory.path, _gradleWrapper),
           <String>[
-            'assembleAndroidTest',
+            'app:assembleAndroidTest',
             '-Pverbose=true',
           ],
           workingDir: androidDirectory);
@@ -137,7 +137,7 @@ class FirebaseTestLabCommand extends PluginCommand {
         exitCode = await processRunner.runAndStream(
             p.join(androidDirectory.path, _gradleWrapper),
             <String>[
-              'assembleDebug',
+              'app:assembleDebug',
               '-Pverbose=true',
               '-Ptarget=${entity.path}'
             ],

@@ -70,38 +70,44 @@ class FirebaseTestLabCommand extends PluginCommand {
   @override
   Future<Null> run() async {
     checkSharding();
-    final Stream<Directory> examplesWithTests = getExamples().where(
+    final Stream<Directory> packagesWithTests = getPackages().where(
         (Directory d) =>
             isFlutterPackage(d, fileSystem) &&
             fileSystem
-                .directory(
-                    p.join(d.path, 'android', 'app', 'src', 'androidTest'))
+                .directory(p.join(
+                    d.path, 'example', 'android', 'app', 'src', 'androidTest'))
                 .existsSync());
 
     final List<String> failingPackages = <String>[];
     final List<String> missingFlutterBuild = <String>[];
-    await for (Directory example in examplesWithTests) {
-      // TODO(jackson): We should also support testing lib/main.dart for
-      // running non-Dart instrumentation tests.
+    await for (Directory package in packagesWithTests) {
       // See https://github.com/flutter/flutter/issues/38983
-      final Directory testsDir =
-          fileSystem.directory(p.join(example.path, 'test_instrumentation'));
-      if (!testsDir.existsSync()) {
-        continue;
-      }
 
+      final Directory exampleDirectory =
+          fileSystem.directory(p.join(package.path, 'example'));
       final String packageName =
-          p.relative(example.path, from: packagesDir.path);
+          p.relative(package.path, from: packagesDir.path);
       print('\nRUNNING FIREBASE TEST LAB TESTS for $packageName');
 
       final Directory androidDirectory =
-          fileSystem.directory(p.join(example.path, 'android'));
+          fileSystem.directory(p.join(exampleDirectory.path, 'android'));
+
+      // Ensures that gradle wrapper exists
       if (!fileSystem
           .file(p.join(androidDirectory.path, _gradleWrapper))
           .existsSync()) {
-        print('ERROR: Run "flutter build apk" on example app of $packageName'
-            'before executing tests.');
-        missingFlutterBuild.add(packageName);
+        final int exitCode = await processRunner.runAndStream(
+            'flutter',
+            <String>[
+              'build',
+              'apk',
+            ],
+            workingDir: androidDirectory);
+
+        if (exitCode != 0) {
+          failingPackages.add(packageName);
+          continue;
+        }
         continue;
       }
 
@@ -110,7 +116,7 @@ class FirebaseTestLabCommand extends PluginCommand {
       int exitCode = await processRunner.runAndStream(
           p.join(androidDirectory.path, _gradleWrapper),
           <String>[
-            'assembleAndroidTest',
+            'app:assembleAndroidTest',
             '-Pverbose=true',
           ],
           workingDir: androidDirectory);
@@ -120,44 +126,65 @@ class FirebaseTestLabCommand extends PluginCommand {
         continue;
       }
 
-      for (File test in testsDir.listSync()) {
-        exitCode = await processRunner.runAndStream(
-            p.join(androidDirectory.path, _gradleWrapper),
-            <String>[
-              'assembleDebug',
-              '-Pverbose=true',
-              '-Ptarget=${test.path}'
-            ],
-            workingDir: androidDirectory);
+      // Look for tests recursively in folders that start with 'test' and that
+      // live in the root or example folders.
+      bool isTestDir(FileSystemEntity dir) {
+        return p.basename(dir.path).startsWith('test');
+      }
 
-        if (exitCode != 0) {
-          failingPackages.add(packageName);
-          continue;
+      final List<FileSystemEntity> testDirs =
+          package.listSync().where(isTestDir).toList();
+      final Directory example =
+          fileSystem.directory(p.join(package.path, 'example'));
+      testDirs.addAll(example.listSync().where(isTestDir).toList());
+      for (Directory testDir in testDirs) {
+        bool isE2ETest(FileSystemEntity file) {
+          return file.path.endsWith('_e2e.dart');
         }
 
-        exitCode = await processRunner.runAndStream(
-            'gcloud',
-            <String>[
-              'firebase',
-              'test',
-              'android',
-              'run',
-              '--type',
-              'instrumentation',
-              '--app',
-              'build/app/outputs/apk/debug/app-debug.apk',
-              '--test',
-              'build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk',
-              '--timeout',
-              '2m',
-              '--results-bucket=${argResults['results-bucket']}',
-              '--results-dir=${argResults['results-dir']}',
-            ],
-            workingDir: example);
+        final List<FileSystemEntity> testFiles = testDir
+            .listSync(recursive: true, followLinks: true)
+            .where(isE2ETest)
+            .toList();
+        for (FileSystemEntity test in testFiles) {
+          exitCode = await processRunner.runAndStream(
+              p.join(androidDirectory.path, _gradleWrapper),
+              <String>[
+                'app:assembleDebug',
+                '-Pverbose=true',
+                '-Ptarget=${test.path}'
+              ],
+              workingDir: androidDirectory);
 
-        if (exitCode != 0) {
-          failingPackages.add(packageName);
-          continue;
+          if (exitCode != 0) {
+            failingPackages.add(packageName);
+            continue;
+          }
+
+          exitCode = await processRunner.runAndStream(
+              'gcloud',
+              <String>[
+                'firebase',
+                'test',
+                'android',
+                'run',
+                '--type',
+                'instrumentation',
+                '--app',
+                'build/app/outputs/apk/debug/app-debug.apk',
+                '--test',
+                'build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk',
+                '--timeout',
+                '2m',
+                '--results-bucket=${argResults['results-bucket']}',
+                '--results-dir=${argResults['results-dir']}',
+              ],
+              workingDir: exampleDirectory);
+
+          if (exitCode != 0) {
+            failingPackages.add(packageName);
+            continue;
+          }
         }
       }
     }

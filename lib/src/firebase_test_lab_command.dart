@@ -129,7 +129,7 @@ class FirebaseTestLabCommand extends PluginCommand {
       final List<FileSystemEntity> entities =
           package.listSync(recursive: true, followLinks: true).toList();
       for (FileSystemEntity entity in entities) {
-        if (!entity.path.endsWith('_e2e.dart')) {
+        if (!entity.path.contains('/test') || !entity.path.endsWith('_e2e.dart')) {
           continue;
         }
 

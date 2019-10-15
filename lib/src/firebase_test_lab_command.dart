@@ -142,7 +142,7 @@ class FirebaseTestLabCommand extends PluginCommand {
           return file.path.endsWith('_e2e.dart');
         }
 
-        List<FileSystemEntity> testFiles = testDir
+        final List<FileSystemEntity> testFiles = testDir
             .listSync(recursive: true, followLinks: true)
             .where(isE2ETest)
             .toList();

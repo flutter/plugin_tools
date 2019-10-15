@@ -126,50 +126,58 @@ class FirebaseTestLabCommand extends PluginCommand {
         continue;
       }
 
-      final List<FileSystemEntity> entities =
-          package.listSync(recursive: true, followLinks: true).toList();
-      for (FileSystemEntity entity in entities) {
-        if (!entity.path.contains('/test') || !entity.path.endsWith('_e2e.dart')) {
-          continue;
+      // Look for tests recursively in folders that start with 'test' and that
+      // live in the root or example folders.
+      bool isTestDir(FileSystemEntity dir) {
+        return p.basename(dir.path).startsWith('test');
+      }
+      final List<FileSystemEntity> testDirs = package.listSync().where(isTestDir).toList();
+      final Directory example = fileSystem.directory(p.join(package.path, 'example'));
+      testDirs.addAll(example.listSync().where(isTestDir).toList());
+      for (Directory testDir in testDirs) {
+        bool isE2ETest(FileSystemEntity file) {
+          return file.path.endsWith('_e2e.dart');
         }
+        List<FileSystemEntity> testFiles = testDir.listSync(recursive: true, followLinks: true).where(isE2ETest).toList();
+        for (FileSystemEntity test in testFiles) {
+          exitCode = await processRunner.runAndStream(
+              p.join(androidDirectory.path, _gradleWrapper),
+              <String>[
+                'app:assembleDebug',
+                '-Pverbose=true',
+                '-Ptarget=${test.path}'
+              ],
+              workingDir: androidDirectory);
 
-        exitCode = await processRunner.runAndStream(
-            p.join(androidDirectory.path, _gradleWrapper),
-            <String>[
-              'app:assembleDebug',
-              '-Pverbose=true',
-              '-Ptarget=${entity.path}'
-            ],
-            workingDir: androidDirectory);
+          if (exitCode != 0) {
+            failingPackages.add(packageName);
+            continue;
+          }
 
-        if (exitCode != 0) {
-          failingPackages.add(packageName);
-          continue;
-        }
+          exitCode = await processRunner.runAndStream(
+              'gcloud',
+              <String>[
+                'firebase',
+                'test',
+                'android',
+                'run',
+                '--type',
+                'instrumentation',
+                '--app',
+                'build/app/outputs/apk/debug/app-debug.apk',
+                '--test',
+                'build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk',
+                '--timeout',
+                '2m',
+                '--results-bucket=${argResults['results-bucket']}',
+                '--results-dir=${argResults['results-dir']}',
+              ],
+              workingDir: exampleDirectory);
 
-        exitCode = await processRunner.runAndStream(
-            'gcloud',
-            <String>[
-              'firebase',
-              'test',
-              'android',
-              'run',
-              '--type',
-              'instrumentation',
-              '--app',
-              'build/app/outputs/apk/debug/app-debug.apk',
-              '--test',
-              'build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk',
-              '--timeout',
-              '2m',
-              '--results-bucket=${argResults['results-bucket']}',
-              '--results-dir=${argResults['results-dir']}',
-            ],
-            workingDir: exampleDirectory);
-
-        if (exitCode != 0) {
-          failingPackages.add(packageName);
-          continue;
+          if (exitCode != 0) {
+            failingPackages.add(packageName);
+            continue;
+          }
         }
       }
     }

@@ -29,6 +29,7 @@ void main() {
         <String>['test', 'plugin_test.dart'],
         <String>['test', 'plugin_e2e.dart'],
         <String>['should_not_run_e2e.dart'],
+        <String>['lib/test/should_not_run_e2e.dart'],
         <String>['example', 'test', 'plugin_e2e.dart'],
         <String>['example', 'test_driver', 'plugin_e2e.dart'],
         <String>['example', 'test_driver', 'plugin_e2e_test.dart'],
@@ -72,7 +73,7 @@ void main() {
               '/packages/plugin/example/android'),
           ProcessCall(
               '/packages/plugin/example/android/gradlew',
-              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/example/test_driver/plugin_e2e.dart'
+              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/test/plugin_e2e.dart'
                   .split(' '),
               '/packages/plugin/example/android'),
           ProcessCall(
@@ -92,7 +93,7 @@ void main() {
               '/packages/plugin/example'),
           ProcessCall(
               '/packages/plugin/example/android/gradlew',
-              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/test/plugin_e2e.dart'
+              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/example/test_driver/plugin_e2e.dart'
                   .split(' '),
               '/packages/plugin/example/android'),
           ProcessCall(

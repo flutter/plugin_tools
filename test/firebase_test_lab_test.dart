@@ -8,12 +8,14 @@ import 'util.dart';
 void main() {
   group('$FirebaseTestLabCommand', () {
     CommandRunner runner;
+    RecordingProcessRunner processRunner;
 
     setUp(() {
       initializeFakePackages();
+      processRunner = RecordingProcessRunner();
       final FirebaseTestLabCommand command = FirebaseTestLabCommand(
           mockPackagesDir, mockFileSystem,
-          processRunner: RecordingProcessRunner());
+          processRunner: processRunner);
 
       runner = CommandRunner<Null>(
           'firebase_test_lab_command', 'Test for $FirebaseTestLabCommand');
@@ -44,6 +46,17 @@ void main() {
           '\nRUNNING FIREBASE TEST LAB TESTS for plugin',
           '\n\n',
           'All Firebase Test Lab tests successful!',
+        ]),
+      );
+
+      expect(
+        processRunner.recordedCalls,
+        orderedEquals(<ProcessCall>[
+          ProcessCall('gcloud', 'auth activate-service-account --key-file=/Users/jackson/gcloud-service-key.json'.split(' '), null),
+          ProcessCall('gcloud', '--quiet config set project flutter-infra'.split(' '), null),
+          ProcessCall('/packages/plugin/example/android/gradlew app:assembleAndroidTest', '-Pverbose=true'.split(' '), '/packages/plugin/example/android'),
+          ProcessCall('/packages/plugin/example/android/gradlew', 'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/example/test/plugin_e2e.dart'.split(' '), '/packages/plugin/example/android'),
+          ProcessCall('gcloud', 'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 2m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/null/null'.split(' '), '/packages/plugin/example'),
         ]),
       );
 

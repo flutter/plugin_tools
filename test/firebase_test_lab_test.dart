@@ -54,7 +54,7 @@ void main() {
         orderedEquals(<ProcessCall>[
           ProcessCall('gcloud', 'auth activate-service-account --key-file=/Users/jackson/gcloud-service-key.json'.split(' '), null),
           ProcessCall('gcloud', '--quiet config set project flutter-infra'.split(' '), null),
-          ProcessCall('/packages/plugin/example/android/gradlew app:assembleAndroidTest', '-Pverbose=true'.split(' '), '/packages/plugin/example/android'),
+          ProcessCall('/packages/plugin/example/android/gradlew', 'app:assembleAndroidTest -Pverbose=true'.split(' '), '/packages/plugin/example/android'),
           ProcessCall('/packages/plugin/example/android/gradlew', 'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/example/test/plugin_e2e.dart'.split(' '), '/packages/plugin/example/android'),
           ProcessCall('gcloud', 'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 2m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/null/null'.split(' '), '/packages/plugin/example'),
         ]),

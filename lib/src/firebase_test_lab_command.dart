@@ -74,8 +74,8 @@ class FirebaseTestLabCommand extends PluginCommand {
         (Directory d) =>
             isFlutterPackage(d, fileSystem) &&
             fileSystem
-                .directory(
-                    p.join(d.path, 'example', 'android', 'app', 'src', 'androidTest'))
+                .directory(p.join(
+                    d.path, 'example', 'android', 'app', 'src', 'androidTest'))
                 .existsSync());
 
     final List<String> failingPackages = <String>[];
@@ -84,7 +84,7 @@ class FirebaseTestLabCommand extends PluginCommand {
       // See https://github.com/flutter/flutter/issues/38983
 
       final Directory exampleDirectory =
-        fileSystem.directory(p.join(package.path, 'example'));
+          fileSystem.directory(p.join(package.path, 'example'));
       final String packageName =
           p.relative(package.path, from: packagesDir.path);
       print('\nRUNNING FIREBASE TEST LAB TESTS for $packageName');
@@ -126,8 +126,9 @@ class FirebaseTestLabCommand extends PluginCommand {
         continue;
       }
 
-      final List<FileSystemEntity> entities = package.listSync(recursive: true, followLinks: true).toList();
-      for(FileSystemEntity entity in entities) {
+      final List<FileSystemEntity> entities =
+          package.listSync(recursive: true, followLinks: true).toList();
+      for (FileSystemEntity entity in entities) {
         if (!entity.path.endsWith('_e2e.dart')) {
           continue;
         }

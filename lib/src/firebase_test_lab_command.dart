@@ -85,8 +85,6 @@ class FirebaseTestLabCommand extends PluginCommand {
 
       final Directory exampleDirectory =
         fileSystem.directory(p.join(package.path, 'example'));
-      final Directory testsDir =
-        fileSystem.directory(p.join(exampleDirectory.path, 'test'));
       final String packageName =
           p.relative(package.path, from: packagesDir.path);
       print('\nRUNNING FIREBASE TEST LAB TESTS for $packageName');
@@ -98,7 +96,7 @@ class FirebaseTestLabCommand extends PluginCommand {
       if (!fileSystem
           .file(p.join(androidDirectory.path, _gradleWrapper))
           .existsSync()) {
-        int exitCode = await processRunner.runAndStream(
+        final int exitCode = await processRunner.runAndStream(
             'flutter',
             <String>[
               'build',
@@ -128,7 +126,7 @@ class FirebaseTestLabCommand extends PluginCommand {
         continue;
       }
 
-      List<FileSystemEntity> entities = package.listSync(recursive: true, followLinks: true).toList();
+      final List<FileSystemEntity> entities = package.listSync(recursive: true, followLinks: true).toList();
       for(FileSystemEntity entity in entities) {
         if (!entity.path.endsWith('_e2e.dart')) {
           continue;

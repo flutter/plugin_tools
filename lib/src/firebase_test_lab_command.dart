@@ -131,14 +131,21 @@ class FirebaseTestLabCommand extends PluginCommand {
       bool isTestDir(FileSystemEntity dir) {
         return p.basename(dir.path).startsWith('test');
       }
-      final List<FileSystemEntity> testDirs = package.listSync().where(isTestDir).toList();
-      final Directory example = fileSystem.directory(p.join(package.path, 'example'));
+
+      final List<FileSystemEntity> testDirs =
+          package.listSync().where(isTestDir).toList();
+      final Directory example =
+          fileSystem.directory(p.join(package.path, 'example'));
       testDirs.addAll(example.listSync().where(isTestDir).toList());
       for (Directory testDir in testDirs) {
         bool isE2ETest(FileSystemEntity file) {
           return file.path.endsWith('_e2e.dart');
         }
-        List<FileSystemEntity> testFiles = testDir.listSync(recursive: true, followLinks: true).where(isE2ETest).toList();
+
+        List<FileSystemEntity> testFiles = testDir
+            .listSync(recursive: true, followLinks: true)
+            .where(isE2ETest)
+            .toList();
         for (FileSystemEntity test in testFiles) {
           exitCode = await processRunner.runAndStream(
               p.join(androidDirectory.path, _gradleWrapper),

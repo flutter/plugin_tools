@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:flutter_plugin_tools/src/firebase_test_lab_command.dart';
@@ -54,7 +56,7 @@ void main() {
         orderedEquals(<ProcessCall>[
           ProcessCall(
               'gcloud',
-              'auth activate-service-account --key-file=/Users/jackson/gcloud-service-key.json'
+              'auth activate-service-account --key-file=${Platform.environment['HOME']}/gcloud-service-key.json'
                   .split(' '),
               null),
           ProcessCall('gcloud',

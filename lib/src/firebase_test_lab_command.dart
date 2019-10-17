@@ -26,7 +26,7 @@ class FirebaseTestLabCommand extends PluginCommand {
             p.join(io.Platform.environment['HOME'], 'gcloud-service-key.json'));
     argParser.addMultiOption('device',
       splitCommas: false,
-      defaultsTo: <String>['model=walleye', 'model=blueline'],
+      defaultsTo: <String>['model=walleye,version=26', 'model=blueline,version=28'],
       help: 'Device model(s) to test.');
     argParser.addOption('results-bucket',
         defaultsTo: 'gs://flutter_firebase_testlab');

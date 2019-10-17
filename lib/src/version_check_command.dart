@@ -86,7 +86,9 @@ Map<Version, NextVersionType> getAllowedNextVersions(
 }
 
 class VersionCheckCommand extends PluginCommand {
-  VersionCheckCommand(Directory packagesDir, FileSystem fileSystem, {
+  VersionCheckCommand(
+    Directory packagesDir,
+    FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
     this.gitDir,
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {

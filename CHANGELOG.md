@@ -6,6 +6,9 @@
 
 ## v.0.0.22
 
+- Updated firebase-test-lab command with updated conventions for test locations.
+- Updated version-check command to always compare refs instead of using the working copy.
+- Added unit tests for the firebase-test-lab and version-check commands.
 - Add ProcessRunner to mock running processes for testing.
 
 ## v.0.0.21

@@ -24,6 +24,10 @@ class FirebaseTestLabCommand extends PluginCommand {
     argParser.addOption('service-key',
         defaultsTo:
             p.join(io.Platform.environment['HOME'], 'gcloud-service-key.json'));
+    argParser.addMultiOption('device',
+      splitCommas: false,
+      defaultsTo: <String>['model=walleye', 'model=blueline'],
+      help: 'Device model(s) to test.');
     argParser.addOption('results-bucket',
         defaultsTo: 'gs://flutter_firebase_testlab');
     final String gitRevision = io.Platform.environment['GIT_REVISION'];
@@ -160,10 +164,7 @@ class FirebaseTestLabCommand extends PluginCommand {
             failingPackages.add(packageName);
             continue;
           }
-
-          exitCode = await processRunner.runAndStream(
-              'gcloud',
-              <String>[
+          final List<String> args = <String>[
                 'firebase',
                 'test',
                 'android',
@@ -178,8 +179,11 @@ class FirebaseTestLabCommand extends PluginCommand {
                 '2m',
                 '--results-bucket=${argResults['results-bucket']}',
                 '--results-dir=${argResults['results-dir']}',
-              ],
-              workingDir: exampleDirectory);
+              ];
+          for (String device in argResults['device']) {
+            args.addAll(<String>['--device', device]);
+          }
+          exitCode = await processRunner.runAndStream('gcloud', args, workingDir: exampleDirectory);
 
           if (exitCode != 0) {
             failingPackages.add(packageName);

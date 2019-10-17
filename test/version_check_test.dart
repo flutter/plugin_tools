@@ -1,7 +1,11 @@
+import 'dart:io';
+import 'package:args/command_runner.dart';
+import 'package:git/git.dart';
+import 'package:mockito/mockito.dart';
 import "package:test/test.dart";
-
 import "package:flutter_plugin_tools/src/version_check_command.dart";
 import 'package:pub_semver/pub_semver.dart';
+import 'util.dart';
 
 void testAllowedVersion(
   String masterVersion,
@@ -23,7 +27,54 @@ void testAllowedVersion(
   }
 }
 
+/// A mock [ProcessRunner] which records process calls.
+class MockGitDir extends Mock implements GitDir {}
+
+class MockProcessResult extends Mock implements ProcessResult {}
+
 void main() {
+
+  group('$VersionCheckCommand', () {
+    CommandRunner runner;
+    RecordingProcessRunner processRunner;
+    List<List<String>> gitDirCommands;
+
+    setUp(() {
+      gitDirCommands = <List<String>>[];
+      final MockGitDir gitDir = MockGitDir();
+      when(gitDir.runCommand(any)).thenAnswer((Invocation invocation) {
+        gitDirCommands.add(invocation.positionalArguments[0]);
+        final MockProcessResult mockProcessResult = MockProcessResult();
+        when(mockProcessResult.stdout).thenReturn("");
+        return Future.value(mockProcessResult);
+      });
+      initializeFakePackages();
+      processRunner = RecordingProcessRunner();
+      final VersionCheckCommand command = VersionCheckCommand(
+          mockPackagesDir, mockFileSystem,
+          processRunner: processRunner, gitDir: gitDir);
+
+      runner = CommandRunner<Null>(
+          'version_check_command', 'Test for $VersionCheckCommand');
+      runner.addCommand(command);
+    });
+
+    test('checks version', () async {
+      createFakePlugin('plugin');
+      List<String> output = await runCapturingPrint(runner, <String>['version-check', '--base_sha=master']);
+
+      expect(
+        output,
+        orderedEquals(<String>[
+          'No version check errors found!',
+        ]),
+      );
+      gitDirCommands.length == 0;
+      expect(gitDirCommands.first.join(' '), equals('diff --name-only master HEAD'));
+      cleanupPackages();
+    });
+  });
+
   group("Pre 1.0", () {
     test("nextVersion allows patch version", () {
       testAllowedVersion("0.12.0", "0.12.0+1",

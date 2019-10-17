@@ -29,7 +29,7 @@ class GitVersionFinder {
 
   Future<List<String>> getChangedPubSpecs() async {
     final io.ProcessResult changedFilesCommand = await baseGitDir
-        .runCommand(<String>['diff', '--name-only', '$baseSha']);
+        .runCommand(<String>['diff', '--name-only', '$baseSha', 'HEAD']);
     final List<String> changedFiles =
         changedFilesCommand.stdout.toString().split('\n');
     return changedFiles.where(isPubspec).toList();
@@ -86,8 +86,9 @@ Map<Version, NextVersionType> getAllowedNextVersions(
 }
 
 class VersionCheckCommand extends PluginCommand {
-  VersionCheckCommand(Directory packagesDir, FileSystem fileSystem)
-      : super(packagesDir, fileSystem) {
+  VersionCheckCommand(Directory packagesDir, FileSystem fileSystem, {
+    ProcessRunner processRunner = const ProcessRunner(),
+  }) : super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addOption(_kBaseSha);
   }
 

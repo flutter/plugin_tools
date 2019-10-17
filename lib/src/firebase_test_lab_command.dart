@@ -25,9 +25,13 @@ class FirebaseTestLabCommand extends PluginCommand {
         defaultsTo:
             p.join(io.Platform.environment['HOME'], 'gcloud-service-key.json'));
     argParser.addMultiOption('device',
-      splitCommas: false,
-      defaultsTo: <String>['model=walleye,version=26', 'model=blueline,version=28'],
-      help: 'Device model(s) to test.');
+        splitCommas: false,
+        defaultsTo: <String>[
+          'model=walleye,version=26',
+          'model=blueline,version=28'
+        ],
+        help:
+            'Device model(s) to test. See https://cloud.google.com/sdk/gcloud/reference/firebase/test/android/run for more info');
     argParser.addOption('results-bucket',
         defaultsTo: 'gs://flutter_firebase_testlab');
     final String gitRevision = io.Platform.environment['GIT_REVISION'];
@@ -165,25 +169,26 @@ class FirebaseTestLabCommand extends PluginCommand {
             continue;
           }
           final List<String> args = <String>[
-                'firebase',
-                'test',
-                'android',
-                'run',
-                '--type',
-                'instrumentation',
-                '--app',
-                'build/app/outputs/apk/debug/app-debug.apk',
-                '--test',
-                'build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk',
-                '--timeout',
-                '2m',
-                '--results-bucket=${argResults['results-bucket']}',
-                '--results-dir=${argResults['results-dir']}',
-              ];
+            'firebase',
+            'test',
+            'android',
+            'run',
+            '--type',
+            'instrumentation',
+            '--app',
+            'build/app/outputs/apk/debug/app-debug.apk',
+            '--test',
+            'build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk',
+            '--timeout',
+            '2m',
+            '--results-bucket=${argResults['results-bucket']}',
+            '--results-dir=${argResults['results-dir']}',
+          ];
           for (String device in argResults['device']) {
             args.addAll(<String>['--device', device]);
           }
-          exitCode = await processRunner.runAndStream('gcloud', args, workingDir: exampleDirectory);
+          exitCode = await processRunner.runAndStream('gcloud', args,
+              workingDir: exampleDirectory);
 
           if (exitCode != 0) {
             failingPackages.add(packageName);

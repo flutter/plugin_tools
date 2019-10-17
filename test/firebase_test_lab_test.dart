@@ -45,8 +45,11 @@ void main() {
         ],
       ]);
 
-      List<String> output =
-          await runCapturingPrint(runner, <String>['firebase-test-lab', '--device', 'model=blueline,version=28']);
+      List<String> output = await runCapturingPrint(runner, <String>[
+        'firebase-test-lab',
+        '--device',
+        'model=blueline,version=28'
+      ]);
 
       expect(
         output,

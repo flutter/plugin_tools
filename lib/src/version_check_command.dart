@@ -88,9 +88,15 @@ Map<Version, NextVersionType> getAllowedNextVersions(
 class VersionCheckCommand extends PluginCommand {
   VersionCheckCommand(Directory packagesDir, FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
+    this.gitDir,
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addOption(_kBaseSha);
   }
+
+  /// The git directory to use. By default it uses the parent directory.
+  ///
+  /// This can be mocked for testing.
+  final GitDir gitDir;
 
   @override
   final String name = 'version-check';
@@ -107,12 +113,15 @@ class VersionCheckCommand extends PluginCommand {
     final String rootDir = packagesDir.parent.absolute.path;
     final String baseSha = argResults[_kBaseSha];
 
-    if (!await GitDir.isGitDir(rootDir)) {
-      print('$rootDir is not a valid Git repository.');
-      throw new ToolExit(2);
+    GitDir baseGitDir = gitDir;
+    if (baseGitDir == null) {
+      if (!await GitDir.isGitDir(rootDir)) {
+        print('$rootDir is not a valid Git repository.');
+        throw new ToolExit(2);
+      }
+      baseGitDir = await GitDir.fromExisting(rootDir);
     }
 
-    final GitDir baseGitDir = await GitDir.fromExisting(rootDir);
     final GitVersionFinder gitVersionFinder =
         GitVersionFinder(baseGitDir, baseSha);
 

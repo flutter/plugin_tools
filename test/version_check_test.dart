@@ -68,7 +68,7 @@ void main() {
           'No version check errors found!',
         ]),
       );
-      gitDirCommands.length == 0;
+      expect(gitDirCommands.length, equals(1));
       expect(gitDirCommands.first.join(' '), equals('diff --name-only master HEAD'));
       cleanupPackages();
     });

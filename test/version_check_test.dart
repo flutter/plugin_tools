@@ -27,7 +27,6 @@ void testAllowedVersion(
   }
 }
 
-/// A mock [ProcessRunner] which records process calls.
 class MockGitDir extends Mock implements GitDir {}
 
 class MockProcessResult extends Mock implements ProcessResult {}

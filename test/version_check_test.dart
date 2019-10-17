@@ -32,7 +32,6 @@ class MockGitDir extends Mock implements GitDir {}
 class MockProcessResult extends Mock implements ProcessResult {}
 
 void main() {
-
   group('$VersionCheckCommand', () {
     CommandRunner runner;
     RecordingProcessRunner processRunner;
@@ -60,7 +59,8 @@ void main() {
 
     test('checks version', () async {
       createFakePlugin('plugin');
-      List<String> output = await runCapturingPrint(runner, <String>['version-check', '--base_sha=master']);
+      List<String> output = await runCapturingPrint(
+          runner, <String>['version-check', '--base_sha=master']);
 
       expect(
         output,
@@ -69,7 +69,8 @@ void main() {
         ]),
       );
       expect(gitDirCommands.length, equals(1));
-      expect(gitDirCommands.first.join(' '), equals('diff --name-only master HEAD'));
+      expect(gitDirCommands.first.join(' '),
+          equals('diff --name-only master HEAD'));
       cleanupPackages();
     });
   });

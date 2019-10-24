@@ -1,3 +1,8 @@
+## v.0.0.23
+
+- Add a test case for transitive dependency solving in the
+  `create_all_plugins_app` command.
+
 ## v.0.0.22
 
 - Updated firebase-test-lab command with updated conventions for test locations.

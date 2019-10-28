@@ -40,7 +40,7 @@ void main() {
 
     setUp(() {
       gitDirCommands = <List<String>>[];
-      gitDirResponses = <String, String>{};
+      gitShowResponses = <String, String>{};
       final MockGitDir gitDir = MockGitDir();
       when(gitDir.runCommand(any)).thenAnswer((Invocation invocation) {
         gitDirCommands.add(invocation.positionalArguments[0]);

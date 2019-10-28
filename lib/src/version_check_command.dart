@@ -133,8 +133,10 @@ class VersionCheckCommand extends PluginCommand {
     for (final String pubspecPath in changedPubspecs) {
       try {
         final File pubspecFile = fileSystem.file(pubspecPath);
+        if (!pubspecFile.existsSync()) {
+          continue;
+        }
         final Pubspec pubspec = Pubspec.parse(pubspecFile.readAsStringSync());
-
         if (pubspec.publishTo == 'none') {
           continue;
         }

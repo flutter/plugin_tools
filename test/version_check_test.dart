@@ -40,15 +40,17 @@ void main() {
 
     setUp(() {
       gitDirCommands = <List<String>>[];
-      gitShowResponses = <String, String>{};
+      gitDirResponses = <String, String>{};
       final MockGitDir gitDir = MockGitDir();
       when(gitDir.runCommand(any)).thenAnswer((Invocation invocation) {
         gitDirCommands.add(invocation.positionalArguments[0]);
         final MockProcessResult mockProcessResult = MockProcessResult();
         if (invocation.positionalArguments[0][0] == 'diff') {
-          when(mockProcessResult.stdout).thenReturn("packages/plugin/pubspec.yaml");
+          when(mockProcessResult.stdout)
+              .thenReturn("packages/plugin/pubspec.yaml");
         } else if (invocation.positionalArguments[0][0] == 'show') {
-          String response = gitShowResponses[invocation.positionalArguments[0][1]];
+          String response =
+              gitShowResponses[invocation.positionalArguments[0][1]];
           when(mockProcessResult.stdout).thenReturn(response);
         }
         return Future.value(mockProcessResult);
@@ -80,8 +82,8 @@ void main() {
         ]),
       );
       expect(gitDirCommands.length, equals(3));
-      expect(gitDirCommands[0].join(' '),
-          equals('diff --name-only master HEAD'));
+      expect(
+          gitDirCommands[0].join(' '), equals('diff --name-only master HEAD'));
       expect(gitDirCommands[1].join(' '),
           equals('show master:packages/plugin/pubspec.yaml'));
       expect(gitDirCommands[2].join(' '),
@@ -103,8 +105,8 @@ void main() {
         throwsA(isInstanceOf<Error>()),
       );
       expect(gitDirCommands.length, equals(3));
-      expect(gitDirCommands[0].join(' '),
-          equals('diff --name-only master HEAD'));
+      expect(
+          gitDirCommands[0].join(' '), equals('diff --name-only master HEAD'));
       expect(gitDirCommands[1].join(' '),
           equals('show master:packages/plugin/pubspec.yaml'));
       expect(gitDirCommands[2].join(' '),
@@ -118,7 +120,11 @@ void main() {
         'master:pubspec.yaml': '',
         'HEAD:pubspec.yaml': 'version: 0.0.1',
       };
-      mockFileSystem.currentDirectory.childDirectory('packages').childDirectory('plugin').childFile('pubspec.yaml').deleteSync();
+      mockFileSystem.currentDirectory
+          .childDirectory('packages')
+          .childDirectory('plugin')
+          .childFile('pubspec.yaml')
+          .deleteSync();
       List<String> output = await runCapturingPrint(
           runner, <String>['version-check', '--base_sha=master']);
 
@@ -133,7 +139,6 @@ void main() {
           equals('diff --name-only master HEAD'));
       cleanupPackages();
     });
-
   });
 
   group("Pre 1.0", () {

@@ -1,7 +1,7 @@
 ## v.0.0.24
 
-- Gracefully handle missing pubpsec.yaml files
-- Additional unit testing
+- Gracefully handle pubspec.yaml files for new plugins.
+- Additional unit testing.
 
 ## v.0.0.23
 

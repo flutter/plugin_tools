@@ -116,10 +116,6 @@ void main() {
 
     test('gracefully handles missing pubspec.yaml', () async {
       createFakePlugin('plugin');
-      gitShowResponses = <String, String>{
-        'master:pubspec.yaml': '',
-        'HEAD:pubspec.yaml': 'version: 0.0.1',
-      };
       mockFileSystem.currentDirectory
           .childDirectory('packages')
           .childDirectory('plugin')

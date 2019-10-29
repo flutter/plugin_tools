@@ -1,3 +1,8 @@
+## v.0.0.24
+
+- Gracefully handle pubspec.yaml files for new plugins.
+- Additional unit testing.
+
 ## v.0.0.23
 
 - Add a test case for transitive dependency solving in the

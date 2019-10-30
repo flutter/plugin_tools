@@ -77,7 +77,7 @@ class DriveExamplesCommand extends PluginCommand {
           if (data.contains('Some tests failed.')) {
             failingTests.add(p.join(packageName, deviceTestPath));
           }
-          if (data.contains('All tests passed!')) {
+          if (data.contains('All tests passed!') || data.contains('All tests skipped.')) {
             testsPassed = true;
           }
           io.stdout.write(data);

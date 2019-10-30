@@ -1,3 +1,7 @@
+## v.0.0.25
+
+- Still treat the tests as passed if all tests are skipped.
+
 ## v.0.0.24
 
 - Gracefully handle pubspec.yaml files for new plugins.

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
@@ -12,8 +11,11 @@ import 'package:path/path.dart' as p;
 import 'common.dart';
 
 class DriveExamplesCommand extends PluginCommand {
-  DriveExamplesCommand(Directory packagesDir, FileSystem fileSystem)
-      : super(packagesDir, fileSystem);
+  DriveExamplesCommand(
+    Directory packagesDir,
+    FileSystem fileSystem, {
+    ProcessRunner processRunner = const ProcessRunner(),
+  }) : super(packagesDir, fileSystem, processRunner: processRunner);
 
   @override
   final String name = 'drive-examples';
@@ -30,8 +32,6 @@ class DriveExamplesCommand extends PluginCommand {
     checkSharding();
     final List<String> failingTests = <String>[];
     await for (Directory example in getExamples()) {
-      final String packageName =
-          p.relative(example.path, from: packagesDir.path);
       final Directory driverTests =
           fileSystem.directory(p.join(example.path, 'test_driver'));
       if (!driverTests.existsSync()) {
@@ -64,41 +64,16 @@ class DriveExamplesCommand extends PluginCommand {
           failingTests.add(p.join(example.path, driverTestName));
           continue;
         }
-        print('RUNNING DRIVER TEST for ${p.join(packageName, deviceTestPath)}');
-        final io.Process process = await io.Process.start(
-          'flutter',
-          <String>['drive', deviceTestPath],
-          workingDirectory: example.path,
-        );
-        bool testsPassed = false;
-        process.stdout.transform(utf8.decoder).listen((String data) {
-          // We treat a run as a failure even if flutter_driver thinks the
-          // test run was successful if the app contained tests that failed.
-          if (data.contains('Some tests failed.')) {
-            failingTests.add(p.join(packageName, deviceTestPath));
-          }
-          if (data.contains('All tests passed!') ||
-              data.contains('All tests skipped.')) {
-            testsPassed = true;
-          }
-          io.stdout.write(data);
-        });
-        io.stderr.addStream(process.stderr);
-        if (await process.exitCode != 0 || !testsPassed) {
-          failingTests.add(p.join(packageName, deviceTestPath));
+
+        final io.ProcessResult result = await processRunner.runAndExitOnError(
+            'flutter', <String>['drive', deviceTestPath],
+            workingDir: example);
+        if (result != null) {
+          print(result.stdout);
         }
       }
     }
-
     print('\n\n');
-
-    if (failingTests.isNotEmpty) {
-      print('The following driver tests are failing (see above for details):');
-      for (String test in failingTests) {
-        print(' * $test');
-      }
-      throw new ToolExit(1);
-    }
 
     print('All driver tests successful!');
   }

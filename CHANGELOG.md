@@ -1,6 +1,8 @@
 ## v.0.0.25
 
-- Still treat the tests as passed if all tests are skipped.
+- Update `DriveExamplesCommand` to use `ProcessRunner`.
+- Make `DriveExamplesCommand` rely on `ProcessRunner` to determine if the test fails or not.
+- Add simple tests for `DriveExamplesCommand`.
 
 ## v.0.0.24
 

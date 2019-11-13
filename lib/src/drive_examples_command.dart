@@ -68,7 +68,7 @@ class DriveExamplesCommand extends PluginCommand {
         }
 
         bool testsPassed = false;
-        await processRunner.runAndStream(
+        final int exitCode = await processRunner.runAndStream(
             'flutter', <String>['drive', deviceTestPath],
             workingDir: example, exitOnError: true);
         final String data = io.stdout.toString();
@@ -79,7 +79,7 @@ class DriveExamplesCommand extends PluginCommand {
             data.contains('All tests skipped!')) {
           testsPassed = true;
         }
-        if (!testsPassed) {
+        if (exitCode != 0 || !testsPassed) {
           failingTests.add(p.join(packageName, deviceTestPath));
         }
       }

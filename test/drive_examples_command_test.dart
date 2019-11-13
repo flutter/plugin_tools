@@ -66,7 +66,7 @@ void main() {
           mockPackagesDir.childDirectory('plugin').childDirectory('example');
 
       createFakePubspec(pluginExampleDirectory, isFlutter: true);
-
+      
       final List<String> output = await runCapturingPrint(runner, <String>[
         'drive-examples',
       ]);

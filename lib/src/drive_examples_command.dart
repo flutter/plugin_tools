@@ -32,6 +32,8 @@ class DriveExamplesCommand extends PluginCommand {
     checkSharding();
     final List<String> failingTests = <String>[];
     await for (Directory example in getExamples()) {
+      final String packageName =
+          p.relative(example.path, from: packagesDir.path);
       final Directory driverTests =
           fileSystem.directory(p.join(example.path, 'test_driver'));
       if (!driverTests.existsSync()) {
@@ -65,15 +67,32 @@ class DriveExamplesCommand extends PluginCommand {
           continue;
         }
 
-        final io.ProcessResult result = await processRunner.runAndExitOnError(
+        bool testsPassed = false;
+        await processRunner.runAndStream(
             'flutter', <String>['drive', deviceTestPath],
-            workingDir: example);
-        if (result != null) {
-          print(result.stdout);
+            workingDir: example, exitOnError: true);
+        final String data = io.stdout.toString();
+        if (data.contains('Some tests failed.')) {
+          failingTests.add(p.join(packageName, deviceTestPath));
+        }
+        if (data.contains('All tests passed!') ||
+            data.contains('All tests skipped!')) {
+          testsPassed = true;
+        }
+        if (!testsPassed) {
+          failingTests.add(p.join(packageName, deviceTestPath));
         }
       }
     }
     print('\n\n');
+
+    if (failingTests.isNotEmpty) {
+      print('The following driver tests are failing (see above for details):');
+      for (String test in failingTests) {
+        print(' * $test');
+      }
+      throw new ToolExit(1);
+    }
 
     print('All driver tests successful!');
   }

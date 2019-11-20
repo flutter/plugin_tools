@@ -69,7 +69,7 @@ class DriveExamplesCommand extends PluginCommand {
 
         final int exitCode = await processRunner.runAndStream(
             'flutter', <String>['drive', deviceTestPath],
-            workingDir: example);
+            workingDir: example, exitOnError: true);
         if (exitCode != 0) {
           failingTests.add(p.join(packageName, deviceTestPath));
         }

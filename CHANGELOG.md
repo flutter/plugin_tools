@@ -1,3 +1,9 @@
+## v.0.0.25
+
+- Update `DriveExamplesCommand` to use `ProcessRunner`.
+- Make `DriveExamplesCommand` rely on `ProcessRunner` to determine if the test fails or not.
+- Add simple tests for `DriveExamplesCommand`.
+
 ## v.0.0.24
 
 - Gracefully handle pubspec.yaml files for new plugins.

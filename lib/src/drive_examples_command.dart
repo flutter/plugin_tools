@@ -3,17 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io' as io;
-
 import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
-
 import 'common.dart';
 
 class DriveExamplesCommand extends PluginCommand {
-  DriveExamplesCommand(Directory packagesDir, FileSystem fileSystem)
-      : super(packagesDir, fileSystem);
+  DriveExamplesCommand(
+    Directory packagesDir,
+    FileSystem fileSystem, {
+    ProcessRunner processRunner = const ProcessRunner(),
+  }) : super(packagesDir, fileSystem, processRunner: processRunner);
 
   @override
   final String name = 'drive-examples';
@@ -64,31 +63,15 @@ class DriveExamplesCommand extends PluginCommand {
           failingTests.add(p.join(example.path, driverTestName));
           continue;
         }
-        print('RUNNING DRIVER TEST for ${p.join(packageName, deviceTestPath)}');
-        final io.Process process = await io.Process.start(
-          'flutter',
-          <String>['drive', deviceTestPath],
-          workingDirectory: example.path,
-        );
-        bool testsPassed = false;
-        process.stdout.transform(utf8.decoder).listen((String data) {
-          // We treat a run as a failure even if flutter_driver thinks the
-          // test run was successful if the app contained tests that failed.
-          if (data.contains('Some tests failed.')) {
-            failingTests.add(p.join(packageName, deviceTestPath));
-          }
-          if (data.contains('All tests passed!')) {
-            testsPassed = true;
-          }
-          io.stdout.write(data);
-        });
-        io.stderr.addStream(process.stderr);
-        if (await process.exitCode != 0 || !testsPassed) {
+
+        final int exitCode = await processRunner.runAndStream(
+            'flutter', <String>['drive', deviceTestPath],
+            workingDir: example, exitOnError: true);
+        if (exitCode != 0) {
           failingTests.add(p.join(packageName, deviceTestPath));
         }
       }
     }
-
     print('\n\n');
 
     if (failingTests.isNotEmpty) {

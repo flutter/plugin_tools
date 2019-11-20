@@ -264,8 +264,8 @@ class ProcessRunner {
   }) async {
     final io.Process process = await io.Process.start(executable, args,
         workingDirectory: workingDir?.path);
-    io.stdout.addStream(process.stdout);
-    io.stderr.addStream(process.stderr);
+    await io.stdout.addStream(process.stdout);
+    await io.stderr.addStream(process.stderr);
     if (exitOnError && await process.exitCode != 0) {
       final String error =
           _getErrorString(executable, args, workingDir: workingDir);
@@ -273,6 +273,19 @@ class ProcessRunner {
       throw new ToolExit(await process.exitCode);
     }
     return process.exitCode;
+  }
+
+  /// Starts the [executable] with [args].
+  ///
+  /// The current working directory of [executable] can be overridden by
+  /// passing [workingDir].
+  ///
+  /// Returns the started [io.Process].
+  Future<io.Process> start(String executable, List<String> args,
+      {Directory workingDirectory}) async {
+    final io.Process process = await io.Process.start(executable, args,
+        workingDirectory: workingDirectory?.path);
+    return process;
   }
 
   /// Run the [executable] with [args], throwing an error on non-zero exit code.

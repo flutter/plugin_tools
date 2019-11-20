@@ -3,11 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
-
 import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
-
 import 'common.dart';
 
 class DriveExamplesCommand extends PluginCommand {

@@ -10,6 +10,8 @@ import 'package:yaml/yaml.dart';
 
 import 'common.dart';
 
+typedef void Print(Object object);
+
 /// Wraps pub publish with a few niceties used by the flutter/plugin team.
 ///
 /// 1. Checks for any modified files in git and refuses to publish if there's an
@@ -19,12 +21,18 @@ import 'common.dart';
 ///
 /// Both 2 and 3 are optional, see `plugin_tools help publish-plugin` for full
 /// usage information.
+///
+/// [processRunner] and [print] can both be overriden for easier testing.
 class PublishPluginCommand extends PluginCommand {
   PublishPluginCommand(
     Directory packagesDir,
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
-  }) : super(packagesDir, fileSystem, processRunner: processRunner) {
+    Print print = print,
+    Stdin stdin,
+  })  : _print = print,
+        _stdin = stdin,
+        super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addOption(
       _packageOption,
       help: 'The package to publish.'
@@ -72,6 +80,8 @@ class PublishPluginCommand extends PluginCommand {
   final String description =
       'Attempts to publish the given plugin and tag its release on Github.';
 
+  final Print _print;
+  final Stdin _stdin;
   // The directory of the actual package that we are publishing.
   Directory _packageDir;
   StreamSubscription<String> _stdinSubscription;
@@ -79,7 +89,7 @@ class PublishPluginCommand extends PluginCommand {
   @override
   Future<Null> run() async {
     checkSharding();
-    print('Checking local repo...');
+    _print('Checking local repo...');
     _packageDir = _checkPackageDir();
     await _checkGitStatus();
     final bool shouldPushTag = argResults[_pushTagsOption];
@@ -88,66 +98,69 @@ class PublishPluginCommand extends PluginCommand {
     if (shouldPushTag) {
       remoteUrl = await _verifyRemote(remote);
     }
-    print('Local repo is ready!');
+    _print('Local repo is ready!');
 
     await _publishOrDie();
-    print('Package published!');
+    _print('Package published!');
     if (!argResults[_tagReleaseOption]) {
-      await _finishSuccesfully();
+      return await _finishSuccesfully();
     }
 
-    print('Tagging release...');
+    _print('Tagging release...');
     final String tag = _getTag();
-    await processRunner.runAndExitOnError('git', <String>['tag', tag]);
+    await processRunner.runAndExitOnError('git', <String>['tag', tag],
+        workingDir: _packageDir);
     if (!shouldPushTag) {
-      await _finishSuccesfully();
+      return await _finishSuccesfully();
     }
 
-    print('Pushing tag to $remote...');
+    _print('Pushing tag to $remote...');
     await _pushTagToRemote(remote: remote, tag: tag, remoteUrl: remoteUrl);
     await _finishSuccesfully();
   }
 
   Future<void> _finishSuccesfully() async {
     await _stdinSubscription.cancel();
-    print('Done!');
+    _print('Done!');
   }
 
   Directory _checkPackageDir() {
     final String package = argResults[_packageOption];
     if (package == null) {
-      print(
+      _print(
           'Must specify a package to publish. See `plugin_tools help publish-plugin`.');
       throw ToolExit(1);
     }
     final Directory _packageDir = packagesDir.childDirectory(package);
     if (!_packageDir.existsSync()) {
-      print('${_packageDir.absolute.path} does not exist.');
+      _print('${_packageDir.absolute.path} does not exist.');
       throw ToolExit(1);
     }
     if (!isFlutterPackage(_packageDir, fileSystem)) {
-      print('${_packageDir.absolute.path} is not a flutter package.');
+      _print('${_packageDir.absolute.path} is not a flutter package.');
       throw ToolExit(1);
     }
     return _packageDir;
   }
 
   Future<void> _checkGitStatus() async {
-    if (!await GitDir.isGitDir(_packageDir.path)) {
-      print('$_packageDir is not a valid Git repository.');
+    if (!await GitDir.isGitDir(packagesDir.path)) {
+      _print('$packagesDir is not a valid Git repository.');
       throw ToolExit(1);
     }
 
     final ProcessResult statusResult = await processRunner.runAndExitOnError(
-        'git', <String>[
-      'status',
-      '--porcelain',
-      '--ignored',
-      _packageDir.absolute.path
-    ]);
+        'git',
+        <String>[
+          'status',
+          '--porcelain',
+          '--ignored',
+          _packageDir.absolute.path
+        ],
+        workingDir: _packageDir);
     final String statusOutput = statusResult.stdout;
     if (statusOutput.isNotEmpty) {
-      print(
+      _print(
           "There are files in the package directory that haven't been saved in git. Refusing to publish these files:\n\n"
           '$statusOutput\n'
           'If the directory should be clean, you can run `git clean -xdf && git reset --hard HEAD` to wipe all local changes.');
@@ -156,26 +169,31 @@ class PublishPluginCommand extends PluginCommand {
   }
 
   Future<String> _verifyRemote(String remote) async {
-    final ProcessResult remoteInfo = await processRunner
-        .runAndExitOnError('git', <String>['remote', 'get-url', remote]);
+    final ProcessResult remoteInfo = await processRunner.runAndExitOnError(
+        'git', <String>['remote', 'get-url', remote],
+        workingDir: _packageDir);
     return remoteInfo.stdout;
   }
 
   Future<void> _publishOrDie() async {
     final List<String> publishFlags = argResults[_pubFlagsOption];
-    print(
+    _print(
         'Running `pub publish ${publishFlags.join(' ')}` in ${_packageDir.absolute.path}...\n');
     final Process publish = await processRunner.start(
         'pub', <String>['publish'] + publishFlags,
-        workingDirectory: _packageDir.absolute);
-    publish.stdout.transform(utf8.decoder).listen((String data) => print(data));
-    publish.stderr.transform(utf8.decoder).listen((String data) => print(data));
-    _stdinSubscription = stdin
+        workingDirectory: _packageDir);
+    publish.stdout
+        .transform(utf8.decoder)
+        .listen((String data) => _print(data));
+    publish.stderr
+        .transform(utf8.decoder)
+        .listen((String data) => _print(data));
+    _stdinSubscription = _stdin
         .transform(utf8.decoder)
         .listen((String data) => publish.stdin.writeln(data));
     final int result = await publish.exitCode;
     if (result != 0) {
-      print('Publish failed. Exiting.');
+      _print('Publish failed. Exiting.');
       throw ToolExit(result);
     }
   }
@@ -198,13 +216,14 @@ class PublishPluginCommand extends PluginCommand {
       @required String tag,
       @required String remoteUrl}) async {
     assert(remote != null && tag != null && remoteUrl != null);
-    print('Ready to push $tag to $remoteUrl (y/n)?');
-    final String input = stdin.readLineSync();
+    _print('Ready to push $tag to $remoteUrl (y/n)?');
+    final String input = _stdin.readLineSync();
     if (input.toLowerCase() != 'y') {
-      print('Tag push canceled.');
+      _print('Tag push canceled.');
       throw ToolExit(1);
     }
 
-    await processRunner.runAndExitOnError('git', <String>['push', remote, tag]);
+    await processRunner.runAndExitOnError('git', <String>['push', remote, tag],
+        workingDir: packagesDir);
   }
 }

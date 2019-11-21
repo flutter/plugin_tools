@@ -11,13 +11,15 @@ final FileSystem mockFileSystem = MemoryFileSystem();
 Directory mockPackagesDir;
 
 /// Creates a mock packages directory in the mock file system.
-void initializeFakePackages() {
-  mockPackagesDir = mockFileSystem.currentDirectory.childDirectory('packages');
+///
+/// If [parentDir] is set the mock packages dir will be creates as a child of
+/// it. If not [mockFileSystem] will be used instead.
+void initializeFakePackages({Directory parentDir}) {
+  mockPackagesDir = (parentDir ?? mockFileSystem.currentDirectory).childDirectory('packages');
   mockPackagesDir.createSync();
 }
 
-/// Creates a plugin package with the given [name] under the mock packages
-/// directory.
+/// Creates a plugin package with the given [name] in [mockPackagesDir].
 Directory createFakePlugin(
   String name, {
   bool withSingleExample: false,
@@ -65,10 +67,14 @@ name: fake_package
 dependencies:
   flutter:
     sdk: flutter
+version: 0.0.1
+publish_to: none
 ''');
   } else {
     parent.childFile('pubspec.yaml').writeAsStringSync('''
 name: fake_package
+version: 0.0.1
+publish_to: none
 ''');
   }
 }

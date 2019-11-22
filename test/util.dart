@@ -15,7 +15,8 @@ Directory mockPackagesDir;
 /// If [parentDir] is set the mock packages dir will be creates as a child of
 /// it. If not [mockFileSystem] will be used instead.
 void initializeFakePackages({Directory parentDir}) {
-  mockPackagesDir = (parentDir ?? mockFileSystem.currentDirectory).childDirectory('packages');
+  mockPackagesDir =
+      (parentDir ?? mockFileSystem.currentDirectory).childDirectory('packages');
   mockPackagesDir.createSync();
 }
 
@@ -59,24 +60,26 @@ Directory createFakePlugin(
 }
 
 /// Creates a `pubspec.yaml` file with a flutter dependency.
-void createFakePubspec(Directory parent, {bool isFlutter = true}) {
+void createFakePubspec(Directory parent,
+    {bool isFlutter = true, bool includeVersion = false}) {
   parent.childFile('pubspec.yaml').createSync();
-  if (isFlutter) {
-    parent.childFile('pubspec.yaml').writeAsStringSync('''
+  String yaml = '''
 name: fake_package
+''';
+  if (isFlutter) {
+    yaml += '''
 dependencies:
   flutter:
     sdk: flutter
-version: 0.0.1
-publish_to: none
-''');
-  } else {
-    parent.childFile('pubspec.yaml').writeAsStringSync('''
-name: fake_package
-version: 0.0.1
-publish_to: none
-''');
+''';
   }
+  if (includeVersion) {
+    yaml += '''
+version: 0.0.1
+publish_to: none
+''';
+  }
+  parent.childFile('pubspec.yaml').writeAsStringSync(yaml);
 }
 
 /// Cleans up the mock packages directory, making it an empty directory again.

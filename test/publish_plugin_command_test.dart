@@ -34,7 +34,7 @@ void main() {
     initializeFakePackages(parentDir: parentDir);
     pluginDir = createFakePlugin(testPluginName, withSingleExample: false);
     assert(pluginDir != null && pluginDir.existsSync());
-    createFakePubspec(pluginDir);
+    createFakePubspec(pluginDir, includeVersion: true);
     io.Process.runSync('git', <String>['init'],
         workingDirectory: mockPackagesDir.path);
     gitDir = await GitDir.fromExisting(mockPackagesDir.path);
@@ -42,14 +42,12 @@ void main() {
     await gitDir.runCommand(<String>['commit', '-m', 'Initial commit']);
     processRunner = TestProcessRunner();
     mockStdin = MockStdin();
-    // when(mockStdin.transform<dynamic>(argThat(anything)))
-    //     .thenAnswer((_) => const Stream<String>.empty());
     commandRunner = CommandRunner<Null>('tester', '')
       ..addCommand(PublishPluginCommand(
           mockPackagesDir, const LocalFileSystem(),
           processRunner: processRunner,
           print: (Object message) => printedMessages.add(message.toString()),
-          stdin: mockStdin));
+          stdinput: mockStdin));
   });
 
   tearDown(() {
@@ -130,8 +128,8 @@ void main() {
 
       await publishCommand;
 
-      expect(printedMessages.contains('Foo'), isTrue);
-      expect(printedMessages.contains('Bar'), isTrue);
+      expect(printedMessages, contains('Foo'));
+      expect(printedMessages, contains('Bar'));
     });
 
     test('forwards input from the user to `pub publish`', () async {

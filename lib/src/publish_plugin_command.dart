@@ -16,22 +16,22 @@ typedef void Print(Object object);
 ///
 /// 1. Checks for any modified files in git and refuses to publish if there's an
 ///    issue.
-/// 2. Tags the release with the format <package-name>v<package-version>.
+/// 2. Tags the release with the format <package-name>-v<package-version>.
 /// 3. Pushes the release to a remote.
 ///
 /// Both 2 and 3 are optional, see `plugin_tools help publish-plugin` for full
 /// usage information.
 ///
-/// [processRunner] and [print] can both be overriden for easier testing.
+/// [processRunner], [print], and [stdin] can be overriden for easier testing.
 class PublishPluginCommand extends PluginCommand {
   PublishPluginCommand(
     Directory packagesDir,
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
     Print print = print,
-    Stdin stdin,
+    Stdin stdinput,
   })  : _print = print,
-        _stdin = stdin,
+        _stdin = stdinput ?? stdin,
         super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addOption(
       _packageOption,

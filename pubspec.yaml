@@ -21,7 +21,6 @@ dependencies:
 
 dev_dependencies:
   mockito: ^4.1.1
-  test_process: ^1.0.4
 
 environment:
   sdk: ">=1.8.0 <3.0.0"

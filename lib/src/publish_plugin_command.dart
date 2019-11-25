@@ -40,7 +40,7 @@ class PublishPluginCommand extends PluginCommand {
     );
     argParser.addMultiOption(_pubFlagsOption,
         help:
-            'A list of options that will be forwarded on to pub. Seperate multiple flags with commas.');
+            'A list of options that will be forwarded on to pub. Separate multiple flags with commas.');
     argParser.addFlag(
       _tagReleaseOption,
       help: 'Whether or not to tag the release.',
@@ -78,7 +78,7 @@ class PublishPluginCommand extends PluginCommand {
 
   @override
   final String description =
-      'Attempts to publish the given plugin and tag its release on Github.';
+      'Attempts to publish the given plugin and tag its release on GitHub.';
 
   final Print _print;
   final Stdin _stdin;

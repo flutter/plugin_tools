@@ -11,13 +11,16 @@ final FileSystem mockFileSystem = MemoryFileSystem();
 Directory mockPackagesDir;
 
 /// Creates a mock packages directory in the mock file system.
-void initializeFakePackages() {
-  mockPackagesDir = mockFileSystem.currentDirectory.childDirectory('packages');
+///
+/// If [parentDir] is set the mock packages dir will be creates as a child of
+/// it. If not [mockFileSystem] will be used instead.
+void initializeFakePackages({Directory parentDir}) {
+  mockPackagesDir =
+      (parentDir ?? mockFileSystem.currentDirectory).childDirectory('packages');
   mockPackagesDir.createSync();
 }
 
-/// Creates a plugin package with the given [name] under the mock packages
-/// directory.
+/// Creates a plugin package with the given [name] in [mockPackagesDir].
 Directory createFakePlugin(
   String name, {
   bool withSingleExample: false,
@@ -57,20 +60,26 @@ Directory createFakePlugin(
 }
 
 /// Creates a `pubspec.yaml` file with a flutter dependency.
-void createFakePubspec(Directory parent, {bool isFlutter = true}) {
+void createFakePubspec(Directory parent,
+    {bool isFlutter = true, bool includeVersion = false}) {
   parent.childFile('pubspec.yaml').createSync();
-  if (isFlutter) {
-    parent.childFile('pubspec.yaml').writeAsStringSync('''
+  String yaml = '''
 name: fake_package
+''';
+  if (isFlutter) {
+    yaml += '''
 dependencies:
   flutter:
     sdk: flutter
-''');
-  } else {
-    parent.childFile('pubspec.yaml').writeAsStringSync('''
-name: fake_package
-''');
+''';
   }
+  if (includeVersion) {
+    yaml += '''
+version: 0.0.1
+publish_to: none # Hardcoded safeguard to prevent this from somehow being published by a broken test.
+''';
+  }
+  parent.childFile('pubspec.yaml').writeAsStringSync(yaml);
 }
 
 /// Cleans up the mock packages directory, making it an empty directory again.

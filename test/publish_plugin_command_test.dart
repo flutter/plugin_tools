@@ -57,8 +57,7 @@ void main() {
 
   group('Initial validation', () {
     test('requires a package flag', () async {
-      await expectLater(
-          () async => await commandRunner.run(<String>['publish-plugin']),
+      await expectLater(() => commandRunner.run(<String>['publish-plugin']),
           throwsA(const isInstanceOf<ToolExit>()));
 
       expect(
@@ -67,7 +66,7 @@ void main() {
 
     test('requires an existing flag', () async {
       await expectLater(
-          () async => await commandRunner
+          () => commandRunner
               .run(<String>['publish-plugin', '--package', 'iamerror']),
           throwsA(const isInstanceOf<ToolExit>()));
 
@@ -78,7 +77,7 @@ void main() {
       pluginDir.childFile('tmp').createSync();
 
       await expectLater(
-          () async => await commandRunner
+          () => commandRunner
               .run(<String>['publish-plugin', '--package', testPluginName]),
           throwsA(const isInstanceOf<ToolExit>()));
 
@@ -90,7 +89,7 @@ void main() {
 
     test('fails immediately if the remote doesn\'t exist', () async {
       await expectLater(
-          () async => await commandRunner
+          () => commandRunner
               .run(<String>['publish-plugin', '--package', testPluginName]),
           throwsA(const isInstanceOf<ToolExit>()));
 
@@ -170,7 +169,7 @@ void main() {
     test('throws if pub publish fails', () async {
       processRunner.mockPublishProcess.exitCodeCompleter.complete(128);
       await expectLater(
-          () async => await commandRunner.run(<String>[
+          () => commandRunner.run(<String>[
                 'publish-plugin',
                 '--package',
                 testPluginName,
@@ -202,7 +201,7 @@ void main() {
     test('only if publishing succeeded', () async {
       processRunner.mockPublishProcess.exitCodeCompleter.complete(128);
       await expectLater(
-          () async => await commandRunner.run(<String>[
+          () => commandRunner.run(<String>[
                 'publish-plugin',
                 '--package',
                 testPluginName,
@@ -229,7 +228,7 @@ void main() {
       processRunner.mockPublishProcess.exitCodeCompleter.complete(0);
       mockStdin.readLineOutput = 'help';
       await expectLater(
-          () async => await commandRunner.run(<String>[
+          () => commandRunner.run(<String>[
                 'publish-plugin',
                 '--package',
                 testPluginName,

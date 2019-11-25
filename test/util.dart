@@ -76,7 +76,7 @@ dependencies:
   if (includeVersion) {
     yaml += '''
 version: 0.0.1
-publish_to: none
+publish_to: none # Hardcoded safeguard to prevent this from somehow being published by a broken test.
 ''';
   }
   parent.childFile('pubspec.yaml').writeAsStringSync(yaml);

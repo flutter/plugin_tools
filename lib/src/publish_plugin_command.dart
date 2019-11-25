@@ -100,7 +100,7 @@ class PublishPluginCommand extends PluginCommand {
     }
     _print('Local repo is ready!');
 
-    await _publishOrDie();
+    await _publish();
     _print('Package published!');
     if (!argResults[_tagReleaseOption]) {
       return await _finishSuccesfully();
@@ -175,7 +175,7 @@ class PublishPluginCommand extends PluginCommand {
     return remoteInfo.stdout;
   }
 
-  Future<void> _publishOrDie() async {
+  Future<void> _publish() async {
     final List<String> publishFlags = argResults[_pubFlagsOption];
     _print(
         'Running `pub publish ${publishFlags.join(' ')}` in ${_packageDir.absolute.path}...\n');

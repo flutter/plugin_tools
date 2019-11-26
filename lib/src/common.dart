@@ -59,7 +59,7 @@ bool isWebPlugin(FileSystemEntity entity, FileSystem fileSystem) {
       return false;
     }
     final YamlMap platforms = pluginSection['platforms'];
-    if (platforms == null)  {
+    if (platforms == null) {
       return false;
     }
     return platforms.containsKey('web');

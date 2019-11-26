@@ -180,7 +180,7 @@ class FirebaseTestLabCommand extends PluginCommand {
             '--test',
             'build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk',
             '--timeout',
-            '5m',
+            '15m',
             '--results-bucket=${argResults['results-bucket']}',
             '--results-dir=${argResults['results-dir']}',
           ];

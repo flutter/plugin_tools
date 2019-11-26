@@ -17,6 +17,7 @@ void main() {
 
       runner = CommandRunner<Null>('test_test', 'Test for $TestCommand');
       runner.addCommand(command);
+      processRunner.recordedCalls.clear();
     });
 
     test('runs flutter test on each plugin', () async {
@@ -28,7 +29,6 @@ void main() {
           createFakePlugin('plugin2', withExtraFiles: <List<String>>[
         <String>['test', 'empty_test.dart'],
       ]);
-      processRunner.recordedCalls.clear();
 
       await runner.run(<String>['test']);
 
@@ -49,7 +49,6 @@ void main() {
           createFakePlugin('plugin2', withExtraFiles: <List<String>>[
         <String>['test', 'empty_test.dart'],
       ]);
-      processRunner.recordedCalls.clear();
 
       await runner.run(<String>['test']);
 
@@ -74,7 +73,6 @@ void main() {
           withExtraFiles: <List<String>>[
             <String>['test', 'empty_test.dart'],
           ]);
-      processRunner.recordedCalls.clear();
 
       await runner.run(<String>['test']);
 
@@ -88,6 +86,27 @@ void main() {
       );
 
       cleanupPackages();
+    });
+
+    test('runs on Chrome for web plugins', () async {
+      Directory pluginDir = createFakePlugin(
+        'plugin',
+        withExtraFiles: <List<String>>[
+          <String>['test', 'empty_test.dart'],
+        ],
+        isFlutter: true,
+        isWebPlugin: true,
+      );
+
+      await runner.run(<String>['test']);
+
+      expect(
+        processRunner.recordedCalls,
+        orderedEquals(<ProcessCall>[
+          ProcessCall('flutter',
+              <String>['test', '--color', '--platform=chrome'], pluginDir.path),
+        ]),
+      );
     });
   });
 }

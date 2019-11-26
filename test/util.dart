@@ -27,13 +27,18 @@ Directory createFakePlugin(
   List<String> withExamples: const <String>[],
   List<List<String>> withExtraFiles: const <List<String>>[],
   bool isFlutter: true,
+  bool isWebPlugin: false,
 }) {
   assert(!(withSingleExample && withExamples.isNotEmpty),
       'cannot pass withSingleExample and withExamples simultaneously');
 
   final Directory pluginDirectory = mockPackagesDir.childDirectory(name)
     ..createSync();
-  createFakePubspec(pluginDirectory, isFlutter: isFlutter);
+  createFakePubspec(
+    pluginDirectory,
+    isFlutter: isFlutter,
+    isWebPlugin: isWebPlugin,
+  );
 
   if (withSingleExample) {
     final Directory exampleDir = pluginDirectory.childDirectory('example')
@@ -60,12 +65,26 @@ Directory createFakePlugin(
 }
 
 /// Creates a `pubspec.yaml` file with a flutter dependency.
-void createFakePubspec(Directory parent,
-    {bool isFlutter = true, bool includeVersion = false}) {
+void createFakePubspec(
+  Directory parent, {
+  bool isFlutter = true,
+  bool includeVersion = false,
+  bool isWebPlugin = false,
+}) {
   parent.childFile('pubspec.yaml').createSync();
   String yaml = '''
 name: fake_package
 ''';
+  if (isWebPlugin) {
+    yaml += '''
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: FakePlugin
+        fileName: fake_plugin_web.dart
+''';
+  }
   if (isFlutter) {
     yaml += '''
 dependencies:

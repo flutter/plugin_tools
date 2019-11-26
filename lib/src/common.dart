@@ -33,6 +33,43 @@ bool isFlutterPackage(FileSystemEntity entity, FileSystem fileSystem) {
   }
 }
 
+/// Returns whether the given directory contains a Flutter web plugin.
+///
+/// It checks this by looking for the following pattern in the pubspec:
+///
+///     flutter:
+///       plugin:
+///         platforms:
+///           web:
+bool isWebPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+  if (entity == null || entity is! Directory) {
+    return false;
+  }
+
+  try {
+    final File pubspecFile =
+        fileSystem.file(p.join(entity.path, 'pubspec.yaml'));
+    final YamlMap pubspecYaml = loadYaml(pubspecFile.readAsStringSync());
+    final YamlMap flutterSection = pubspecYaml['flutter'];
+    if (flutterSection == null) {
+      return false;
+    }
+    final YamlMap pluginSection = flutterSection['plugin'];
+    if (pluginSection == null) {
+      return false;
+    }
+    final YamlMap platforms = pluginSection['platforms'];
+    if (platforms == null)  {
+      return false;
+    }
+    return platforms.containsKey('web');
+  } on FileSystemException {
+    return false;
+  } on YamlException {
+    return false;
+  }
+}
+
 /// Error thrown when a command needs to exit with a non-zero exit code.
 class ToolExit extends Error {
   ToolExit(this.exitCode);

@@ -39,9 +39,13 @@ class TestCommand extends PluginCommand {
       // `flutter test` automatically gets packages.  `pub run test` does not.  :(
       int exitCode = 0;
       if (isFlutterPackage(packageDir, fileSystem)) {
+        final List<String> args = <String>['test', '--color'];
+        if (isWebPlugin(packageDir, fileSystem)) {
+          args.add('--platform=chrome');
+        }
         exitCode = await processRunner.runAndStream(
           'flutter',
-          <String>['test', '--color'],
+          args,
           workingDir: packageDir,
         );
       } else {

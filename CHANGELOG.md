@@ -1,3 +1,7 @@
+## v.0.0.27
+
+- Run tests with `--platform=chrome` for web plugins.
+
 ## v.0.0.26
 
 - Add a command for publishing plugins to pub.

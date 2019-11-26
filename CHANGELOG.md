@@ -1,3 +1,7 @@
+## v.0.0.28
+
+- Increase Firebase test lab timeouts to 5 minutes.
+
 ## v.0.0.27
 
 - Run tests with `--platform=chrome` for web plugins.

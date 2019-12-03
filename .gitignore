@@ -5,6 +5,7 @@ google-java-format-1.3-all-deps.jar
 
 # Files and directories created by pub
 .buildlog
+.dart_tool
 .packages
 .project
 .pub/

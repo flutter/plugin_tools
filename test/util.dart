@@ -127,6 +127,7 @@ Future<List<String>> runCapturingPrint(
 
 /// A mock [ProcessRunner] which records process calls.
 class RecordingProcessRunner extends ProcessRunner {
+  io.Process processToReturn;
   final List<ProcessCall> recordedCalls = <ProcessCall>[];
 
   @override
@@ -148,6 +149,13 @@ class RecordingProcessRunner extends ProcessRunner {
   }) {
     recordedCalls.add(ProcessCall(executable, args, workingDir?.path));
     return Future<io.ProcessResult>.value(null);
+  }
+
+  @override
+  Future<io.Process> start(String executable, List<String> args,
+      {Directory workingDirectory}) async {
+    recordedCalls.add(ProcessCall(executable, args, workingDirectory?.path));
+    return Future<io.Process>.value(processToReturn);
   }
 }
 

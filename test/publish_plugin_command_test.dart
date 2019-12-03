@@ -11,6 +11,7 @@ import 'package:git/git.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
+import 'mocks.dart';
 import 'util.dart';
 
 void main() {
@@ -325,34 +326,6 @@ class TestProcessRunner extends ProcessRunner {
     mockPublishArgs.addAll(args);
     return mockPublishProcess;
   }
-}
-
-class MockProcess extends Mock implements io.Process {
-  final Completer<int> exitCodeCompleter = Completer<int>();
-  final StreamController<List<int>> stdoutController =
-      StreamController<List<int>>();
-  final StreamController<List<int>> stderrController =
-      StreamController<List<int>>();
-  final MockIOSink stdinMock = MockIOSink();
-
-  @override
-  Future<int> get exitCode => exitCodeCompleter.future;
-
-  @override
-  Stream<List<int>> get stdout => stdoutController.stream;
-
-  @override
-  Stream<List<int>> get stderr => stderrController.stream;
-
-  @override
-  IOSink get stdin => stdinMock;
-}
-
-class MockIOSink extends Mock implements IOSink {
-  List<String> lines = <String>[];
-
-  @override
-  void writeln([Object obj = ""]) => lines.add(obj);
 }
 
 class MockStdin extends Mock implements io.Stdin {

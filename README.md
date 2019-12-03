@@ -31,6 +31,7 @@ To use all features of `flutter_plugin_tools` you'll need the following commands
 * `git`
 * `pub` (recommended: version from `<path/to/flutter>/bin/cache/dart-sdk/bin`)
 * `clang-format` version 5 (alternatively, you can provide the path via `--clang-format=`)
+* [`pod`](https://guides.cocoapods.org/using/getting-started.html#installation) (macOS only)
 
 ## Usage
 

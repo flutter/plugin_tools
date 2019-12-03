@@ -18,6 +18,7 @@ import 'drive_examples_command.dart';
 import 'firebase_test_lab_command.dart';
 import 'format_command.dart';
 import 'java_test_command.dart';
+import 'lint_podspecs_command.dart';
 import 'list_command.dart';
 import 'test_command.dart';
 import 'version_check_command.dart';
@@ -47,6 +48,7 @@ void main(List<String> args) {
     ..addCommand(new FirebaseTestLabCommand(packagesDir, fileSystem))
     ..addCommand(new FormatCommand(packagesDir, fileSystem))
     ..addCommand(new JavaTestCommand(packagesDir, fileSystem))
+    ..addCommand(new LintPodspecsCommand(packagesDir, fileSystem))
     ..addCommand(new ListCommand(packagesDir, fileSystem))
     ..addCommand(new PublishPluginCommand(packagesDir, fileSystem))
     ..addCommand(new TestCommand(packagesDir, fileSystem))

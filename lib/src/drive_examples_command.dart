@@ -13,7 +13,8 @@ class DriveExamplesCommand extends PluginCommand {
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
-    argParser.addFlag('macos', help: 'Runs the macOS implementation of the examples');
+    argParser.addFlag('macos',
+        help: 'Runs the macOS implementation of the examples');
   }
 
   @override
@@ -75,7 +76,7 @@ class DriveExamplesCommand extends PluginCommand {
           continue;
         }
 
-      final List<String> driveArgs = <String>['drive'];
+        final List<String> driveArgs = <String>['drive'];
         if (isMacos) {
           driveArgs.addAll(<String>[
             '-d',

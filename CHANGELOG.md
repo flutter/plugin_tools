@@ -1,3 +1,7 @@
+## v.0.0.31
+
+- Add support for macos on `DriveExamplesCommand` and `BuildExamplesCommand`.
+
 ## v.0.0.30
 
 - Adopt pedantic analysis options, fix firebase_test_lab_test.

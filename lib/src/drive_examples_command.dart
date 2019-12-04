@@ -12,7 +12,10 @@ class DriveExamplesCommand extends PluginCommand {
     Directory packagesDir,
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
-  }) : super(packagesDir, fileSystem, processRunner: processRunner);
+  }) : super(packagesDir, fileSystem, processRunner: processRunner) {
+    argParser.addFlag('macos',
+        help: 'Runs the macOS implementation of the examples');
+  }
 
   @override
   final String name = 'drive-examples';
@@ -28,9 +31,18 @@ class DriveExamplesCommand extends PluginCommand {
   Future<Null> run() async {
     checkSharding();
     final List<String> failingTests = <String>[];
+    final bool isMacos = argResults['macos'];
     await for (Directory example in getExamples()) {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
+      // If macos is specified, filter out plugins that don't have a macos implementation yet.
+      if (isMacos) {
+        final Directory macosDir =
+            fileSystem.directory(p.join(example.path, 'macos'));
+        if (!macosDir.existsSync()) {
+          continue;
+        }
+      }
       final Directory driverTests =
           fileSystem.directory(p.join(example.path, 'test_driver'));
       if (!driverTests.existsSync()) {
@@ -64,8 +76,16 @@ class DriveExamplesCommand extends PluginCommand {
           continue;
         }
 
+        final List<String> driveArgs = <String>['drive'];
+        if (isMacos) {
+          driveArgs.addAll(<String>[
+            '-d',
+            'macos',
+          ]);
+        }
+        driveArgs.add(deviceTestPath);
         final int exitCode = await processRunner.runAndStream(
-            'flutter', <String>['drive', deviceTestPath],
+            'flutter', driveArgs,
             workingDir: example, exitOnError: true);
         if (exitCode != 0) {
           failingTests.add(p.join(packageName, deviceTestPath));

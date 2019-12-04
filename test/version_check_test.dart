@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+
 import 'package:args/command_runner.dart';
 import 'package:git/git.dart';
 import 'package:mockito/mockito.dart';
@@ -33,7 +35,7 @@ class MockProcessResult extends Mock implements ProcessResult {}
 
 void main() {
   group('$VersionCheckCommand', () {
-    CommandRunner runner;
+    CommandRunner<VersionCheckCommand> runner;
     RecordingProcessRunner processRunner;
     List<List<String>> gitDirCommands;
     Map<String, String> gitShowResponses;
@@ -46,14 +48,14 @@ void main() {
         gitDirCommands.add(invocation.positionalArguments[0]);
         final MockProcessResult mockProcessResult = MockProcessResult();
         if (invocation.positionalArguments[0][0] == 'diff') {
-          when(mockProcessResult.stdout)
+          when<String>(mockProcessResult.stdout)
               .thenReturn("packages/plugin/pubspec.yaml");
         } else if (invocation.positionalArguments[0][0] == 'show') {
-          String response =
+          final String response =
               gitShowResponses[invocation.positionalArguments[0][1]];
-          when(mockProcessResult.stdout).thenReturn(response);
+          when<String>(mockProcessResult.stdout).thenReturn(response);
         }
-        return Future.value(mockProcessResult);
+        return Future<ProcessResult>.value(mockProcessResult);
       });
       initializeFakePackages();
       processRunner = RecordingProcessRunner();
@@ -72,7 +74,7 @@ void main() {
         'master:packages/plugin/pubspec.yaml': 'version: 0.0.1',
         'HEAD:packages/plugin/pubspec.yaml': 'version: 0.0.2',
       };
-      List<String> output = await runCapturingPrint(
+      final List<String> output = await runCapturingPrint(
           runner, <String>['version-check', '--base_sha=master']);
 
       expect(
@@ -97,12 +99,12 @@ void main() {
         'master:packages/plugin/pubspec.yaml': 'version: 0.0.1',
         'HEAD:packages/plugin/pubspec.yaml': 'version: 0.2.0',
       };
-      Future<List<String>> result = runCapturingPrint(
+      final Future<List<String>> result = runCapturingPrint(
           runner, <String>['version-check', '--base_sha=master']);
 
       await expectLater(
         result,
-        throwsA(isInstanceOf<Error>()),
+        throwsA(const TypeMatcher<Error>()),
       );
       expect(gitDirCommands.length, equals(3));
       expect(
@@ -121,7 +123,7 @@ void main() {
           .childDirectory('plugin')
           .childFile('pubspec.yaml')
           .deleteSync();
-      List<String> output = await runCapturingPrint(
+      final List<String> output = await runCapturingPrint(
           runner, <String>['version-check', '--base_sha=master']);
 
       expect(

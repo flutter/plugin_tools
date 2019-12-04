@@ -79,7 +79,7 @@ class DriveExamplesCommand extends PluginCommand {
       for (String test in failingTests) {
         print(' * $test');
       }
-      throw new ToolExit(1);
+      throw ToolExit(1);
     }
 
     print('All driver tests successful!');

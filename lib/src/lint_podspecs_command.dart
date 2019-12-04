@@ -63,7 +63,7 @@ class LintPodspecsCommand extends PluginCommand {
       failingPlugins.forEach((String plugin) {
         print(' * $plugin');
       });
-      throw new ToolExit(1);
+      throw ToolExit(1);
     }
   }
 

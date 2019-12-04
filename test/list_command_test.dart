@@ -7,7 +7,7 @@ import 'util.dart';
 
 void main() {
   group('$ListCommand', () {
-    CommandRunner runner;
+    CommandRunner<ListCommand> runner;
 
     setUp(() {
       initializeFakePackages();
@@ -21,7 +21,7 @@ void main() {
       createFakePlugin('plugin1');
       createFakePlugin('plugin2');
 
-      List<String> plugins =
+      final List<String> plugins =
           await runCapturingPrint(runner, <String>['list', '--type=plugin']);
 
       expect(
@@ -41,7 +41,7 @@ void main() {
           withExamples: <String>['example1', 'example2']);
       createFakePlugin('plugin3');
 
-      List<String> examples =
+      final List<String> examples =
           await runCapturingPrint(runner, <String>['list', '--type=example']);
 
       expect(
@@ -62,7 +62,7 @@ void main() {
           withExamples: <String>['example1', 'example2']);
       createFakePlugin('plugin3');
 
-      List<String> packages =
+      final List<String> packages =
           await runCapturingPrint(runner, <String>['list', '--type=package']);
 
       expect(
@@ -86,7 +86,7 @@ void main() {
           withExamples: <String>['example1', 'example2']);
       createFakePlugin('plugin3');
 
-      List<String> examples =
+      final List<String> examples =
           await runCapturingPrint(runner, <String>['list', '--type=file']);
 
       expect(
@@ -122,7 +122,8 @@ void main() {
       createFakePubspec(macLibrary);
 
       // Test without specifying `--type`.
-      List<String> plugins = await runCapturingPrint(runner, <String>['list']);
+      final List<String> plugins =
+          await runCapturingPrint(runner, <String>['list']);
 
       expect(
         plugins,

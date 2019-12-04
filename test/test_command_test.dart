@@ -7,8 +7,8 @@ import 'util.dart';
 
 void main() {
   group('$TestCommand', () {
-    CommandRunner runner;
-    RecordingProcessRunner processRunner = RecordingProcessRunner();
+    CommandRunner<TestCommand> runner;
+    final RecordingProcessRunner processRunner = RecordingProcessRunner();
 
     setUp(() {
       initializeFakePackages();
@@ -21,11 +21,11 @@ void main() {
     });
 
     test('runs flutter test on each plugin', () async {
-      Directory plugin1Dir =
+      final Directory plugin1Dir =
           createFakePlugin('plugin1', withExtraFiles: <List<String>>[
         <String>['test', 'empty_test.dart'],
       ]);
-      Directory plugin2Dir =
+      final Directory plugin2Dir =
           createFakePlugin('plugin2', withExtraFiles: <List<String>>[
         <String>['test', 'empty_test.dart'],
       ]);
@@ -44,8 +44,8 @@ void main() {
     });
 
     test('skips testing plugins without test directory', () async {
-      Directory plugin1Dir = createFakePlugin('plugin1');
-      Directory plugin2Dir =
+      createFakePlugin('plugin1');
+      final Directory plugin2Dir =
           createFakePlugin('plugin2', withExtraFiles: <List<String>>[
         <String>['test', 'empty_test.dart'],
       ]);
@@ -63,12 +63,12 @@ void main() {
     });
 
     test('runs pub run test on non-Flutter packages', () async {
-      Directory plugin1Dir = createFakePlugin('plugin1',
+      final Directory plugin1Dir = createFakePlugin('plugin1',
           isFlutter: true,
           withExtraFiles: <List<String>>[
             <String>['test', 'empty_test.dart'],
           ]);
-      Directory plugin2Dir = createFakePlugin('plugin2',
+      final Directory plugin2Dir = createFakePlugin('plugin2',
           isFlutter: false,
           withExtraFiles: <List<String>>[
             <String>['test', 'empty_test.dart'],
@@ -89,7 +89,7 @@ void main() {
     });
 
     test('runs on Chrome for web plugins', () async {
-      Directory pluginDir = createFakePlugin(
+      final Directory pluginDir = createFakePlugin(
         'plugin',
         withExtraFiles: <List<String>>[
           <String>['test', 'empty_test.dart'],

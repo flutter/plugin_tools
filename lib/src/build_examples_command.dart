@@ -70,7 +70,7 @@ class BuildExamplesCommand extends PluginCommand {
       for (String package in failingPackages) {
         print(' * $package');
       }
-      throw new ToolExit(1);
+      throw ToolExit(1);
     }
 
     print('All builds successful!');

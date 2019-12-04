@@ -23,11 +23,11 @@ void initializeFakePackages({Directory parentDir}) {
 /// Creates a plugin package with the given [name] in [mockPackagesDir].
 Directory createFakePlugin(
   String name, {
-  bool withSingleExample: false,
-  List<String> withExamples: const <String>[],
-  List<List<String>> withExtraFiles: const <List<String>>[],
-  bool isFlutter: true,
-  bool isWebPlugin: false,
+  bool withSingleExample = false,
+  List<String> withExamples = const <String>[],
+  List<List<String>> withExtraFiles = const <List<String>>[],
+  bool isFlutter = true,
+  bool isWebPlugin = false,
 }) {
   assert(!(withSingleExample && withExamples.isNotEmpty),
       'cannot pass withSingleExample and withExamples simultaneously');
@@ -55,7 +55,8 @@ Directory createFakePlugin(
   }
 
   for (List<String> file in withExtraFiles) {
-    final List<String> newFilePath = [pluginDirectory.path]..addAll(file);
+    final List<String> newFilePath = <String>[pluginDirectory.path]
+      ..addAll(file);
     final File newFile =
         mockFileSystem.file(mockFileSystem.path.joinAll(newFilePath));
     newFile.createSync(recursive: true);
@@ -111,7 +112,7 @@ void cleanupPackages() {
 /// Run the command [runner] with the given [args] and return
 /// what was printed.
 Future<List<String>> runCapturingPrint(
-    CommandRunner runner, List<String> args) async {
+    CommandRunner<PluginCommand> runner, List<String> args) async {
   final List<String> prints = <String>[];
   final ZoneSpecification spec = ZoneSpecification(
     print: (_, __, ___, String message) {
@@ -172,16 +173,27 @@ class ProcessCall {
   /// The working directory this process was called from.
   final String workingDir;
 
+  @override
   bool operator ==(dynamic other) {
-    if (other is! ProcessCall) return false;
-    ProcessCall otherCall = other;
+    if (other is! ProcessCall) {
+      return false;
+    }
+    final ProcessCall otherCall = other;
     return executable == otherCall.executable &&
         listsEqual(args, otherCall.args) &&
         workingDir == otherCall.workingDir;
   }
 
+  @override
+  int get hashCode =>
+      executable?.hashCode ??
+      0 ^ args?.hashCode ??
+      0 ^ workingDir?.hashCode ??
+      0;
+
+  @override
   String toString() {
-    final List<String> command = [executable]..addAll(args);
+    final List<String> command = <String>[executable]..addAll(args);
     return '"${command.join(' ')}" in $workingDir';
   }
 }

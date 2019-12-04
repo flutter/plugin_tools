@@ -73,7 +73,7 @@ class TestCommand extends PluginCommand {
       failingPackages.forEach((String package) {
         print(' * $package');
       });
-      throw new ToolExit(1);
+      throw ToolExit(1);
     }
 
     print('All tests are passing!');

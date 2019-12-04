@@ -38,21 +38,21 @@ void main(List<String> args) {
     }
   }
 
-  final CommandRunner<Null> commandRunner = new CommandRunner<Null>(
+  final CommandRunner<Null> commandRunner = CommandRunner<Null>(
       'pub global run flutter_plugin_tools',
       'Productivity utils for hosting multiple plugins within one repository.')
-    ..addCommand(new AnalyzeCommand(packagesDir, fileSystem))
-    ..addCommand(new BuildExamplesCommand(packagesDir, fileSystem))
-    ..addCommand(new CreateAllPluginsAppCommand(packagesDir, fileSystem))
-    ..addCommand(new DriveExamplesCommand(packagesDir, fileSystem))
-    ..addCommand(new FirebaseTestLabCommand(packagesDir, fileSystem))
-    ..addCommand(new FormatCommand(packagesDir, fileSystem))
-    ..addCommand(new JavaTestCommand(packagesDir, fileSystem))
-    ..addCommand(new LintPodspecsCommand(packagesDir, fileSystem))
-    ..addCommand(new ListCommand(packagesDir, fileSystem))
-    ..addCommand(new PublishPluginCommand(packagesDir, fileSystem))
-    ..addCommand(new TestCommand(packagesDir, fileSystem))
-    ..addCommand(new VersionCheckCommand(packagesDir, fileSystem));
+    ..addCommand(AnalyzeCommand(packagesDir, fileSystem))
+    ..addCommand(BuildExamplesCommand(packagesDir, fileSystem))
+    ..addCommand(CreateAllPluginsAppCommand(packagesDir, fileSystem))
+    ..addCommand(DriveExamplesCommand(packagesDir, fileSystem))
+    ..addCommand(FirebaseTestLabCommand(packagesDir, fileSystem))
+    ..addCommand(FormatCommand(packagesDir, fileSystem))
+    ..addCommand(JavaTestCommand(packagesDir, fileSystem))
+    ..addCommand(LintPodspecsCommand(packagesDir, fileSystem))
+    ..addCommand(ListCommand(packagesDir, fileSystem))
+    ..addCommand(PublishPluginCommand(packagesDir, fileSystem))
+    ..addCommand(TestCommand(packagesDir, fileSystem))
+    ..addCommand(VersionCheckCommand(packagesDir, fileSystem));
 
   commandRunner.run(args).catchError((Object e) {
     final ToolExit toolExit = e;

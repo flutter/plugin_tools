@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:file/file.dart';
 import 'package:flutter_plugin_tools/src/firebase_test_lab_command.dart';
 import 'package:test/test.dart';
 
@@ -9,7 +8,7 @@ import 'util.dart';
 
 void main() {
   group('$FirebaseTestLabCommand', () {
-    CommandRunner runner;
+    CommandRunner<FirebaseTestLabCommand> runner;
     RecordingProcessRunner processRunner;
 
     setUp(() {
@@ -45,7 +44,7 @@ void main() {
         ],
       ]);
 
-      List<String> output = await runCapturingPrint(runner, <String>[
+      final List<String> output = await runCapturingPrint(runner, <String>[
         'firebase-test-lab',
         '--device',
         'model=blueline,version=28',
@@ -83,7 +82,7 @@ void main() {
               '/packages/plugin/example/android'),
           ProcessCall(
               'gcloud',
-              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 2m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/null/null --device model=blueline,version=28 --device model=seoul,version=26'
+              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/null/null --device model=blueline,version=28 --device model=seoul,version=26'
                   .split(' '),
               '/packages/plugin/example'),
           ProcessCall(
@@ -93,7 +92,7 @@ void main() {
               '/packages/plugin/example/android'),
           ProcessCall(
               'gcloud',
-              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 2m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/null/null --device model=blueline,version=28 --device model=seoul,version=26'
+              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/null/null --device model=blueline,version=28 --device model=seoul,version=26'
                   .split(' '),
               '/packages/plugin/example'),
           ProcessCall(
@@ -103,7 +102,7 @@ void main() {
               '/packages/plugin/example/android'),
           ProcessCall(
               'gcloud',
-              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 2m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/null/null --device model=blueline,version=28 --device model=seoul,version=26'
+              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/null/null --device model=blueline,version=28 --device model=seoul,version=26'
                   .split(' '),
               '/packages/plugin/example'),
         ]),

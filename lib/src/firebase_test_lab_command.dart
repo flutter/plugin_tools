@@ -59,7 +59,7 @@ class FirebaseTestLabCommand extends PluginCommand {
     ]);
 
     if (exitCode != 0) {
-      throw new ToolExit(1);
+      throw ToolExit(1);
     }
 
     exitCode = await processRunner.runAndStream('gcloud', <String>[
@@ -71,7 +71,7 @@ class FirebaseTestLabCommand extends PluginCommand {
     ]);
 
     if (exitCode != 0) {
-      throw new ToolExit(1);
+      throw ToolExit(1);
     }
   }
 
@@ -216,7 +216,7 @@ class FirebaseTestLabCommand extends PluginCommand {
     }
 
     if (failingPackages.isNotEmpty || missingFlutterBuild.isNotEmpty) {
-      throw new ToolExit(1);
+      throw ToolExit(1);
     }
 
     print('All Firebase Test Lab tests successful!');

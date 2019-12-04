@@ -1,3 +1,7 @@
+## v.0.0.31+1
+
+- Add --skip and --no-analyze flags to podspec command.
+
 ## v.0.0.31
 
 - Add support for macos on `DriveExamplesCommand` and `BuildExamplesCommand`.

@@ -21,7 +21,16 @@ class LintPodspecsCommand extends PluginCommand {
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
     this.platform = const LocalPlatform(),
-  }) : super(packagesDir, fileSystem, processRunner: processRunner);
+  }) : super(packagesDir, fileSystem, processRunner: processRunner) {
+    argParser.addMultiOption('skip',
+        help:
+            'Skip all linting for podspecs with this basename (example: federated plugins with placeholder podspecs)',
+        valueHelp: 'podspec_file_name');
+    argParser.addMultiOption('no-analyze',
+        help:
+            'Do not pass --analyze flag to "pod lib lint" for podspecs with this basename (example: plugins with known analyzer warnings)',
+        valueHelp: 'podspec_file_name');
+  }
 
   @override
   final String name = 'podspecs';
@@ -68,16 +77,10 @@ class LintPodspecsCommand extends PluginCommand {
   }
 
   Future<List<File>> _podspecsToLint() async {
-    // Skip placeholder podspecs for plugins that do not have iOS platform code.
-    const List<String> skippedPodspecs = <String>[
-      'url_launcher_web',
-      'google_sign_in_web'
-    ];
-
     final List<File> podspecs = await getFiles().where((File entity) {
       final String filePath = entity.path;
       return p.extension(filePath) == '.podspec' &&
-          !skippedPodspecs.contains(p.basenameWithoutExtension(filePath));
+          !argResults['skip'].contains(p.basenameWithoutExtension(filePath));
     }).toList();
 
     podspecs.sort(
@@ -87,9 +90,8 @@ class LintPodspecsCommand extends PluginCommand {
 
   Future<bool> _lintPodspec(File podspec) async {
     // Do not run the static analyzer on plugins with known analyzer issues.
-    const List<String> knownAnalyzerIssuePodspecs = <String>['camera'];
     final String podspecPath = podspec.path;
-    final bool runAnalyzer = !knownAnalyzerIssuePodspecs
+    final bool runAnalyzer = !argResults['no-analyze']
         .contains(p.basenameWithoutExtension(podspecPath));
 
     final String podspecBasename = p.basename(podspecPath);

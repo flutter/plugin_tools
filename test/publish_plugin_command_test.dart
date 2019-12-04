@@ -8,6 +8,7 @@ import 'package:file/local.dart';
 import 'package:flutter_plugin_tools/src/publish_plugin_command.dart';
 import 'package:flutter_plugin_tools/src/common.dart';
 import 'package:git/git.dart';
+import 'package:matcher/matcher.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
@@ -59,7 +60,7 @@ void main() {
   group('Initial validation', () {
     test('requires a package flag', () async {
       await expectLater(() => commandRunner.run(<String>['publish-plugin']),
-          throwsA(const isInstanceOf<ToolExit>()));
+          throwsA(const TypeMatcher<ToolExit>()));
 
       expect(
           printedMessages.last, contains("Must specify a package to publish."));
@@ -69,7 +70,7 @@ void main() {
       await expectLater(
           () => commandRunner
               .run(<String>['publish-plugin', '--package', 'iamerror']),
-          throwsA(const isInstanceOf<ToolExit>()));
+          throwsA(const TypeMatcher<ToolExit>()));
 
       expect(printedMessages.last, contains('iamerror does not exist'));
     });
@@ -80,7 +81,7 @@ void main() {
       await expectLater(
           () => commandRunner
               .run(<String>['publish-plugin', '--package', testPluginName]),
-          throwsA(const isInstanceOf<ToolExit>()));
+          throwsA(const TypeMatcher<ToolExit>()));
 
       expect(
           printedMessages.last,
@@ -92,7 +93,7 @@ void main() {
       await expectLater(
           () => commandRunner
               .run(<String>['publish-plugin', '--package', testPluginName]),
-          throwsA(const isInstanceOf<ToolExit>()));
+          throwsA(const TypeMatcher<ToolExit>()));
 
       expect(processRunner.results.last.stderr, contains("No such remote"));
     });
@@ -177,7 +178,7 @@ void main() {
                 '--no-push-tags',
                 '--no-tag-release',
               ]),
-          throwsA(const isInstanceOf<ToolExit>()));
+          throwsA(const TypeMatcher<ToolExit>()));
 
       expect(printedMessages, contains("Publish failed. Exiting."));
     });
@@ -208,7 +209,7 @@ void main() {
                 testPluginName,
                 '--no-push-tags',
               ]),
-          throwsA(const isInstanceOf<ToolExit>()));
+          throwsA(const TypeMatcher<ToolExit>()));
 
       expect(printedMessages, contains("Publish failed. Exiting."));
       final String tag = (await gitDir.runCommand(
@@ -234,7 +235,7 @@ void main() {
                 '--package',
                 testPluginName,
               ]),
-          throwsA(const isInstanceOf<ToolExit>()));
+          throwsA(const TypeMatcher<ToolExit>()));
 
       expect(printedMessages, contains('Tag push canceled.'));
     });

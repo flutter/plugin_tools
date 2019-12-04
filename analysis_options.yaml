@@ -19,8 +19,6 @@
 # indicating the # of violations for that rule.
 
 analyzer:
-  language:
-    enableSuperMixins: true
   strong-mode:
     implicit-dynamic: false
   errors:
@@ -119,7 +117,6 @@ linter:
     - slash_for_doc_comments
     - sort_constructors_first
     - sort_unnamed_constructors_first
-    - super_goes_last
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     - unawaited_futures

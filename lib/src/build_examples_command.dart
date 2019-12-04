@@ -16,6 +16,7 @@ class BuildExamplesCommand extends PluginCommand {
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
+    argParser.addFlag('macos', defaultsTo: io.Platform.isMacOS);
     argParser.addFlag('ipa', defaultsTo: io.Platform.isMacOS);
     argParser.addFlag('apk');
   }
@@ -30,8 +31,8 @@ class BuildExamplesCommand extends PluginCommand {
 
   @override
   Future<Null> run() async {
-    if (!argResults['ipa'] && !argResults['apk']) {
-      print('Neither --apk nor --ipa were specified, so not building '
+    if (!argResults['ipa'] && !argResults['apk'] && !argResults['macos']) {
+      print('Neither --macos, --apk nor --ipa were specified, so not building '
           'anything.');
       return;
     }
@@ -41,6 +42,16 @@ class BuildExamplesCommand extends PluginCommand {
     await for (io.Directory example in getExamples()) {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
+
+      if (argResults['macos']) {
+        print('\nBUILDING macos for $packageName');
+        final int exitCode = await processRunner.runAndStream(
+            'flutter', <String>['build', 'macos'],
+            workingDir: example);
+        if (exitCode != 0) {
+          failingPackages.add('$packageName (macos)');
+        }
+      }
 
       if (argResults['ipa']) {
         print('\nBUILDING IPA for $packageName');

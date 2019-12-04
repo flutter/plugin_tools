@@ -89,5 +89,73 @@ void main() {
 
       cleanupPackages();
     });
+    test('runs drive with no macos implementation', () async {
+      createFakePlugin('plugin', withExtraFiles: <List<String>>[
+        <String>['example', 'test_driver', 'plugin_test.dart'],
+        <String>['example', 'test_driver', 'plugin.dart'],
+      ]);
+
+      final Directory pluginExampleDirectory =
+          mockPackagesDir.childDirectory('plugin').childDirectory('example');
+
+      createFakePubspec(pluginExampleDirectory, isFlutter: true);
+
+      final List<String> output = await runCapturingPrint(runner, <String>[
+        'drive-examples',
+        '--macos',
+      ]);
+
+      expect(
+        output,
+        orderedEquals(<String>[
+          '\n\n',
+          'All driver tests successful!',
+        ]),
+      );
+
+      print(processRunner.recordedCalls);
+      // Output should be empty since running drive-examples --macos with no macos
+      // implementation is a no-op.
+      expect(processRunner.recordedCalls, <ProcessCall>[]);
+
+      cleanupPackages();
+    });
+    test('runs drive with a macOS implementation', () async {
+      createFakePlugin('plugin', withExtraFiles: <List<String>>[
+        <String>['example', 'test_driver', 'plugin_test.dart'],
+        <String>['example', 'test_driver', 'plugin.dart'],
+        <String>['example', 'macos', 'macos.swift'],
+      ]);
+
+      final Directory pluginExampleDirectory =
+          mockPackagesDir.childDirectory('plugin').childDirectory('example');
+
+      createFakePubspec(pluginExampleDirectory, isFlutter: true);
+
+      final List<String> output = await runCapturingPrint(runner, <String>[
+        'drive-examples',
+        '--macos',
+      ]);
+
+      expect(
+        output,
+        orderedEquals(<String>[
+          '\n\n',
+          'All driver tests successful!',
+        ]),
+      );
+
+      print(processRunner.recordedCalls);
+      expect(
+          processRunner.recordedCalls,
+          orderedEquals(<ProcessCall>[
+            ProcessCall(
+                'flutter',
+                <String>['drive', '-d', 'macos', 'test_driver/plugin.dart'],
+                pluginExampleDirectory.path),
+          ]));
+
+      cleanupPackages();
+    });
   });
 }

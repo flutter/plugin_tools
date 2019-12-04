@@ -1,3 +1,7 @@
+## v.0.0.29
+
+- Add a command to run pod lib lint on podspec files.
+
 ## v.0.0.28
 
 - Increase Firebase test lab timeouts to 5 minutes.

@@ -1,3 +1,7 @@
+## v.0.0.30
+
+- Adopt pedantic analysis options, fix firebase_test_lab_test.
+
 ## v.0.0.29
 
 - Add a command to run pod lib lint on podspec files.

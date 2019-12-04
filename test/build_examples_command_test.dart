@@ -65,7 +65,7 @@ void main() {
       createFakePubspec(pluginExampleDirectory, isFlutter: true);
 
       final List<String> output = await runCapturingPrint(
-          runner, <String>['build-examples', '--no-ipa']);
+          runner, <String>['build-examples', '--no-ipa', '--macos']);
 
       expect(
         output,

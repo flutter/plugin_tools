@@ -45,6 +45,12 @@ class BuildExamplesCommand extends PluginCommand {
 
       if (argResults['macos']) {
         print('\nBUILDING macos for $packageName');
+        final Directory macosDir =
+            fileSystem.directory(p.join(example.path, 'macos'));
+        if (!macosDir.existsSync()) {
+          print('No macOS implementation found.');
+          continue;
+        }
         final int exitCode = await processRunner.runAndStream(
             'flutter', <String>['build', 'macos'],
             workingDir: example);

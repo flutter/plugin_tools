@@ -16,11 +16,12 @@ import 'common.dart';
 ///
 /// See https://guides.cocoapods.org/terminal/commands.html#pod_lib_lint.
 class LintPodspecsCommand extends PluginCommand {
-  LintPodspecsCommand(Directory packagesDir,
-      FileSystem fileSystem, {
-        ProcessRunner processRunner = const ProcessRunner(),
-        this.platform = const LocalPlatform(),
-      }) : super(packagesDir, fileSystem, processRunner: processRunner);
+  LintPodspecsCommand(
+    Directory packagesDir,
+    FileSystem fileSystem, {
+    ProcessRunner processRunner = const ProcessRunner(),
+    this.platform = const LocalPlatform(),
+  }) : super(packagesDir, fileSystem, processRunner: processRunner);
 
   @override
   final String name = 'podspecs';
@@ -29,7 +30,8 @@ class LintPodspecsCommand extends PluginCommand {
   List<String> get aliases => <String>['podspec'];
 
   @override
-  final String description = 'Runs "pod lib lint" on all iOS and macOS plugin podspecs.\n\n'
+  final String description =
+      'Runs "pod lib lint" on all iOS and macOS plugin podspecs.\n\n'
       'This command requires "pod" and "flutter" to be in your path. Runs on macOS only.';
 
   final Platform platform;
@@ -43,11 +45,8 @@ class LintPodspecsCommand extends PluginCommand {
 
     checkSharding();
 
-    await processRunner.runAndExitOnError(
-        'which',
-        <String>['pod'],
-        workingDir: packagesDir
-    );
+    await processRunner.runAndExitOnError('which', <String>['pod'],
+        workingDir: packagesDir);
 
     print('Starting podspec lint test');
 
@@ -81,7 +80,8 @@ class LintPodspecsCommand extends PluginCommand {
           !skippedPodspecs.contains(p.basenameWithoutExtension(filePath));
     }).toList();
 
-    podspecs.sort((File a, File b) => p.basename(a.path).compareTo(p.basename(b.path)));
+    podspecs.sort(
+        (File a, File b) => p.basename(a.path).compareTo(p.basename(b.path)));
     return podspecs;
   }
 
@@ -89,7 +89,8 @@ class LintPodspecsCommand extends PluginCommand {
     // Do not run the static analyzer on plugins with known analyzer issues.
     const List<String> knownAnalyzerIssuePodspecs = <String>['camera'];
     final String podspecPath = podspec.path;
-    final bool runAnalyzer = !knownAnalyzerIssuePodspecs.contains(p.basenameWithoutExtension(podspecPath));
+    final bool runAnalyzer = !knownAnalyzerIssuePodspecs
+        .contains(p.basenameWithoutExtension(podspecPath));
 
     final String podspecBasename = p.basename(podspecPath);
     if (runAnalyzer) {
@@ -110,7 +111,8 @@ class LintPodspecsCommand extends PluginCommand {
     return !statuses.contains(false);
   }
 
-  Future<bool> _runPodLint(String podspecPath, bool runAnalyzer, bool libraryLint) async {
+  Future<bool> _runPodLint(
+      String podspecPath, bool runAnalyzer, bool libraryLint) async {
     final List<String> arguments = <String>[
       'lib',
       'lint',
@@ -122,19 +124,18 @@ class LintPodspecsCommand extends PluginCommand {
       if (libraryLint) '--use-libraries'
     ];
 
-    final Process process = await processRunner.start(
-        'pod',
-        arguments,
-        workingDirectory: packagesDir
-    );
+    final Process process = await processRunner.start('pod', arguments,
+        workingDirectory: packagesDir);
 
     if (await process.exitCode != 0) {
       final String lintType = libraryLint ? 'library' : 'framework';
-      String command = 'pod lib lint $podspecPath --analyze --allow-warnings --no-clean';
+      String command =
+          'pod lib lint $podspecPath --analyze --allow-warnings --no-clean';
       if (libraryLint) {
         command += ' --use-libraries';
       }
-      stderr.writeln('${p.basename(podspecPath)} has $lintType issues. Run "$command" to inspect.');
+      stderr.writeln(
+          '${p.basename(podspecPath)} has $lintType issues. Run "$command" to inspect.');
       return false;
     }
 

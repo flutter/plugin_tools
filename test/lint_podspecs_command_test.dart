@@ -20,13 +20,11 @@ void main() {
       mockPlatform = MockPlatform();
       when(mockPlatform.isMacOS).thenReturn(true);
       final LintPodspecsCommand command = LintPodspecsCommand(
-          mockPackagesDir,
-          mockFileSystem,
-          processRunner: processRunner,
-        platform: mockPlatform
-      );
+          mockPackagesDir, mockFileSystem,
+          processRunner: processRunner, platform: mockPlatform);
 
-      runner = CommandRunner<Null>('podspec_test', 'Test for $LintPodspecsCommand');
+      runner =
+          CommandRunner<Null>('podspec_test', 'Test for $LintPodspecsCommand');
       runner.addCommand(command);
       final MockProcess mockLintProcess = MockProcess();
       mockLintProcess.exitCodeCompleter.complete(0);
@@ -52,7 +50,7 @@ void main() {
 
     test('runs pod lib lint on a podspec', () async {
       Directory plugin1Dir =
-      createFakePlugin('plugin1', withExtraFiles: <List<String>>[
+          createFakePlugin('plugin1', withExtraFiles: <List<String>>[
         <String>['ios', 'plugin1.podspec'],
         <String>['bogus.dart'], // Ignore non-podspecs.
       ]);
@@ -63,25 +61,31 @@ void main() {
         processRunner.recordedCalls,
         orderedEquals(<ProcessCall>[
           ProcessCall('which', <String>['pod'], mockPackagesDir.path),
-          ProcessCall('pod', <String>[
-            'lib',
-            'lint',
-            p.join(plugin1Dir.path, 'ios', 'plugin1.podspec'),
-            '--allow-warnings',
-            '--fail-fast',
-            '--silent',
-            '--analyze',
-            '--use-libraries'
-          ], mockPackagesDir.path),
-          ProcessCall('pod', <String>[
-            'lib',
-            'lint',
-            p.join(plugin1Dir.path, 'ios', 'plugin1.podspec'),
-            '--allow-warnings',
-            '--fail-fast',
-            '--silent',
-            '--analyze',
-          ], mockPackagesDir.path),
+          ProcessCall(
+              'pod',
+              <String>[
+                'lib',
+                'lint',
+                p.join(plugin1Dir.path, 'ios', 'plugin1.podspec'),
+                '--allow-warnings',
+                '--fail-fast',
+                '--silent',
+                '--analyze',
+                '--use-libraries'
+              ],
+              mockPackagesDir.path),
+          ProcessCall(
+              'pod',
+              <String>[
+                'lib',
+                'lint',
+                p.join(plugin1Dir.path, 'ios', 'plugin1.podspec'),
+                '--allow-warnings',
+                '--fail-fast',
+                '--silent',
+                '--analyze',
+              ],
+              mockPackagesDir.path),
         ]),
       );
 
@@ -107,7 +111,7 @@ void main() {
 
     test('skips analyzer for podspecs with known warnings', () async {
       Directory plugin1Dir =
-      createFakePlugin('camera', withExtraFiles: <List<String>>[
+          createFakePlugin('camera', withExtraFiles: <List<String>>[
         <String>['camera.podspec'],
       ]);
 
@@ -117,23 +121,29 @@ void main() {
         processRunner.recordedCalls,
         orderedEquals(<ProcessCall>[
           ProcessCall('which', <String>['pod'], mockPackagesDir.path),
-          ProcessCall('pod', <String>[
-            'lib',
-            'lint',
-            p.join(plugin1Dir.path, 'camera.podspec'),
-            '--allow-warnings',
-            '--fail-fast',
-            '--silent',
-            '--use-libraries'
-          ], mockPackagesDir.path),
-          ProcessCall('pod', <String>[
-            'lib',
-            'lint',
-            p.join(plugin1Dir.path, 'camera.podspec'),
-            '--allow-warnings',
-            '--fail-fast',
-            '--silent',
-          ], mockPackagesDir.path),
+          ProcessCall(
+              'pod',
+              <String>[
+                'lib',
+                'lint',
+                p.join(plugin1Dir.path, 'camera.podspec'),
+                '--allow-warnings',
+                '--fail-fast',
+                '--silent',
+                '--use-libraries'
+              ],
+              mockPackagesDir.path),
+          ProcessCall(
+              'pod',
+              <String>[
+                'lib',
+                'lint',
+                p.join(plugin1Dir.path, 'camera.podspec'),
+                '--allow-warnings',
+                '--fail-fast',
+                '--silent',
+              ],
+              mockPackagesDir.path),
         ]),
       );
 

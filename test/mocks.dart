@@ -8,9 +8,9 @@ import 'package:mockito/mockito.dart';
 class MockProcess extends Mock implements io.Process {
   final Completer<int> exitCodeCompleter = Completer<int>();
   final StreamController<List<int>> stdoutController =
-  StreamController<List<int>>();
+      StreamController<List<int>>();
   final StreamController<List<int>> stderrController =
-  StreamController<List<int>>();
+      StreamController<List<int>>();
   final MockIOSink stdinMock = MockIOSink();
 
   @override

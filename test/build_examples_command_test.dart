@@ -54,7 +54,8 @@ void main() {
           ]));
       cleanupPackages();
     });
-    test('runs build for macos with no implementation results in no-op', () async {
+    test('runs build for macos with no implementation results in no-op',
+        () async {
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test'],
       ]);
@@ -80,9 +81,7 @@ void main() {
       print(processRunner.recordedCalls);
       // Output should be empty since running build-examples --macos with no macos
       // implementation is a no-op.
-      expect(
-          processRunner.recordedCalls,
-          orderedEquals(<ProcessCall>[]));
+      expect(processRunner.recordedCalls, orderedEquals(<ProcessCall>[]));
       cleanupPackages();
     });
     test('runs build for macos', () async {

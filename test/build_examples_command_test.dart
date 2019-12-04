@@ -23,7 +23,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs build under for ios', () async {
+    test('runs build for ios', () async {
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test'],
       ]);
@@ -34,7 +34,7 @@ void main() {
       createFakePubspec(pluginExampleDirectory, isFlutter: true);
 
       final List<String> output = await runCapturingPrint(
-          runner, <String>['build-examples', '--no-macos']);
+          runner, <String>['build-examples', '--ipa', '--no-macos']);
 
       expect(
         output,
@@ -54,7 +54,7 @@ void main() {
           ]));
       cleanupPackages();
     });
-    test('runs build under for macos', () async {
+    test('runs build for macos', () async {
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test'],
       ]);
@@ -85,7 +85,7 @@ void main() {
           ]));
       cleanupPackages();
     });
-    test('runs build under for android', () async {
+    test('runs build for android', () async {
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test'],
       ]);

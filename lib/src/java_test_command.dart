@@ -81,7 +81,7 @@ class JavaTestCommand extends PluginCommand {
     }
 
     if (failingPackages.isNotEmpty || missingFlutterBuild.isNotEmpty) {
-      throw new ToolExit(1);
+      throw ToolExit(1);
     }
 
     print('All Java tests successful!');

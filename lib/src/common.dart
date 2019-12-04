@@ -195,7 +195,7 @@ abstract class PluginCommand extends Command<Null> {
   ///    "client library" package, which declares the API for the plugin, as
   ///    well as one or more platform-specific implementations.
   Stream<Directory> _getAllPlugins() async* {
-    final Set<String> plugins = new Set<String>.from(argResults[_pluginsArg]);
+    final Set<String> plugins = Set<String>.from(argResults[_pluginsArg]);
     await for (FileSystemEntity entity
         in packagesDir.list(followLinks: false)) {
       // A top-level Dart package is a plugin package.
@@ -297,7 +297,7 @@ class ProcessRunner {
     String executable,
     List<String> args, {
     Directory workingDir,
-    bool exitOnError: false,
+    bool exitOnError = false,
   }) async {
     final io.Process process = await io.Process.start(executable, args,
         workingDirectory: workingDir?.path);
@@ -307,7 +307,7 @@ class ProcessRunner {
       final String error =
           _getErrorString(executable, args, workingDir: workingDir);
       print('$error See above for details.');
-      throw new ToolExit(await process.exitCode);
+      throw ToolExit(await process.exitCode);
     }
     return process.exitCode;
   }
@@ -345,7 +345,7 @@ class ProcessRunner {
       final String error =
           _getErrorString(executable, args, workingDir: workingDir);
       print('$error Stderr:\n${result.stdout}');
-      throw new ToolExit(result.exitCode);
+      throw ToolExit(result.exitCode);
     }
     return result;
   }

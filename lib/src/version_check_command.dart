@@ -119,7 +119,7 @@ class VersionCheckCommand extends PluginCommand {
     if (baseGitDir == null) {
       if (!await GitDir.isGitDir(rootDir)) {
         print('$rootDir is not a valid Git repository.');
-        throw new ToolExit(2);
+        throw ToolExit(2);
       }
       baseGitDir = await GitDir.fromExisting(rootDir);
     }
@@ -158,7 +158,7 @@ class VersionCheckCommand extends PluginCommand {
               'Allowed versions: $allowedNextVersions';
           final Colorize redError = Colorize(error)..red();
           print(redError);
-          throw new ToolExit(1);
+          throw ToolExit(1);
         }
       } on io.ProcessException {
         print('Unable to find pubspec in master for $pubspecPath.'

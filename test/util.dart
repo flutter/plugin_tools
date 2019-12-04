@@ -23,11 +23,11 @@ void initializeFakePackages({Directory parentDir}) {
 /// Creates a plugin package with the given [name] in [mockPackagesDir].
 Directory createFakePlugin(
   String name, {
-  bool withSingleExample: false,
-  List<String> withExamples: const <String>[],
-  List<List<String>> withExtraFiles: const <List<String>>[],
-  bool isFlutter: true,
-  bool isWebPlugin: false,
+  bool withSingleExample = false,
+  List<String> withExamples = const <String>[],
+  List<List<String>> withExtraFiles = const <List<String>>[],
+  bool isFlutter = true,
+  bool isWebPlugin = false,
 }) {
   assert(!(withSingleExample && withExamples.isNotEmpty),
       'cannot pass withSingleExample and withExamples simultaneously');

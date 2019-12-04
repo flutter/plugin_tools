@@ -313,7 +313,7 @@ class TestProcessRunner extends ProcessRunner {
         workingDirectory: workingDir?.path);
     results.add(result);
     if (result.exitCode != 0) {
-      throw new ToolExit(result.exitCode);
+      throw ToolExit(result.exitCode);
     }
     return result;
   }
@@ -347,7 +347,8 @@ class MockStdin extends Mock implements io.Stdin {
 
   @override
   String readLineSync(
-          {Encoding encoding: io.systemEncoding, bool retainNewlines: false}) =>
+          {Encoding encoding = io.systemEncoding,
+          bool retainNewlines = false}) =>
       readLineOutput;
 }
 

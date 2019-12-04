@@ -49,7 +49,7 @@ class FormatCommand extends PluginCommand {
     if (argResults['travis']) {
       final bool modified = await _didModifyAnything();
       if (modified) {
-        throw new ToolExit(1);
+        throw ToolExit(1);
       }
     }
   }

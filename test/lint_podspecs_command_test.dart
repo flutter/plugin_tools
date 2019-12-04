@@ -93,11 +93,15 @@ void main() {
     });
 
     test('skips podspecs with known warnings', () async {
-      createFakePlugin('url_launcher_web', withExtraFiles: <List<String>>[
-        <String>['url_launcher_web.podspec']
+      createFakePlugin('plugin1', withExtraFiles: <List<String>>[
+        <String>['plugin1.podspec']
+      ]);
+      createFakePlugin('plugin2', withExtraFiles: <List<String>>[
+        <String>['plugin2.podspec']
       ]);
 
-      await runner.run(<String>['podspecs']);
+      await runner
+          .run(<String>['podspecs', '--skip=plugin1', '--skip=plugin2']);
 
       expect(
         processRunner.recordedCalls,
@@ -111,11 +115,11 @@ void main() {
 
     test('skips analyzer for podspecs with known warnings', () async {
       Directory plugin1Dir =
-          createFakePlugin('camera', withExtraFiles: <List<String>>[
-        <String>['camera.podspec'],
+          createFakePlugin('plugin1', withExtraFiles: <List<String>>[
+        <String>['plugin1.podspec'],
       ]);
 
-      await runner.run(<String>['podspecs']);
+      await runner.run(<String>['podspecs', '--no-analyze=plugin1']);
 
       expect(
         processRunner.recordedCalls,
@@ -126,7 +130,7 @@ void main() {
               <String>[
                 'lib',
                 'lint',
-                p.join(plugin1Dir.path, 'camera.podspec'),
+                p.join(plugin1Dir.path, 'plugin1.podspec'),
                 '--allow-warnings',
                 '--fail-fast',
                 '--silent',
@@ -138,7 +142,7 @@ void main() {
               <String>[
                 'lib',
                 'lint',
-                p.join(plugin1Dir.path, 'camera.podspec'),
+                p.join(plugin1Dir.path, 'plugin1.podspec'),
                 '--allow-warnings',
                 '--fail-fast',
                 '--silent',

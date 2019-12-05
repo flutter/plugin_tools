@@ -14,7 +14,14 @@ class AnalyzeCommand extends PluginCommand {
     Directory packagesDir,
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
-  }) : super(packagesDir, fileSystem);
+  }) : super(packagesDir, fileSystem, processRunner: processRunner) {
+    argParser.addMultiOption(_customAnalysisFlag,
+        help:
+            'Directories (comma seperated) that are allowed to have their own analysis options.',
+        defaultsTo: <String>[]);
+  }
+
+  static const String _customAnalysisFlag = 'custom-analysis';
 
   @override
   final String name = 'analyze';
@@ -26,6 +33,28 @@ class AnalyzeCommand extends PluginCommand {
   @override
   Future<Null> run() async {
     checkSharding();
+
+    print('Verifying analysis settings...');
+    final List<FileSystemEntity> files = packagesDir.listSync(recursive: true);
+    for (final FileSystemEntity file in files) {
+      if (file.basename != 'analysis_options.yaml' &&
+          file.basename != '.analysis_options') {
+        continue;
+      }
+
+      final bool whitelisted = argResults[_customAnalysisFlag].any(
+          (String directory) =>
+              p.isWithin(p.join(packagesDir.path, directory), file.path));
+      if (whitelisted) {
+        continue;
+      }
+
+      print('Found an extra analysis_options.yaml in ${file.absolute.path}.');
+      print(
+          'If this was deliberate, pass the package to the analyze command with the --$_customAnalysisFlag flag and try again.');
+      throw ToolExit(1);
+    }
+
     print('Activating tuneup package...');
     await processRunner.runAndStream(
         'pub', <String>['global', 'activate', 'tuneup'],

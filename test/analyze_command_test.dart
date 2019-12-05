@@ -27,7 +27,6 @@ void main() {
     mockPackagesDir.deleteSync(recursive: true);
   });
 
-
   test('analyzes all packages', () async {
     final Directory plugin1Dir = await createFakePlugin('a');
     final Directory plugin2Dir = await createFakePlugin('b');

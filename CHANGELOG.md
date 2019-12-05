@@ -1,3 +1,9 @@
+## v.0.0.32
+
+- `analyze` now asserts that the global `analysis_options.yaml` is the only one
+  by default. Individual directories can be excluded from this check with the
+  new `--custom-analysis` flag.
+
 ## v.0.0.31+1
 
 - Add --skip and --no-analyze flags to podspec command.

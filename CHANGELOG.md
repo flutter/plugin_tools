@@ -1,3 +1,7 @@
+## v.0.0.32+2
+
+- Runs pub get before building macos to avoid failures.
+
 ## v.0.0.32+1
 
 - Default macOS example builds to false. Previously they were running whenever

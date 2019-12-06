@@ -111,8 +111,8 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
-            ProcessCall('flutter', <String>['pub', 'get'],
-                pluginExampleDirectory.path),
+            ProcessCall(
+                'flutter', <String>['pub', 'get'], pluginExampleDirectory.path),
             ProcessCall('flutter', <String>['build', 'macos'],
                 pluginExampleDirectory.path),
           ]));

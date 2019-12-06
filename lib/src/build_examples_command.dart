@@ -51,7 +51,17 @@ class BuildExamplesCommand extends PluginCommand {
           print('No macOS implementation found.');
           continue;
         }
-        final int exitCode = await processRunner.runAndStream(
+        // TODO(https://github.com/flutter/flutter/issues/46236):
+        // Builing macos without running flutter pub get first results
+        // in an error.
+        int exitCode = await processRunner.runAndStream(
+            'flutter', <String>['pub', 'get'],
+            workingDir: example);
+        if (exitCode != 0) {
+          failingPackages.add('$packageName (macos)');
+        }
+
+        exitCode = await processRunner.runAndStream(
             'flutter', <String>['build', 'macos'],
             workingDir: example);
         if (exitCode != 0) {

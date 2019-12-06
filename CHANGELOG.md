@@ -1,3 +1,8 @@
+## v.0.0.32+1
+
+- Default macOS example builds to false. Previously they were running whenever
+  CI was itself running on macOS.
+
 ## v.0.0.32
 
 - `analyze` now asserts that the global `analysis_options.yaml` is the only one

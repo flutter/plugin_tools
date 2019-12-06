@@ -16,7 +16,7 @@ class BuildExamplesCommand extends PluginCommand {
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
-    argParser.addFlag('macos', defaultsTo: io.Platform.isMacOS);
+    argParser.addFlag('macos', defaultsTo: false);
     argParser.addFlag('ipa', defaultsTo: io.Platform.isMacOS);
     argParser.addFlag('apk');
   }

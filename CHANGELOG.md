@@ -1,3 +1,7 @@
+## v.0.0.32+3
+
+- Update Firebase Testlab deprecated test device. (Pixel 3 API 28 -> Pixel 4 API 29).
+
 ## v.0.0.32+2
 
 - Runs pub get before building macos to avoid failures.

@@ -28,7 +28,7 @@ class FirebaseTestLabCommand extends PluginCommand {
         splitCommas: false,
         defaultsTo: <String>[
           'model=walleye,version=26',
-          'model=blueline,version=28'
+          'model=flame,version=29'
         ],
         help:
             'Device model(s) to test. See https://cloud.google.com/sdk/gcloud/reference/firebase/test/android/run for more info');

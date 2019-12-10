@@ -180,7 +180,7 @@ class PublishPluginCommand extends PluginCommand {
     _print(
         'Running `pub publish ${publishFlags.join(' ')}` in ${_packageDir.absolute.path}...\n');
     final Process publish = await processRunner.start(
-        'pub', <String>['publish'] + publishFlags,
+        'flutter', <String>['pub', 'publish'] + publishFlags,
         workingDirectory: _packageDir);
     publish.stdout
         .transform(utf8.decoder)

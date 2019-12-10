@@ -162,10 +162,11 @@ void main() {
         '--dry-run,--server=foo'
       ]);
 
-      expect(processRunner.mockPublishArgs.length, 3);
-      expect(processRunner.mockPublishArgs[0], 'publish');
-      expect(processRunner.mockPublishArgs[1], '--dry-run');
-      expect(processRunner.mockPublishArgs[2], '--server=foo');
+      expect(processRunner.mockPublishArgs.length, 4);
+      expect(processRunner.mockPublishArgs[0], 'pub');
+      expect(processRunner.mockPublishArgs[1], 'publish');
+      expect(processRunner.mockPublishArgs[2], '--dry-run');
+      expect(processRunner.mockPublishArgs[3], '--server=foo');
     });
 
     test('throws if pub publish fails', () async {
@@ -323,7 +324,10 @@ class TestProcessRunner extends ProcessRunner {
       {Directory workingDirectory}) async {
     /// Never actually publish anything. Start is always and only used for this
     /// since it returns something we can route stdin through.
-    assert(executable == 'pub' && args.isNotEmpty && args[0] == 'publish');
+    assert(executable == 'flutter' &&
+        args.isNotEmpty &&
+        args[0] == 'pub' &&
+        args[1] == 'publish');
     mockPublishArgs.addAll(args);
     return mockPublishProcess;
   }

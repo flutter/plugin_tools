@@ -1,3 +1,9 @@
+## v.0.0.32+4
+
+- Update `publish-plugin` to use `flutter pub publish` instead of just `pub
+  publish`. Enforces a `pub publish` command that matches the Dart SDK in the
+  user's Flutter install.
+
 ## v.0.0.32+3
 
 - Update Firebase Testlab deprecated test device. (Pixel 3 API 28 -> Pixel 4 API 29).

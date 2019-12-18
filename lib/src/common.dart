@@ -301,8 +301,10 @@ class ProcessRunner {
   }) async {
     final io.Process process = await io.Process.start(executable, args,
         workingDirectory: workingDir?.path);
-    await io.stdout.addStream(process.stdout);
-    await io.stderr.addStream(process.stderr);
+    // ignore: unawaited_futures
+    io.stdout.addStream(process.stdout);
+    // ignore: unawaited_futures
+    io.stderr.addStream(process.stderr);
     if (exitOnError && await process.exitCode != 0) {
       final String error =
           _getErrorString(executable, args, workingDir: workingDir);

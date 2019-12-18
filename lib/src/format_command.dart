@@ -23,9 +23,10 @@ class FormatCommand extends PluginCommand {
     ProcessRunner processRunner = const ProcessRunner(),
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addFlag('travis', hide: true);
-    argParser.addOption('clang-format',
-        defaultsTo: 'clang-format',
-        help: 'Path to executable of clang-format v5.');
+    argParser.addOption(
+      'clang-format',
+      help: 'Path to executable of clang-format v5.',
+    );
   }
 
   @override
@@ -36,6 +37,16 @@ class FormatCommand extends PluginCommand {
       'Formats the code of all packages (Java, Objective-C, and Dart).\n\n'
       'This command requires "git", "flutter" and "clang-format" v5 to be in '
       'your path.';
+
+  String get _clangFormatUrl {
+    if (io.Platform.isMacOS) {
+      return 'http://releases.llvm.org/5.0.0/clang+llvm-5.0.0-x86_64-apple-darwin.tar.xz';
+    } else if (io.Platform.isLinux) {
+      return 'http://releases.llvm.org/5.0.0/clang+llvm-5.0.0-linux-x86_64-ubuntu16.04.tar.xz';
+    } else if (io.Platform.isWindows) {
+      return 'http://releases.llvm.org/5.0.0/LLVM-5.0.0-win32.exe';
+    }
+  }
 
   @override
   Future<Null> run() async {
@@ -94,7 +105,7 @@ class FormatCommand extends PluginCommand {
       ..addAll(mFiles);
     final Iterable<List<String>> batches = partition(allFiles, 100);
     for (List<String> batch in batches) {
-      await processRunner.runAndStream(argResults['clang-format'],
+      await processRunner.runAndStream(await _getClangFormatPath(),
           <String>['-i', '--style=Google']..addAll(batch),
           workingDir: packagesDir, exitOnError: true);
     }
@@ -138,4 +149,55 @@ class FormatCommand extends PluginCommand {
 
     return javaFormatterPath;
   }
+
+  Future<String> _getClangFormatPath() async {
+    if (argResults['clang-format'] != null) return argResults['clang-format'];
+
+    final Directory clangFormatDir = fileSystem.directory(p.join(
+      p.dirname(p.fromUri(io.Platform.script)),
+      'clang-format',
+    ));
+    if (!clangFormatDir.existsSync()) clangFormatDir.createSync();
+
+    final FileSystemEntity clangScript =
+        clangFormatDir.listSync(recursive: true).firstWhere(
+              (FileSystemEntity entity) =>
+                  entity is File && p.basename(entity.path) == 'clang-format',
+              orElse: () => null,
+            );
+    if (clangScript != null) return clangScript.path;
+
+    final File tarFile = fileSystem.file(
+      p.join(clangFormatDir.path, 'clang-format.tar.xz'),
+    );
+
+    if (!tarFile.existsSync()) {
+      print('Downloading Clang Format...');
+      await processRunner.runAndStream(
+        'curl',
+        <String>[_clangFormatUrl, '-o', tarFile.path],
+        exitOnError: true,
+      );
+    }
+
+    await processRunner.runAndStream(
+      'tar',
+      <String>['xvfj', tarFile.path],
+      workingDir: clangFormatDir,
+      exitOnError: true,
+    );
+
+    return clangFormatDir
+        .listSync(recursive: true)
+        .firstWhere(
+          (FileSystemEntity entity) =>
+              entity is File && p.basename(entity.path) == 'clang-format',
+          orElse: () => null,
+        )
+        .path;
+  }
+
+//  Future<String> _getBashClangScript() {
+//
+//  }
 }

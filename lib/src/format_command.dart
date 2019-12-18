@@ -46,7 +46,7 @@ class FormatCommand extends PluginCommand {
     }
 
     throw UnsupportedError(
-        'Downloading of clang-format is only supported on MacOS and unbuntu16.04');
+        'Auto-downloading of clang-format is only supported on MacOS and unbuntu16.04. Please specifiy location with --clang-format=<path>.');
   }
 
   @override
@@ -167,6 +167,7 @@ class FormatCommand extends PluginCommand {
     await processRunner.runAndStream(
       'tar',
       <String>['xvfj', (await _downloadClangFormat(clangFormatDir)).path],
+      workingDir: clangFormatDir,
       exitOnError: true,
     );
 
@@ -187,12 +188,12 @@ class FormatCommand extends PluginCommand {
     );
 
     if (!tarFile.existsSync()) {
-      print('Downloading Clang Format...');
-      await processRunner.runAndStream(
-        'curl',
-        <String>[_clangFormatUrl, '-o', tarFile.path],
-        exitOnError: true,
-      );
+      print('Downloading clang-format...');
+      await io.HttpClient()
+          .getUrl(Uri.parse(_clangFormatUrl))
+          .then((io.HttpClientRequest request) => request.close())
+          .then((io.HttpClientResponse response) =>
+              response.pipe(io.File(tarFile.path).openWrite()));
     }
 
     return tarFile;

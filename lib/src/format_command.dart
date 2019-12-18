@@ -43,9 +43,10 @@ class FormatCommand extends PluginCommand {
       return 'http://releases.llvm.org/5.0.0/clang+llvm-5.0.0-x86_64-apple-darwin.tar.xz';
     } else if (io.Platform.isLinux) {
       return 'http://releases.llvm.org/5.0.0/clang+llvm-5.0.0-linux-x86_64-ubuntu16.04.tar.xz';
-    } else if (io.Platform.isWindows) {
-      return 'http://releases.llvm.org/5.0.0/LLVM-5.0.0-win32.exe';
     }
+
+    throw UnsupportedError(
+        'Downloading of clang-format is only supported on MacOS and unbuntu16.04');
   }
 
   @override
@@ -152,23 +153,37 @@ class FormatCommand extends PluginCommand {
 
   Future<String> _getClangFormatPath() async {
     if (argResults['clang-format'] != null) return argResults['clang-format'];
+    if (!io.Platform.isMacOS && !io.Platform.isLinux) return 'clang-format';
 
     final Directory clangFormatDir = fileSystem.directory(p.join(
       p.dirname(p.fromUri(io.Platform.script)),
       'clang-format',
     ));
-    if (!clangFormatDir.existsSync()) clangFormatDir.createSync();
+    clangFormatDir.createSync();
 
-    final FileSystemEntity clangScript =
-        clangFormatDir.listSync(recursive: true).firstWhere(
-              (FileSystemEntity entity) =>
-                  entity is File && p.basename(entity.path) == 'clang-format',
-              orElse: () => null,
-            );
+    final File clangScript = _findBashScript(clangFormatDir);
     if (clangScript != null) return clangScript.path;
 
+    await processRunner.runAndStream(
+      'tar',
+      <String>['xvfj', (await _downloadClangFormat(clangFormatDir)).path],
+      exitOnError: true,
+    );
+
+    return _findBashScript(clangFormatDir).path;
+  }
+
+  File _findBashScript(Directory dir) {
+    return dir.listSync(recursive: true).firstWhere(
+          (FileSystemEntity entity) =>
+              entity is File && p.basename(entity.path) == 'clang-format',
+          orElse: () => null,
+        );
+  }
+
+  Future<File> _downloadClangFormat(Directory dir) async {
     final File tarFile = fileSystem.file(
-      p.join(clangFormatDir.path, 'clang-format.tar.xz'),
+      p.join(dir.path, 'clang-format.tar.xz'),
     );
 
     if (!tarFile.existsSync()) {
@@ -180,24 +195,6 @@ class FormatCommand extends PluginCommand {
       );
     }
 
-    await processRunner.runAndStream(
-      'tar',
-      <String>['xvfj', tarFile.path],
-      workingDir: clangFormatDir,
-      exitOnError: true,
-    );
-
-    return clangFormatDir
-        .listSync(recursive: true)
-        .firstWhere(
-          (FileSystemEntity entity) =>
-              entity is File && p.basename(entity.path) == 'clang-format',
-          orElse: () => null,
-        )
-        .path;
+    return tarFile;
   }
-
-//  Future<String> _getBashClangScript() {
-//
-//  }
 }

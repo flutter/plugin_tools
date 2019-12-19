@@ -153,6 +153,8 @@ class FormatCommand extends PluginCommand {
 
   Future<String> _getClangFormatPath() async {
     if (argResults['clang-format'] != null) return argResults['clang-format'];
+    if (_clangInPath()) return 'clang-format';
+
     if (!io.Platform.isMacOS && !io.Platform.isLinux) return 'clang-format';
 
     final Directory clangFormatDir = fileSystem.directory(p.join(
@@ -197,5 +199,9 @@ class FormatCommand extends PluginCommand {
     }
 
     return tarFile;
+  }
+
+  bool _clangInPath() {
+    return io.Process.runSync('clang-format', <String>['-h']).exitCode == 0;
   }
 }

@@ -19,7 +19,8 @@ const String _googleFormatterUrl =
 class FormatCommand extends PluginCommand {
   FormatCommand(
     Directory packagesDir,
-    FileSystem fileSystem, {
+    FileSystem fileSystem,
+    this.downloadDir, {
     ProcessRunner processRunner = const ProcessRunner(),
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addFlag('travis', hide: true);
@@ -28,6 +29,9 @@ class FormatCommand extends PluginCommand {
       help: 'Path to executable of clang-format v5.',
     );
   }
+
+  /// Location to find .jar java formatter or objective-c clang-format script.
+  final Directory downloadDir;
 
   @override
   final String name = 'format';
@@ -137,9 +141,8 @@ class FormatCommand extends PluginCommand {
           .toList();
 
   Future<String> _getGoogleFormatterPath() async {
-    final String javaFormatterPath = p.join(
-        p.dirname(p.fromUri(io.Platform.script)),
-        'google-java-format-1.3-all-deps.jar');
+    final String javaFormatterPath =
+        downloadDir.childFile('google-java-format-1.3-all-deps.jar').path;
     final File javaFormatterFile = fileSystem.file(javaFormatterPath);
 
     if (!javaFormatterFile.existsSync()) {
@@ -157,10 +160,7 @@ class FormatCommand extends PluginCommand {
 
     if (!io.Platform.isMacOS && !io.Platform.isLinux) return 'clang-format';
 
-    final Directory clangFormatDir = fileSystem.directory(p.join(
-      p.dirname(p.fromUri(io.Platform.script)),
-      'clang-format',
-    ));
+    final Directory clangFormatDir = downloadDir.childDirectory('clang-format');
     clangFormatDir.createSync();
 
     final File clangScript = _findBashScript(clangFormatDir);

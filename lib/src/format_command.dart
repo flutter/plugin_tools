@@ -19,10 +19,10 @@ const String _googleFormatterUrl =
 class FormatCommand extends PluginCommand {
   FormatCommand(
     Directory packagesDir,
-    FileSystem fileSystem,
-    this.downloadDir, {
+    FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
-  }) : super(packagesDir, fileSystem, processRunner: processRunner) {
+  })  : downloadDir = fileSystem.file(p.fromUri(io.Platform.script)).parent,
+        super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addFlag('travis', hide: true);
     argParser.addOption(
       'clang-format',
@@ -57,10 +57,11 @@ class FormatCommand extends PluginCommand {
   Future<Null> run() async {
     checkSharding();
     final String googleFormatterPath = await _getGoogleFormatterPath();
+    final String clangFormatPath = await _getClangFormatPath();
 
     await _formatDart();
     await _formatJava(googleFormatterPath);
-    await _formatObjectiveC();
+    await _formatObjectiveC(clangFormatPath);
 
     if (argResults['travis']) {
       final bool modified = await _didModifyAnything();
@@ -99,7 +100,7 @@ class FormatCommand extends PluginCommand {
     return true;
   }
 
-  Future<Null> _formatObjectiveC() async {
+  Future<Null> _formatObjectiveC(String clangFormatPath) async {
     print('Formatting all .m and .h files...');
     final Iterable<String> hFiles = await _getFilesWithExtension('.h');
     final Iterable<String> mFiles = await _getFilesWithExtension('.m');
@@ -110,18 +111,24 @@ class FormatCommand extends PluginCommand {
       ..addAll(mFiles);
     final Iterable<List<String>> batches = partition(allFiles, 100);
     for (List<String> batch in batches) {
-      await processRunner.runAndStream(await _getClangFormatPath(),
-          <String>['-i', '--style=Google']..addAll(batch),
-          workingDir: packagesDir, exitOnError: true);
+      await processRunner.runAndStream(
+        clangFormatPath,
+        <String>['-i', '--style=Google']..addAll(batch),
+        workingDir: packagesDir,
+        exitOnError: true,
+      );
     }
   }
 
   Future<Null> _formatJava(String googleFormatterPath) async {
     print('Formatting all .java files...');
     final Iterable<String> javaFiles = await _getFilesWithExtension('.java');
-    await processRunner.runAndStream('java',
-        <String>['-jar', googleFormatterPath, '--replace']..addAll(javaFiles),
-        workingDir: packagesDir, exitOnError: true);
+    await processRunner.runAndStream(
+      'java',
+      <String>['-jar', googleFormatterPath, '--replace']..addAll(javaFiles),
+      workingDir: packagesDir,
+      exitOnError: true,
+    );
   }
 
   Future<Null> _formatDart() async {
@@ -130,8 +137,11 @@ class FormatCommand extends PluginCommand {
     print('Formatting all .dart files...');
     final Iterable<String> dartFiles = await _getFilesWithExtension('.dart');
     await processRunner.runAndStream(
-        'flutter', <String>['format']..addAll(dartFiles),
-        workingDir: packagesDir, exitOnError: true);
+      'flutter',
+      <String>['format']..addAll(dartFiles),
+      workingDir: packagesDir,
+      exitOnError: true,
+    );
   }
 
   Future<List<String>> _getFilesWithExtension(String extension) async =>

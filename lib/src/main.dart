@@ -46,11 +46,7 @@ void main(List<String> args) {
     ..addCommand(CreateAllPluginsAppCommand(packagesDir, fileSystem))
     ..addCommand(DriveExamplesCommand(packagesDir, fileSystem))
     ..addCommand(FirebaseTestLabCommand(packagesDir, fileSystem))
-    ..addCommand(FormatCommand(
-      packagesDir,
-      fileSystem,
-      fileSystem.file(p.fromUri(io.Platform.script)).parent,
-    ))
+    ..addCommand(FormatCommand(packagesDir, fileSystem))
     ..addCommand(JavaTestCommand(packagesDir, fileSystem))
     ..addCommand(LintPodspecsCommand(packagesDir, fileSystem))
     ..addCommand(ListCommand(packagesDir, fileSystem))

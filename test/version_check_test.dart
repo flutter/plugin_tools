@@ -232,4 +232,49 @@ void main() {
       testAllowedVersion("1.1.0", "2.3.0", allowed: false);
     });
   });
+
+  group('Pre releases', () {
+    test('nextVersion allows jumping major & minor', () {
+      testAllowedVersion("1.0.0+1", "1.1.0-dev", allowed: true);
+      testAllowedVersion("1.0.0", "1.1.0-dev", allowed: true);
+      testAllowedVersion("1.0.1", "1.1.0-test.1", allowed: true);
+      testAllowedVersion("1.1.0", "2.0.0-dev.1", allowed: true);
+    });
+
+    test('nextVersion does not allow skipping major & minor versions', () {
+      testAllowedVersion("1.0.0", "1.2.0-dev", allowed: false);
+      testAllowedVersion("1.0.1", "1.2.0-test.1", allowed: false);
+      testAllowedVersion("1.1.0", "3.0.0-dev.1", allowed: false);
+    });
+
+    test('nextVersion allows jumping pre number', () {
+      testAllowedVersion("1.1.0-dev.1", "1.1.0-dev.2", allowed: true);
+      testAllowedVersion("2.0.0-test.3", "2.0.0-test.4", allowed: true);
+      testAllowedVersion("2.0.0-alpha.3", "2.0.0-beta.1", allowed: true);
+      testAllowedVersion("2.0.0-alpha.3", "2.0.0-beta", allowed: true);
+    });
+
+    test('nextVersion does not allow downgrade', () {
+      testAllowedVersion("1.1.0-dev.2", "1.1.0-dev.1", allowed: false);
+      testAllowedVersion("2.0.0-test.4", "2.0.0-test.2", allowed: false);
+      testAllowedVersion("2.0.1-alpha.3", "2.0.0-alpha.3", allowed: false);
+      testAllowedVersion("1.0.0+3", "1.0.0-dev.1", allowed: false);
+      testAllowedVersion("1.0.0", "1.0.0-beta", allowed: false);
+      testAllowedVersion("1.0.0-dev.5", "1.0.0-dev.5", allowed: false);
+    });
+
+    test('nextVersion allow upgrade to stable versions', () {
+      testAllowedVersion("1.1.0-dev.1", "1.1.0", allowed: true);
+      testAllowedVersion("2.0.0-alpha", "2.0.0", allowed: true);
+      testAllowedVersion("2.1.1-alpha.3", "2.1.1", allowed: true);
+    });
+
+    test("nextVersion does not allow usage build number with pre release", () {
+      testAllowedVersion("2.0.0-alpha.3", "2.0.0+2", allowed: false);
+      testAllowedVersion("2.0.0", "2.1.0-test.1+1", allowed: false);
+      testAllowedVersion("2.0.0+1", "2.1.0-test.1+1", allowed: false);
+      testAllowedVersion("2.0.0-dev.1", "2.1.0-dev.1", allowed: false);
+      testAllowedVersion("2.0.0-dev.1", "2.0.0-dev.dev", allowed: false);
+    });
+  });
 }

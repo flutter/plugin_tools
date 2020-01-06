@@ -101,16 +101,10 @@ class LintPodspecsCommand extends PluginCommand {
       print('Linting $podspecBasename');
     }
 
-    // Lint two at a time.
-    final Iterable<bool> statuses = await Future.wait(<Future<bool>>[
-      // Lint plugin as framework (use_frameworks!).
-      _runPodLint(podspecPath, runAnalyzer, true),
-
-      // Lint plugin as library.
-      _runPodLint(podspecPath, runAnalyzer, false)
-    ]);
-
-    return !statuses.contains(false);
+    // Lint plugin as framework (use_frameworks!).
+    return await _runPodLint(podspecPath, runAnalyzer, true)
+        // Lint plugin as library.
+        && await _runPodLint(podspecPath, runAnalyzer, false);
   }
 
   Future<bool> _runPodLint(
@@ -124,21 +118,12 @@ class LintPodspecsCommand extends PluginCommand {
       if (libraryLint) '--use-libraries'
     ];
 
-    final Process process = await processRunner.start('pod', arguments,
-        workingDirectory: packagesDir);
+    final int exitCode = await processRunner.runAndStream(
+        'pod',
+        arguments,
+        workingDir: packagesDir
+    );
 
-    if (await process.exitCode != 0) {
-      final String lintType = libraryLint ? 'library' : 'framework';
-      String command =
-          'pod lib lint $podspecPath --analyze --allow-warnings --no-clean';
-      if (libraryLint) {
-        command += ' --use-libraries';
-      }
-      stderr.writeln(
-          '${p.basename(podspecPath)} has $lintType issues. Run "$command" to inspect.');
-      return false;
-    }
-
-    return true;
+    return exitCode == 0;
   }
 }

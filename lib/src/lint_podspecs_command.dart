@@ -120,8 +120,6 @@ class LintPodspecsCommand extends PluginCommand {
       'lint',
       podspecPath,
       '--allow-warnings',
-      '--fail-fast',
-      '--silent',
       if (runAnalyzer) '--analyze',
       if (libraryLint) '--use-libraries'
     ];

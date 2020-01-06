@@ -1,3 +1,7 @@
+## v.0.0.32+5
+
+- Remove --fail-fast and --silent from lint podspec command.
+
 ## v.0.0.32+4
 
 - Update `publish-plugin` to use `flutter pub publish` instead of just `pub

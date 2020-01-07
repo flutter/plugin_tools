@@ -101,14 +101,33 @@ class LintPodspecsCommand extends PluginCommand {
       print('Linting $podspecBasename');
     }
 
-    // Lint plugin as framework (use_frameworks!).
-    return await _runPodLint(podspecPath, runAnalyzer, true)
-        // Lint plugin as library.
-        && await _runPodLint(podspecPath, runAnalyzer, false);
+    // Lint two at a time.
+    final Iterable<Process> results = await Future.wait(<Future<Process>>[
+      // Lint plugin as framework (use_frameworks!).
+      _runPodLint(podspecPath, runAnalyzer: runAnalyzer, libraryLint: true),
+
+      // Lint plugin as library.
+      _runPodLint(podspecPath, runAnalyzer: runAnalyzer, libraryLint: false)
+    ]);
+
+    bool success = true;
+
+    // Print output sequentially.
+    for (Process result in results) {
+      // Wait for process to complete.
+      int exitCode = await result.exitCode;
+      print(result.stdout);
+      print(result.stderr);
+      if (exitCode != 0) {
+        success = false;
+      }
+    }
+
+    return success;
   }
 
-  Future<bool> _runPodLint(
-      String podspecPath, bool runAnalyzer, bool libraryLint) async {
+  Future<Process> _runPodLint(String podspecPath,
+      {bool runAnalyzer, bool libraryLint}) async {
     final List<String> arguments = <String>[
       'lib',
       'lint',
@@ -118,12 +137,6 @@ class LintPodspecsCommand extends PluginCommand {
       if (libraryLint) '--use-libraries'
     ];
 
-    final int exitCode = await processRunner.runAndStream(
-        'pod',
-        arguments,
-        workingDir: packagesDir
-    );
-
-    return exitCode == 0;
+    return Process.start('pod', arguments, workingDirectory: packagesDir.path);
   }
 }

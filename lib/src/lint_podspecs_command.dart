@@ -137,6 +137,6 @@ class LintPodspecsCommand extends PluginCommand {
       if (libraryLint) '--use-libraries'
     ];
 
-    return Process.start('pod', arguments, workingDirectory: packagesDir.path);
+    return processRunner.start('pod', arguments, workingDirectory: packagesDir);
   }
 }

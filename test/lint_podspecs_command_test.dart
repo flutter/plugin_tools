@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:flutter_plugin_tools/src/lint_podspecs_command.dart';
@@ -14,14 +16,21 @@ void main() {
     CommandRunner<Null> runner;
     MockPlatform mockPlatform;
     final RecordingProcessRunner processRunner = RecordingProcessRunner();
+    List<String> printedMessages;
 
     setUp(() {
       initializeFakePackages();
+
+      printedMessages = <String>[];
       mockPlatform = MockPlatform();
       when(mockPlatform.isMacOS).thenReturn(true);
       final LintPodspecsCommand command = LintPodspecsCommand(
-          mockPackagesDir, mockFileSystem,
-          processRunner: processRunner, platform: mockPlatform);
+        mockPackagesDir,
+        mockFileSystem,
+        processRunner: processRunner,
+        platform: mockPlatform,
+        print: (Object message) => printedMessages.add(message.toString()),
+      );
 
       runner =
           CommandRunner<Null>('podspec_test', 'Test for $LintPodspecsCommand');
@@ -30,6 +39,10 @@ void main() {
       mockLintProcess.exitCodeCompleter.complete(0);
       processRunner.processToReturn = mockLintProcess;
       processRunner.recordedCalls.clear();
+    });
+
+    tearDown(() {
+      cleanupPackages();
     });
 
     test('only runs on macOS', () async {
@@ -44,8 +57,6 @@ void main() {
         processRunner.recordedCalls,
         equals(<ProcessCall>[]),
       );
-
-      cleanupPackages();
     });
 
     test('runs pod lib lint on a podspec', () async {
@@ -54,6 +65,9 @@ void main() {
         <String>['ios', 'plugin1.podspec'],
         <String>['bogus.dart'], // Ignore non-podspecs.
       ]);
+
+      processRunner.resultStdout = 'Foo';
+      processRunner.resultStderr = 'Bar';
 
       await runner.run(<String>['podspecs']);
 
@@ -85,7 +99,10 @@ void main() {
         ]),
       );
 
-      cleanupPackages();
+      expect(
+          printedMessages, contains('Linting and analyzing plugin1.podspec'));
+      expect(printedMessages, contains('Foo'));
+      expect(printedMessages, contains('Bar'));
     });
 
     test('skips podspecs with known warnings', () async {
@@ -105,8 +122,6 @@ void main() {
           ProcessCall('which', <String>['pod'], mockPackagesDir.path),
         ]),
       );
-
-      cleanupPackages();
     });
 
     test('skips analyzer for podspecs with known warnings', () async {
@@ -143,7 +158,7 @@ void main() {
         ]),
       );
 
-      cleanupPackages();
+      expect(printedMessages, contains('Linting plugin1.podspec'));
     });
   });
 }

@@ -312,6 +312,26 @@ class ProcessRunner {
     return process.exitCode;
   }
 
+  /// Run the [executable] with [args].
+  ///
+  /// The current working directory of [executable] can be overridden by
+  /// passing [workingDir].
+  ///
+  /// If [exitOnError] is set to `true`, then this will throw an error if
+  /// the [executable] terminates with a non-zero exit code.
+  ///
+  /// Returns the [io.ProcessResult] of the [executable].
+  Future<io.ProcessResult> run(String executable, List<String> args,
+      {Directory workingDir,
+      bool exitOnError = false,
+      stdoutEncoding = io.systemEncoding,
+      stderrEncoding = io.systemEncoding}) async {
+    return io.Process.run(executable, args,
+        workingDirectory: workingDir?.path,
+        stdoutEncoding: stdoutEncoding,
+        stderrEncoding: stderrEncoding);
+  }
+
   /// Starts the [executable] with [args].
   ///
   /// The current working directory of [executable] can be overridden by

@@ -131,6 +131,12 @@ class RecordingProcessRunner extends ProcessRunner {
   io.Process processToReturn;
   final List<ProcessCall> recordedCalls = <ProcessCall>[];
 
+  /// Populate for [io.ProcessResult] to use a String [stdout] instead of a [List] of [int].
+  String resultStdout;
+
+  /// Populate for [io.ProcessResult] to use a String [stderr] instead of a [List] of [int].
+  String resultStderr;
+
   @override
   Future<int> runAndStream(
     String executable,
@@ -140,6 +146,26 @@ class RecordingProcessRunner extends ProcessRunner {
   }) {
     recordedCalls.add(ProcessCall(executable, args, workingDir?.path));
     return Future<int>.value(0);
+  }
+
+  /// Returns [io.ProcessResult] created from [processToReturn], [resultStdout], and [resultStderr].
+  @override
+  Future<io.ProcessResult> run(String executable, List<String> args,
+      {Directory workingDir,
+      bool exitOnError = false,
+      stdoutEncoding = io.systemEncoding,
+      stderrEncoding = io.systemEncoding}) async {
+    recordedCalls.add(ProcessCall(executable, args, workingDir?.path));
+    io.ProcessResult result;
+
+    if (processToReturn != null) {
+      result = io.ProcessResult(
+          processToReturn.pid,
+          await processToReturn.exitCode,
+          resultStdout ?? processToReturn.stdout,
+          resultStderr ?? processToReturn.stderr);
+    }
+    return Future<io.ProcessResult>.value(result);
   }
 
   @override

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart';
@@ -10,6 +11,8 @@ import 'package:path/path.dart' as p;
 import 'package:platform/platform.dart';
 
 import 'common.dart';
+
+typedef void Print(Object object);
 
 /// Lint the CocoaPod podspecs, run the static analyzer on iOS/macOS plugin
 /// platform code, and run unit tests.
@@ -21,7 +24,9 @@ class LintPodspecsCommand extends PluginCommand {
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
     this.platform = const LocalPlatform(),
-  }) : super(packagesDir, fileSystem, processRunner: processRunner) {
+    Print print = print,
+  })  : _print = print,
+        super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addMultiOption('skip',
         help:
             'Skip all linting for podspecs with this basename (example: federated plugins with placeholder podspecs)',
@@ -45,10 +50,12 @@ class LintPodspecsCommand extends PluginCommand {
 
   final Platform platform;
 
+  final Print _print;
+
   @override
   Future<Null> run() async {
     if (!platform.isMacOS) {
-      print('Detected platform is not macOS, skipping podspec lint');
+      _print('Detected platform is not macOS, skipping podspec lint');
       return;
     }
 
@@ -57,7 +64,7 @@ class LintPodspecsCommand extends PluginCommand {
     await processRunner.runAndExitOnError('which', <String>['pod'],
         workingDir: packagesDir);
 
-    print('Starting podspec lint test');
+    _print('Starting podspec lint test');
 
     final List<String> failingPlugins = <String>[];
     for (File podspec in await _podspecsToLint()) {
@@ -66,11 +73,11 @@ class LintPodspecsCommand extends PluginCommand {
       }
     }
 
-    print('\n\n');
+    _print('\n\n');
     if (failingPlugins.isNotEmpty) {
-      print('The following plugins have podspec errors (see above):');
+      _print('The following plugins have podspec errors (see above):');
       failingPlugins.forEach((String plugin) {
-        print(' * $plugin');
+        _print(' * $plugin');
       });
       throw ToolExit(1);
     }
@@ -96,51 +103,41 @@ class LintPodspecsCommand extends PluginCommand {
 
     final String podspecBasename = p.basename(podspecPath);
     if (runAnalyzer) {
-      print('Linting and analyzing $podspecBasename');
+      _print('Linting and analyzing $podspecBasename');
     } else {
-      print('Linting $podspecBasename');
+      _print('Linting $podspecBasename');
     }
 
     // Lint two at a time.
-    final Iterable<bool> statuses = await Future.wait(<Future<bool>>[
+    final Iterable<ProcessResult> results =
+        await Future.wait(<Future<ProcessResult>>[
       // Lint plugin as framework (use_frameworks!).
-      _runPodLint(podspecPath, runAnalyzer, true),
+      _runPodLint(podspecPath, runAnalyzer: runAnalyzer, libraryLint: true),
 
       // Lint plugin as library.
-      _runPodLint(podspecPath, runAnalyzer, false)
+      _runPodLint(podspecPath, runAnalyzer: runAnalyzer, libraryLint: false)
     ]);
 
-    return !statuses.contains(false);
+    for (ProcessResult result in results) {
+      _print(result.stdout);
+      _print(result.stderr);
+    }
+
+    return results.every((ProcessResult result) => result.exitCode == 0);
   }
 
-  Future<bool> _runPodLint(
-      String podspecPath, bool runAnalyzer, bool libraryLint) async {
+  Future<ProcessResult> _runPodLint(String podspecPath,
+      {bool runAnalyzer, bool libraryLint}) async {
     final List<String> arguments = <String>[
       'lib',
       'lint',
       podspecPath,
       '--allow-warnings',
-      '--fail-fast',
-      '--silent',
       if (runAnalyzer) '--analyze',
       if (libraryLint) '--use-libraries'
     ];
 
-    final Process process = await processRunner.start('pod', arguments,
-        workingDirectory: packagesDir);
-
-    if (await process.exitCode != 0) {
-      final String lintType = libraryLint ? 'library' : 'framework';
-      String command =
-          'pod lib lint $podspecPath --analyze --allow-warnings --no-clean';
-      if (libraryLint) {
-        command += ' --use-libraries';
-      }
-      stderr.writeln(
-          '${p.basename(podspecPath)} has $lintType issues. Run "$command" to inspect.');
-      return false;
-    }
-
-    return true;
+    return processRunner.run('pod', arguments,
+        workingDir: packagesDir, stdoutEncoding: utf8, stderrEncoding: utf8);
   }
 }

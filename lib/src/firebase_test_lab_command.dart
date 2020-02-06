@@ -165,7 +165,8 @@ class FirebaseTestLabCommand extends PluginCommand {
             continue;
           }
           final String buildId = io.Platform.environment['CIRRUS_BUILD_ID'];
-          final String resultsDir = 'plugins_android_test/$packageName/$buildId';
+          final String resultsDir =
+              'plugins_android_test/$packageName/$buildId';
           final List<String> args = <String>[
             'firebase',
             'test',

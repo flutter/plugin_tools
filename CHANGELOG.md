@@ -1,3 +1,7 @@
+## v.0.0.32+6
+
+- Ensure that Firebase Test Lab tests have a unique storage bucket for each package.
+
 ## v.0.0.32+5
 
 - Remove --fail-fast and --silent from lint podspec command.

@@ -34,10 +34,6 @@ class FirebaseTestLabCommand extends PluginCommand {
             'Device model(s) to test. See https://cloud.google.com/sdk/gcloud/reference/firebase/test/android/run for more info');
     argParser.addOption('results-bucket',
         defaultsTo: 'gs://flutter_firebase_testlab');
-    final String gitRevision = io.Platform.environment['GIT_REVISION'];
-    final String buildId = io.Platform.environment['CIRRUS_BUILD_ID'];
-    argParser.addOption('results-dir',
-        defaultsTo: 'plugins_android_test/$gitRevision/$buildId');
   }
 
   @override
@@ -168,6 +164,9 @@ class FirebaseTestLabCommand extends PluginCommand {
             failingPackages.add(packageName);
             continue;
           }
+          final String buildId = io.Platform.environment['CIRRUS_BUILD_ID'];
+          final String resultsDir =
+              'plugins_android_test/$packageName/$buildId';
           final List<String> args = <String>[
             'firebase',
             'test',
@@ -182,7 +181,7 @@ class FirebaseTestLabCommand extends PluginCommand {
             '--timeout',
             '5m',
             '--results-bucket=${argResults['results-bucket']}',
-            '--results-dir=${argResults['results-dir']}',
+            '--results-dir=${resultsDir}',
           ];
           for (String device in argResults['device']) {
             args.addAll(<String>['--device', device]);

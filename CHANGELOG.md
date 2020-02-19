@@ -1,3 +1,7 @@
+## v.0.0.32+7
+
+- Ensure that Firebase Test Lab tests have a unique storage bucket for each test run.
+
 ## v.0.0.32+6
 
 - Ensure that Firebase Test Lab tests have a unique storage bucket for each package.

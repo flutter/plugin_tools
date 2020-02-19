@@ -84,7 +84,8 @@ class FirebaseTestLabCommand extends PluginCommand {
 
     final List<String> failingPackages = <String>[];
     final List<String> missingFlutterBuild = <String>[];
-    int resultsCounter = 0; // We use a unique GCS bucket for each Firebase Test Lab run
+    int resultsCounter =
+        0; // We use a unique GCS bucket for each Firebase Test Lab run
     await for (Directory package in packagesWithTests) {
       // See https://github.com/flutter/flutter/issues/38983
 

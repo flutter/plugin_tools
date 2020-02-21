@@ -1,6 +1,7 @@
 ## v.0.0.32+7
 
-- Ensure that Firebase Test Lab tests have a unique storage bucket for each test run.
+- Use package:uuid to ensure that Firebase Test Lab tests have a unique storage
+  bucket each time tests are run.
 
 ## v.0.0.32+6
 

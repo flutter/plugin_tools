@@ -52,7 +52,7 @@ class FirebaseTestLabCommand extends PluginCommand {
 
   /// A unique identifier for this test run, to prevent directories from being shared between tests.
   ///
-  /// Defaults to `Uuid().v4()`
+  /// Defaults to `Uuid().v4()`.
   final String testRunId;
 
   Future<void> _configureFirebaseProject() async {

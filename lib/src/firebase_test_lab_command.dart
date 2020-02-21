@@ -7,6 +7,7 @@ import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
+import 'package:uuid/uuid.dart';
 
 import 'common.dart';
 
@@ -14,8 +15,10 @@ class FirebaseTestLabCommand extends PluginCommand {
   FirebaseTestLabCommand(
     Directory packagesDir,
     FileSystem fileSystem, {
+    String testRunId,
     ProcessRunner processRunner = const ProcessRunner(),
-  }) : super(packagesDir, fileSystem, processRunner: processRunner) {
+  }) : this.testRunId = testRunId ?? Uuid().v4(),
+    super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addOption(
       'project',
       defaultsTo: 'flutter-infra',
@@ -46,6 +49,11 @@ class FirebaseTestLabCommand extends PluginCommand {
       'instrumentation_test package.';
 
   static const String _gradleWrapper = 'gradlew';
+
+  /// A unique identifier for this test run, to prevent directories from being shared between tests.
+  ///
+  /// Defaults to `Uuid().v4()`
+  final String testRunId;
 
   Future<void> _configureFirebaseProject() async {
     int exitCode = await processRunner.runAndStream('gcloud', <String>[
@@ -85,7 +93,7 @@ class FirebaseTestLabCommand extends PluginCommand {
     final List<String> failingPackages = <String>[];
     final List<String> missingFlutterBuild = <String>[];
     int resultsCounter =
-        0; // We use a unique GCS bucket for each Firebase Test Lab run
+        0; // Ensures a unique GCS bucket path for each Firebase Test Lab run
     await for (Directory package in packagesWithTests) {
       // See https://github.com/flutter/flutter/issues/38983
 
@@ -168,7 +176,7 @@ class FirebaseTestLabCommand extends PluginCommand {
           }
           final String buildId = io.Platform.environment['CIRRUS_BUILD_ID'];
           final String resultsDir =
-              'plugins_android_test/$packageName/$buildId/${resultsCounter++}/';
+              'plugins_android_test/$packageName/$buildId/${testRunId}/${resultsCounter++}/';
           final List<String> args = <String>[
             'firebase',
             'test',

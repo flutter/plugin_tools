@@ -16,7 +16,8 @@ void main() {
       processRunner = RecordingProcessRunner();
       final FirebaseTestLabCommand command = FirebaseTestLabCommand(
           mockPackagesDir, mockFileSystem,
-          processRunner: processRunner);
+          processRunner: processRunner,
+          testRunId: 'testRun');
 
       runner = CommandRunner<Null>(
           'firebase_test_lab_command', 'Test for $FirebaseTestLabCommand');
@@ -82,7 +83,7 @@ void main() {
               '/packages/plugin/example/android'),
           ProcessCall(
               'gcloud',
-              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/0/ --device model=flame,version=29 --device model=seoul,version=26'
+              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/testRun/0/ --device model=flame,version=29 --device model=seoul,version=26'
                   .split(' '),
               '/packages/plugin/example'),
           ProcessCall(
@@ -92,7 +93,7 @@ void main() {
               '/packages/plugin/example/android'),
           ProcessCall(
               'gcloud',
-              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/1/ --device model=flame,version=29 --device model=seoul,version=26'
+              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/testRun/1/ --device model=flame,version=29 --device model=seoul,version=26'
                   .split(' '),
               '/packages/plugin/example'),
           ProcessCall(
@@ -102,7 +103,7 @@ void main() {
               '/packages/plugin/example/android'),
           ProcessCall(
               'gcloud',
-              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/2/ --device model=flame,version=29 --device model=seoul,version=26'
+              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/testRun/2/ --device model=flame,version=29 --device model=seoul,version=26'
                   .split(' '),
               '/packages/plugin/example'),
         ]),

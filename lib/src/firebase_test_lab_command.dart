@@ -17,8 +17,8 @@ class FirebaseTestLabCommand extends PluginCommand {
     FileSystem fileSystem, {
     String testRunId,
     ProcessRunner processRunner = const ProcessRunner(),
-  }) : this.testRunId = testRunId ?? Uuid().v4(),
-    super(packagesDir, fileSystem, processRunner: processRunner) {
+  })  : this.testRunId = testRunId ?? Uuid().v4(),
+        super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addOption(
       'project',
       defaultsTo: 'flutter-infra',

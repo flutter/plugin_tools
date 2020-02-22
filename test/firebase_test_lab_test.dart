@@ -16,8 +16,7 @@ void main() {
       processRunner = RecordingProcessRunner();
       final FirebaseTestLabCommand command = FirebaseTestLabCommand(
           mockPackagesDir, mockFileSystem,
-          processRunner: processRunner,
-          testRunId: 'testRun');
+          processRunner: processRunner, testRunId: 'testRun');
 
       runner = CommandRunner<Null>(
           'firebase_test_lab_command', 'Test for $FirebaseTestLabCommand');

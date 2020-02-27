@@ -50,6 +50,8 @@ void main() {
         'model=flame,version=29',
         '--device',
         'model=seoul,version=26',
+        '--test-run-id',
+        'testRunId'
       ]);
 
       expect(
@@ -82,7 +84,7 @@ void main() {
               '/packages/plugin/example/android'),
           ProcessCall(
               'gcloud',
-              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/0/ --device model=flame,version=29 --device model=seoul,version=26'
+              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/testRunId/0/ --device model=flame,version=29 --device model=seoul,version=26'
                   .split(' '),
               '/packages/plugin/example'),
           ProcessCall(
@@ -92,7 +94,7 @@ void main() {
               '/packages/plugin/example/android'),
           ProcessCall(
               'gcloud',
-              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/1/ --device model=flame,version=29 --device model=seoul,version=26'
+              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/testRunId/1/ --device model=flame,version=29 --device model=seoul,version=26'
                   .split(' '),
               '/packages/plugin/example'),
           ProcessCall(
@@ -102,7 +104,7 @@ void main() {
               '/packages/plugin/example/android'),
           ProcessCall(
               'gcloud',
-              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/2/ --device model=flame,version=29 --device model=seoul,version=26'
+              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/testRunId/2/ --device model=flame,version=29 --device model=seoul,version=26'
                   .split(' '),
               '/packages/plugin/example'),
         ]),

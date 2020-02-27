@@ -7,6 +7,7 @@ import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
+import 'package:uuid/uuid.dart';
 
 import 'common.dart';
 
@@ -24,6 +25,10 @@ class FirebaseTestLabCommand extends PluginCommand {
     argParser.addOption('service-key',
         defaultsTo:
             p.join(io.Platform.environment['HOME'], 'gcloud-service-key.json'));
+    argParser.addOption('test-run-id',
+        defaultsTo: Uuid().v4(),
+        help:
+            'Optional string to append to the results path, to avoid conflicts. Randomly chosen if none is provided.');
     argParser.addMultiOption('device',
         splitCommas: false,
         defaultsTo: <String>[
@@ -167,8 +172,9 @@ class FirebaseTestLabCommand extends PluginCommand {
             continue;
           }
           final String buildId = io.Platform.environment['CIRRUS_BUILD_ID'];
+          final String testRunId = argResults['test-run-id'];
           final String resultsDir =
-              'plugins_android_test/$packageName/$buildId/${resultsCounter++}/';
+              'plugins_android_test/$packageName/$buildId/$testRunId/${resultsCounter++}/';
           final List<String> args = <String>[
             'firebase',
             'test',

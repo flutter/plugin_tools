@@ -1,3 +1,7 @@
+## v.0.0.33
+
+- Firebase Test Lab command generates a configurable unique path suffix for results.
+
 ## v.0.0.32+7
 
 - Ensure that Firebase Test Lab tests have a unique storage bucket for each test run.

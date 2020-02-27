@@ -1,3 +1,7 @@
+## v.0.0.35+1
+
+- Minor cleanup to the analyze test.
+
 ## v.0.0.35
 
 - Firebase Test Lab command generates a configurable unique path suffix for results.

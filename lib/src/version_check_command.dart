@@ -160,6 +160,16 @@ class VersionCheckCommand extends PluginCommand {
           print(redError);
           throw ToolExit(1);
         }
+
+        bool isPlatformInterface = pubspec.name.endsWith("_platform_interface");
+        if (isPlatformInterface && allowedNextVersions[headVersion] ==
+            NextVersionType.BREAKING_MAJOR) {
+          final String error = '$pubspecPath breaking change detected.\n'
+              'Breaking changes to platform interfaces are strongly discouraged.\n';
+          final Colorize redError = Colorize(error)..red();
+          print(redError);
+          throw ToolExit(1);
+        }
       } on io.ProcessException {
         print('Unable to find pubspec in master for $pubspecPath.'
             ' Safe to ignore if the project is new.');

@@ -1,3 +1,7 @@
+## v.0.0.32+8
+
+- Minor cleanup to the analyze test.
+
 ## v.0.0.32+7
 
 - Ensure that Firebase Test Lab tests have a unique storage bucket for each test run.

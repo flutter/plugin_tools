@@ -19,7 +19,7 @@ void main() {
         processRunner: processRunner);
 
     runner = CommandRunner<Null>(
-        'drive_examples_command', 'Test for drive_example_command');
+        'analyze_command', 'Test for analyze_command');
     runner.addCommand(analyzeCommand);
   });
 

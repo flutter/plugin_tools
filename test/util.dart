@@ -69,7 +69,7 @@ Directory createFakePlugin(
 /// Creates a `pubspec.yaml` file with a flutter dependency.
 void createFakePubspec(
   Directory parent, {
-  String name: 'plugin',
+  String name: 'fake_package',
   bool isFlutter = true,
   bool includeVersion = false,
   bool isWebPlugin = false,

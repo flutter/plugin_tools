@@ -1,3 +1,8 @@
+## v.0.0.33
+
+- Version check command now fails on breaking changes to platform interfaces.
+- Updated version check test to be more flexible.
+
 ## v.0.0.32+7
 
 - Ensure that Firebase Test Lab tests have a unique storage bucket for each test run.

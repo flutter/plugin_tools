@@ -1,3 +1,7 @@
+## v.0.0.33+1
+
+- Fixes some formatting and test issues that weren't caught by CI.
+
 ## v.0.0.33
 
 - Version check command now fails on breaking changes to platform interfaces.

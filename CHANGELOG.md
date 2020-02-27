@@ -1,6 +1,11 @@
-## v.0.0.32+8
+## v.0.0.33+1
 
 - Minor cleanup to the analyze test.
+
+## v.0.0.33
+
+- Version check command now fails on breaking changes to platform interfaces.
+- Updated version check test to be more flexible.
 
 ## v.0.0.32+7
 

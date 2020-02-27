@@ -38,18 +38,19 @@ void main() {
     CommandRunner<VersionCheckCommand> runner;
     RecordingProcessRunner processRunner;
     List<List<String>> gitDirCommands;
+    String gitDiffResponse;
     Map<String, String> gitShowResponses;
 
     setUp(() {
       gitDirCommands = <List<String>>[];
+      gitDiffResponse = '';
       gitShowResponses = <String, String>{};
       final MockGitDir gitDir = MockGitDir();
       when(gitDir.runCommand(any)).thenAnswer((Invocation invocation) {
         gitDirCommands.add(invocation.positionalArguments[0]);
         final MockProcessResult mockProcessResult = MockProcessResult();
         if (invocation.positionalArguments[0][0] == 'diff') {
-          when<String>(mockProcessResult.stdout)
-              .thenReturn("packages/plugin/pubspec.yaml");
+          when<String>(mockProcessResult.stdout).thenReturn(gitDiffResponse);
         } else if (invocation.positionalArguments[0][0] == 'show') {
           final String response =
               gitShowResponses[invocation.positionalArguments[0][1]];
@@ -68,11 +69,16 @@ void main() {
       runner.addCommand(command);
     });
 
+    tearDown(() {
+      cleanupPackages();
+    });
+
     test('allows valid version', () async {
       createFakePlugin('plugin');
+      gitDiffResponse = "packages/plugin/pubspec.yaml";
       gitShowResponses = <String, String>{
-        'master:packages/plugin/pubspec.yaml': 'version: 0.0.1',
-        'HEAD:packages/plugin/pubspec.yaml': 'version: 0.0.2',
+        'master:packages/plugin/pubspec.yaml': 'version: 1.0.0',
+        'HEAD:packages/plugin/pubspec.yaml': 'version: 2.0.0',
       };
       final List<String> output = await runCapturingPrint(
           runner, <String>['version-check', '--base_sha=master']);
@@ -90,11 +96,11 @@ void main() {
           equals('show master:packages/plugin/pubspec.yaml'));
       expect(gitDirCommands[2].join(' '),
           equals('show HEAD:packages/plugin/pubspec.yaml'));
-      cleanupPackages();
     });
 
     test('denies invalid version', () async {
       createFakePlugin('plugin');
+      gitDiffResponse = "packages/plugin/pubspec.yaml";
       gitShowResponses = <String, String>{
         'master:packages/plugin/pubspec.yaml': 'version: 0.0.1',
         'HEAD:packages/plugin/pubspec.yaml': 'version: 0.2.0',
@@ -113,11 +119,11 @@ void main() {
           equals('show master:packages/plugin/pubspec.yaml'));
       expect(gitDirCommands[2].join(' '),
           equals('show HEAD:packages/plugin/pubspec.yaml'));
-      cleanupPackages();
     });
 
     test('gracefully handles missing pubspec.yaml', () async {
       createFakePlugin('plugin');
+      gitDiffResponse = "packages/plugin/pubspec.yaml";
       mockFileSystem.currentDirectory
           .childDirectory('packages')
           .childDirectory('plugin')
@@ -135,7 +141,60 @@ void main() {
       expect(gitDirCommands.length, equals(1));
       expect(gitDirCommands.first.join(' '),
           equals('diff --name-only master HEAD'));
-      cleanupPackages();
+    });
+
+    test('allows minor changes to platform interfaces', () async {
+      createFakePlugin('plugin_platform_interface');
+      gitDiffResponse = "packages/plugin_platform_interface/pubspec.yaml";
+      gitShowResponses = <String, String>{
+        'master:packages/plugin_platform_interface/pubspec.yaml':
+            'version: 1.0.0',
+        'HEAD:packages/plugin_platform_interface/pubspec.yaml':
+            'version: 1.1.0',
+      };
+      final List<String> output = await runCapturingPrint(
+          runner, <String>['version-check', '--base_sha=master']);
+      expect(
+        output,
+        orderedEquals(<String>[
+          'No version check errors found!',
+        ]),
+      );
+      expect(gitDirCommands.length, equals(3));
+      expect(
+          gitDirCommands[0].join(' '), equals('diff --name-only master HEAD'));
+      expect(
+          gitDirCommands[1].join(' '),
+          equals(
+              'show master:packages/plugin_platform_interface/pubspec.yaml'));
+      expect(gitDirCommands[2].join(' '),
+          equals('show HEAD:packages/plugin_platform_interface/pubspec.yaml'));
+    });
+
+    test('disallows breaking changes to platform interfaces', () async {
+      createFakePlugin('plugin_platform_interface');
+      gitDiffResponse = "packages/plugin_platform_interface/pubspec.yaml";
+      gitShowResponses = <String, String>{
+        'master:packages/plugin_platform_interface/pubspec.yaml':
+            'version: 1.0.0',
+        'HEAD:packages/plugin_platform_interface/pubspec.yaml':
+            'version: 2.0.0',
+      };
+      final Future<List<String>> output = runCapturingPrint(
+          runner, <String>['version-check', '--base_sha=master']);
+      await expectLater(
+        output,
+        throwsA(const TypeMatcher<Error>()),
+      );
+      expect(gitDirCommands.length, equals(3));
+      expect(
+          gitDirCommands[0].join(' '), equals('diff --name-only master HEAD'));
+      expect(
+          gitDirCommands[1].join(' '),
+          equals(
+              'show master:packages/plugin_platform_interface/pubspec.yaml'));
+      expect(gitDirCommands[2].join(' '),
+          equals('show HEAD:packages/plugin_platform_interface/pubspec.yaml'));
     });
   });
 

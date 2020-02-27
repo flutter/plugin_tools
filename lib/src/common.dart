@@ -11,6 +11,8 @@ import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
+typedef void Print(Object object);
+
 /// Returns whether the given directory contains a Flutter package.
 bool isFlutterPackage(FileSystemEntity entity, FileSystem fileSystem) {
   if (entity == null || entity is! Directory) {

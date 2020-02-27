@@ -44,7 +44,8 @@ Directory createFakePlugin(
   if (withSingleExample) {
     final Directory exampleDir = pluginDirectory.childDirectory('example')
       ..createSync();
-    createFakePubspec(exampleDir, name: "${name}_example", isFlutter: isFlutter);
+    createFakePubspec(exampleDir,
+        name: "${name}_example", isFlutter: isFlutter);
   } else if (withExamples.isNotEmpty) {
     final Directory exampleDir = pluginDirectory.childDirectory('example')
       ..createSync();

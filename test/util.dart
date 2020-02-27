@@ -146,9 +146,10 @@ class RecordingProcessRunner extends ProcessRunner {
     List<String> args, {
     Directory workingDir,
     bool exitOnError = false,
-  }) {
+  }) async {
     recordedCalls.add(ProcessCall(executable, args, workingDir?.path));
-    return Future<int>.value(0);
+    return Future<int>.value(
+        processToReturn == null ? 0 : await processToReturn.exitCode);
   }
 
   /// Returns [io.ProcessResult] created from [processToReturn], [resultStdout], and [resultStderr].
@@ -176,9 +177,17 @@ class RecordingProcessRunner extends ProcessRunner {
     String executable,
     List<String> args, {
     Directory workingDir,
-  }) {
+  }) async {
     recordedCalls.add(ProcessCall(executable, args, workingDir?.path));
-    return Future<io.ProcessResult>.value(null);
+    io.ProcessResult result;
+    if (processToReturn != null) {
+      result = io.ProcessResult(
+          processToReturn.pid,
+          await processToReturn.exitCode,
+          resultStdout ?? processToReturn.stdout,
+          resultStderr ?? processToReturn.stderr);
+    }
+    return Future<io.ProcessResult>.value(result);
   }
 
   @override

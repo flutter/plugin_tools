@@ -1,3 +1,8 @@
+## v.0.0.34
+
+- Firebase Test Lab command now only tries to configure the project once
+- Firebase Test Lab command now retries project configuration up to five times.
+
 ## v.0.0.33+1
 
 - Fixes formatting issues that got past our CI due to 

@@ -1,6 +1,7 @@
 ## v.0.0.33+1
 
-- Fixes some formatting and test issues that weren't caught by CI.
+- Fixes formatting and correctness issues with the `createFakePubspec` testing
+  method that got past our CI due to https://github.com/flutter/flutter/issues/51585.
 
 ## v.0.0.33
 

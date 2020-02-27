@@ -144,7 +144,6 @@ void main() {
     });
 
     test('allows minor changes to platform interfaces', () async {
-      cleanupPackages();
       createFakePlugin('plugin_platform_interface');
       gitDiffResponse = "packages/plugin_platform_interface/pubspec.yaml";
       gitShowResponses = <String, String>{
@@ -173,7 +172,6 @@ void main() {
     });
 
     test('disallows breaking changes to platform interfaces', () async {
-      cleanupPackages();
       createFakePlugin('plugin_platform_interface');
       gitDiffResponse = "packages/plugin_platform_interface/pubspec.yaml";
       gitShowResponses = <String, String>{

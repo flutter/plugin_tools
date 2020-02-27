@@ -1,3 +1,7 @@
+## v.0.0.35
+
+- Firebase Test Lab command generates a configurable unique path suffix for results.
+
 ## v.0.0.34
 
 - Firebase Test Lab command now only tries to configure the project once

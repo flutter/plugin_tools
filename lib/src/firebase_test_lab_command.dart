@@ -16,7 +16,8 @@ class FirebaseTestLabCommand extends PluginCommand {
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
     Print print = print,
-  }) : _print = print, super(packagesDir, fileSystem, processRunner: processRunner) {
+  })  : _print = print,
+        super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addOption(
       'project',
       defaultsTo: 'flutter-infra',
@@ -60,13 +61,13 @@ class FirebaseTestLabCommand extends PluginCommand {
     }
     int attempts = 5;
     for (int i = 0; i < attempts; i++) {
-    int exitCode = await processRunner.runAndStream('gcloud', <String>[
-      'auth',
-      'activate-service-account',
-      '--key-file=${argResults['service-key']}',
-    ]);
+      int exitCode = await processRunner.runAndStream('gcloud', <String>[
+        'auth',
+        'activate-service-account',
+        '--key-file=${argResults['service-key']}',
+      ]);
 
-    if (exitCode == 0) {
+      if (exitCode == 0) {
         exitCode = await processRunner.runAndStream('gcloud', <String>[
           '--quiet',
           'config',
@@ -80,9 +81,10 @@ class FirebaseTestLabCommand extends PluginCommand {
           _firebaseProjectConfigured.complete(null);
           return;
         }
+      }
     }
-    }
-    _print('\nConfiguring Firebase project failed after $attempts attempts. Exiting.');
+    _print(
+        '\nConfiguring Firebase project failed after $attempts attempts. Exiting.');
     throw ToolExit(1);
   }
 

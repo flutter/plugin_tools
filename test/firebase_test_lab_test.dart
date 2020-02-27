@@ -20,7 +20,7 @@ void main() {
       final FirebaseTestLabCommand command = FirebaseTestLabCommand(
           mockPackagesDir, mockFileSystem,
           processRunner: processRunner,
-                    print: (Object message) => printedMessages.add(message.toString()));
+          print: (Object message) => printedMessages.add(message.toString()));
 
       runner = CommandRunner<Null>(
           'firebase_test_lab_command', 'Test for $FirebaseTestLabCommand');
@@ -50,10 +50,13 @@ void main() {
           'MainActivityTest.java'
         ],
       ]);
-      await expectLater(() => runCapturingPrint(runner, <String>['firebase-test-lab']),
+      await expectLater(
+          () => runCapturingPrint(runner, <String>['firebase-test-lab']),
           throwsA(const TypeMatcher<ToolExit>()));
       expect(
-          printedMessages.last, contains("\nConfiguring Firebase project failed after 5 attempts. Exiting."));
+          printedMessages.last,
+          contains(
+              "\nConfiguring Firebase project failed after 5 attempts. Exiting."));
     });
 
     test('runs e2e tests', () async {

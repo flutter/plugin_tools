@@ -145,7 +145,8 @@ class RecordingProcessRunner extends ProcessRunner {
     bool exitOnError = false,
   }) async {
     recordedCalls.add(ProcessCall(executable, args, workingDir?.path));
-    return Future<int>.value(processToReturn == null ? 0 : await processToReturn.exitCode);
+    return Future<int>.value(
+        processToReturn == null ? 0 : await processToReturn.exitCode);
   }
 
   /// Returns [io.ProcessResult] created from [processToReturn], [resultStdout], and [resultStderr].

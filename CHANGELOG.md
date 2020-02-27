@@ -1,6 +1,23 @@
-## v.0.0.33
+## v.0.0.35
 
 - Firebase Test Lab command generates a configurable unique path suffix for results.
+
+## v.0.0.34
+
+- Firebase Test Lab command now only tries to configure the project once
+- Firebase Test Lab command now retries project configuration up to five times.
+
+## v.0.0.33+1
+
+- Fixes formatting issues that got past our CI due to 
+  https://github.com/flutter/flutter/issues/51585.
+- Changes the default package name for testing method `createFakePubspec` back
+  its previous behavior.
+
+## v.0.0.33
+
+- Version check command now fails on breaking changes to platform interfaces.
+- Updated version check test to be more flexible.
 
 ## v.0.0.32+7
 

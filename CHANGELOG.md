@@ -1,3 +1,8 @@
+## v.0.0.33
+
+- Firebase Test Lab command now only tries to configure the project once
+- Firebase Test Lab command now retries project configuration up to five times.
+
 ## v.0.0.32+7
 
 - Ensure that Firebase Test Lab tests have a unique storage bucket for each test run.

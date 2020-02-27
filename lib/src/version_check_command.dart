@@ -162,8 +162,9 @@ class VersionCheckCommand extends PluginCommand {
         }
 
         bool isPlatformInterface = pubspec.name.endsWith("_platform_interface");
-        if (isPlatformInterface && allowedNextVersions[headVersion] ==
-            NextVersionType.BREAKING_MAJOR) {
+        if (isPlatformInterface &&
+            allowedNextVersions[headVersion] ==
+                NextVersionType.BREAKING_MAJOR) {
           final String error = '$pubspecPath breaking change detected.\n'
               'Breaking changes to platform interfaces are strongly discouraged.\n';
           final Colorize redError = Colorize(error)..red();

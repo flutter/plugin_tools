@@ -1,3 +1,10 @@
+## v.0.0.33+1
+
+- Fixes formatting issues that got past our CI due to 
+  https://github.com/flutter/flutter/issues/51585.
+- Changes the default package name for testing method `createFakePubspec` back
+  its previous behavior.
+
 ## v.0.0.33
 
 - Version check command now fails on breaking changes to platform interfaces.

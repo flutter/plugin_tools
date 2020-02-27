@@ -35,8 +35,8 @@ Directory createFakePlugin(
   final Directory pluginDirectory = mockPackagesDir.childDirectory(name)
     ..createSync();
   createFakePubspec(
-    name,
     pluginDirectory,
+    name: name,
     isFlutter: isFlutter,
     isWebPlugin: isWebPlugin,
   );
@@ -44,14 +44,15 @@ Directory createFakePlugin(
   if (withSingleExample) {
     final Directory exampleDir = pluginDirectory.childDirectory('example')
       ..createSync();
-    createFakePubspec("${name}_example", exampleDir, isFlutter: isFlutter);
+    createFakePubspec(exampleDir,
+        name: "${name}_example", isFlutter: isFlutter);
   } else if (withExamples.isNotEmpty) {
     final Directory exampleDir = pluginDirectory.childDirectory('example')
       ..createSync();
     for (String example in withExamples) {
       final Directory currentExample = exampleDir.childDirectory(example)
         ..createSync();
-      createFakePubspec(example, currentExample, isFlutter: isFlutter);
+      createFakePubspec(currentExample, name: example, isFlutter: isFlutter);
     }
   }
 
@@ -68,8 +69,8 @@ Directory createFakePlugin(
 
 /// Creates a `pubspec.yaml` file with a flutter dependency.
 void createFakePubspec(
-  String name,
   Directory parent, {
+  String name: 'fake_package',
   bool isFlutter = true,
   bool includeVersion = false,
   bool isWebPlugin = false,
@@ -145,9 +146,10 @@ class RecordingProcessRunner extends ProcessRunner {
     List<String> args, {
     Directory workingDir,
     bool exitOnError = false,
-  }) {
+  }) async {
     recordedCalls.add(ProcessCall(executable, args, workingDir?.path));
-    return Future<int>.value(0);
+    return Future<int>.value(
+        processToReturn == null ? 0 : await processToReturn.exitCode);
   }
 
   /// Returns [io.ProcessResult] created from [processToReturn], [resultStdout], and [resultStderr].
@@ -175,9 +177,17 @@ class RecordingProcessRunner extends ProcessRunner {
     String executable,
     List<String> args, {
     Directory workingDir,
-  }) {
+  }) async {
     recordedCalls.add(ProcessCall(executable, args, workingDir?.path));
-    return Future<io.ProcessResult>.value(null);
+    io.ProcessResult result;
+    if (processToReturn != null) {
+      result = io.ProcessResult(
+          processToReturn.pid,
+          await processToReturn.exitCode,
+          resultStdout ?? processToReturn.stdout,
+          resultStderr ?? processToReturn.stderr);
+    }
+    return Future<io.ProcessResult>.value(result);
   }
 
   @override

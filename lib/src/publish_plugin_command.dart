@@ -10,8 +10,6 @@ import 'package:yaml/yaml.dart';
 
 import 'common.dart';
 
-typedef void Print(Object object);
-
 /// Wraps pub publish with a few niceties used by the flutter/plugin team.
 ///
 /// 1. Checks for any modified files in git and refuses to publish if there's an

@@ -18,8 +18,7 @@ void main() {
         mockPackagesDir, mockFileSystem,
         processRunner: processRunner);
 
-    runner = CommandRunner<Null>(
-        'analyze_command', 'Test for analyze_command');
+    runner = CommandRunner<Null>('analyze_command', 'Test for analyze_command');
     runner.addCommand(analyzeCommand);
   });
 

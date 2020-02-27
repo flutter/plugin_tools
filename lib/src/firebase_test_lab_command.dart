@@ -28,7 +28,9 @@ class FirebaseTestLabCommand extends PluginCommand {
     argParser.addOption('test-run-id',
         defaultsTo: Uuid().v4(),
         help:
-            'Optional string to append to the results path, to avoid conflicts. Randomly chosen if none is provided.');
+            'Optional string to append to the results path, to avoid conflicts. '
+            'Randomly chosen on each invocation if none is provided. '
+            'The default shown here is just an example.');
     argParser.addMultiOption('device',
         splitCommas: false,
         defaultsTo: <String>[

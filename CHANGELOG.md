@@ -1,3 +1,11 @@
+## v.0.0.36
+
+- Remove retry on Firebase Test Lab's call to gcloud set.
+- Make Firebase Test Lab's gcloud set command verbose to show error messages.
+- Allow Firebase Test Lab command to continue past gcloud set failures.
+  This is a mitigation for the network service sometimes not responding,
+  but it isn't actually necessary to have a network connection for this command.
+
 ## v.0.0.35+1
 
 - Minor cleanup to the analyze test.

@@ -54,9 +54,9 @@ void main() {
           () => runCapturingPrint(runner, <String>['firebase-test-lab']),
           throwsA(const TypeMatcher<ToolExit>()));
       expect(
-          printedMessages.last,
+          printedMessages,
           contains(
-              "\nConfiguring Firebase project failed after 5 attempts. Exiting."));
+              "\nWarning: gcloud config set returned a non-zero exit code. Continuing anyway."));
     });
 
     test('runs e2e tests', () async {
@@ -109,7 +109,7 @@ void main() {
                   .split(' '),
               null),
           ProcessCall('gcloud',
-              '--quiet config set project flutter-infra'.split(' '), null),
+              'config set project flutter-infra'.split(' '), null),
           ProcessCall(
               '/packages/plugin/example/android/gradlew',
               'app:assembleAndroidTest -Pverbose=true'.split(' '),

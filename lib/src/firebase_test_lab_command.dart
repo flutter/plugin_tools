@@ -66,33 +66,24 @@ class FirebaseTestLabCommand extends PluginCommand {
     } else {
       _firebaseProjectConfigured = Completer<void>();
     }
-    int attempts = 5;
-    for (int i = 0; i < attempts; i++) {
-      int exitCode = await processRunner.runAndStream('gcloud', <String>[
-        'auth',
-        'activate-service-account',
-        '--key-file=${argResults['service-key']}',
-      ]);
-
-      if (exitCode == 0) {
-        exitCode = await processRunner.runAndStream('gcloud', <String>[
-          '--quiet',
-          'config',
-          'set',
-          'project',
-          argResults['project'],
-        ]);
-
-        if (exitCode == 0) {
-          _print('\nFirebase project configured.');
-          _firebaseProjectConfigured.complete(null);
-          return;
-        }
-      }
+    await processRunner.runAndExitOnError('gcloud', <String>[
+      'auth',
+      'activate-service-account',
+      '--key-file=${argResults['service-key']}',
+    ]);
+    int exitCode = await processRunner.runAndStream('gcloud', <String>[
+      'config',
+      'set',
+      'project',
+      argResults['project'],
+    ]);
+    if (exitCode == 0) {
+      _print('\nFirebase project configured.');
+      return;
+    } else {
+      _print('\nWarning: gcloud config set returned a non-zero exit code. Continuing anyway.');
     }
-    _print(
-        '\nConfiguring Firebase project failed after $attempts attempts. Exiting.');
-    throw ToolExit(1);
+    _firebaseProjectConfigured.complete(null);
   }
 
   @override

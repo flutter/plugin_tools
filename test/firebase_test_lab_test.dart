@@ -108,8 +108,8 @@ void main() {
               'auth activate-service-account --key-file=${Platform.environment['HOME']}/gcloud-service-key.json'
                   .split(' '),
               null),
-          ProcessCall('gcloud',
-              'config set project flutter-infra'.split(' '), null),
+          ProcessCall(
+              'gcloud', 'config set project flutter-infra'.split(' '), null),
           ProcessCall(
               '/packages/plugin/example/android/gradlew',
               'app:assembleAndroidTest -Pverbose=true'.split(' '),

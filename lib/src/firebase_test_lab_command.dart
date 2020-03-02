@@ -81,7 +81,8 @@ class FirebaseTestLabCommand extends PluginCommand {
       _print('\nFirebase project configured.');
       return;
     } else {
-      _print('\nWarning: gcloud config set returned a non-zero exit code. Continuing anyway.');
+      _print(
+          '\nWarning: gcloud config set returned a non-zero exit code. Continuing anyway.');
     }
     _firebaseProjectConfigured.complete(null);
   }

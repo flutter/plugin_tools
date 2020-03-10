@@ -44,9 +44,9 @@ class FormatCommand extends PluginCommand {
 
   String get _clangFormatUrl {
     if (io.Platform.isMacOS) {
-      return 'http://releases.llvm.org/5.0.0/clang+llvm-5.0.0-x86_64-apple-darwin.tar.xz';
+      return 'http://releases.llvm.org/7.0.0/clang+llvm-7.0.0-x86_64-apple-darwin.tar.xz';
     } else if (io.Platform.isLinux) {
-      return 'http://releases.llvm.org/5.0.0/clang+llvm-5.0.0-linux-x86_64-ubuntu16.04.tar.xz';
+      return 'http://releases.llvm.org/7.0.0/clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz';
     }
 
     throw UnsupportedError(

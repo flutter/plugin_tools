@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 import 'common.dart';
@@ -15,6 +16,8 @@ class DriveExamplesCommand extends PluginCommand {
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addFlag('macos',
         help: 'Runs the macOS implementation of the examples');
+    argParser.addFlag('windows',
+        help: 'Runs the Windows implementation of the examples');
   }
 
   @override
@@ -27,19 +30,30 @@ class DriveExamplesCommand extends PluginCommand {
       'For example, test_driver/app_test.dart would match test/app.dart.\n\n'
       'This command requires "flutter" to be in your path.';
 
+  bool _platformDirectoryExists(String platform, Directory directory) {
+    assert(platform == 'macos' ||
+           platform == 'windows');
+    final Directory dir = fileSystem.directory(p.join(directory.path, platform));
+    return dir.existsSync();
+  }
+
   @override
   Future<Null> run() async {
     checkSharding();
     final List<String> failingTests = <String>[];
     final bool isMacos = argResults['macos'];
+    final bool isWindows = argResults['windows'];
     await for (Directory example in getExamples()) {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
       // If macos is specified, filter out plugins that don't have a macos implementation yet.
       if (isMacos) {
-        final Directory macosDir =
-            fileSystem.directory(p.join(example.path, 'macos'));
-        if (!macosDir.existsSync()) {
+        if (_platformDirectoryExists('macos', example)) {
+          continue;
+        }
+      }
+      if (isWindows) {
+        if (_platformDirectoryExists('windows', example)) {
           continue;
         }
       }
@@ -81,6 +95,12 @@ class DriveExamplesCommand extends PluginCommand {
           driveArgs.addAll(<String>[
             '-d',
             'macos',
+          ]);
+        }
+        if (isWindows) {
+          driveArgs.addAll(<String>[
+            '-d',
+            'windows',
           ]);
         }
         driveArgs.add(deviceTestPath);

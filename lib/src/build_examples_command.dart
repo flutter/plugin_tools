@@ -16,6 +16,7 @@ class BuildExamplesCommand extends PluginCommand {
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
+    argParser.addFlag('windows', defaultsTo: false);
     argParser.addFlag('macos', defaultsTo: false);
     argParser.addFlag('ipa', defaultsTo: io.Platform.isMacOS);
     argParser.addFlag('apk');
@@ -31,8 +32,8 @@ class BuildExamplesCommand extends PluginCommand {
 
   @override
   Future<Null> run() async {
-    if (!argResults['ipa'] && !argResults['apk'] && !argResults['macos']) {
-      print('Neither --macos, --apk nor --ipa were specified, so not building '
+    if (!argResults['ipa'] && !argResults['apk'] && !argResults['macos'] && !argResults['windows']) {
+      print('Neither --windows, --macos, --apk nor --ipa were specified, so not building '
           'anything.');
       return;
     }
@@ -66,6 +67,23 @@ class BuildExamplesCommand extends PluginCommand {
             workingDir: example);
         if (exitCode != 0) {
           failingPackages.add('$packageName (macos)');
+        }
+      }
+
+      if (argResults['windows']) {
+        print('\nBUILDING windows for $packageName');
+        final Directory windowsDir =
+            fileSystem.directory(p.join(example.path, 'windows'));
+        if (!windowsDir.existsSync()) {
+          print('No Windows implementation found.');
+          continue;
+        }
+
+        int exitCode = await processRunner.runAndStream(
+            'flutter', <String>['build', 'windows'],
+            workingDir: example);
+        if (exitCode != 0) {
+          failingPackages.add('$packageName (windows)');
         }
       }
 

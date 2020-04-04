@@ -12,6 +12,14 @@ import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
 typedef void Print(Object object);
+/// Key for windows platform.
+const String kWindows = 'windows';
+/// Key for macos platform.
+const String kMacos = 'macos';
+/// Key for ipa platform.
+const String kIpa = 'ipa';
+/// Key for apk platform.
+const String kApk = 'apk';
 
 /// Returns whether the given directory contains a Flutter package.
 bool isFlutterPackage(FileSystemEntity entity, FileSystem fileSystem) {

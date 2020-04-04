@@ -13,9 +13,9 @@ class DriveExamplesCommand extends PluginCommand {
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
-    argParser.addFlag('macos',
+    argParser.addFlag(kMacos,
         help: 'Runs the macOS implementation of the examples');
-    argParser.addFlag('windows',
+    argParser.addFlag(kWindows,
         help: 'Runs the Windows implementation of the examples');
   }
 
@@ -33,19 +33,19 @@ class DriveExamplesCommand extends PluginCommand {
   Future<Null> run() async {
     checkSharding();
     final List<String> failingTests = <String>[];
-    final bool isMacos = argResults['macos'];
-    final bool isWindows = argResults['windows'];
+    final bool isMacos = argResults[kMacos];
+    final bool isWindows = argResults[kWindows];
     await for (Directory example in getExamples()) {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
       // Filter out plugins that don't have the required platform implementation yet.
       if (isMacos) {
-        if (platformDirectoryExists('macos', example)) {
+        if (platformDirectoryExists(kMacos, example)) {
           continue;
         }
       }
       if (isWindows) {
-        if (platformDirectoryExists('windows', example)) {
+        if (platformDirectoryExists(kWindows, example)) {
           continue;
         }
       }

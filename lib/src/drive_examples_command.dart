@@ -38,7 +38,7 @@ class DriveExamplesCommand extends PluginCommand {
     await for (Directory example in getExamples()) {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
-      // If macos is specified, filter out plugins that don't have a macos implementation yet.
+      // Filter out plugins that don't have the required platform implementation yet.
       if (isMacos) {
         if (platformDirectoryExists('macos', example)) {
           continue;

@@ -10,11 +10,6 @@ import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
-const String kWindows = 'windows';
-const String kMacos = 'macos';
-const String kIpa = 'ipa';
-const String kApk = 'apk';
-
 class BuildExamplesCommand extends PluginCommand {
   BuildExamplesCommand(
     Directory packagesDir,

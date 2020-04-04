@@ -224,6 +224,12 @@ abstract class PluginCommand extends Command<Null> {
     }
   }
 
+  /// Checks if a [platform] directory exists in a [directory].
+  bool platformDirectoryExists(String platform, Directory directory) {
+    final Directory dir = fileSystem.directory(p.join(directory.path, platform));
+    return dir.existsSync();
+  }
+
   /// Returns the example Dart package folders of the plugins involved in this
   /// command execution.
   Stream<Directory> getExamples() =>

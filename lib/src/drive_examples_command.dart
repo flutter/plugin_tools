@@ -30,13 +30,6 @@ class DriveExamplesCommand extends PluginCommand {
       'For example, test_driver/app_test.dart would match test/app.dart.\n\n'
       'This command requires "flutter" to be in your path.';
 
-  bool _platformDirectoryExists(String platform, Directory directory) {
-    assert(platform == 'macos' ||
-           platform == 'windows');
-    final Directory dir = fileSystem.directory(p.join(directory.path, platform));
-    return dir.existsSync();
-  }
-
   @override
   Future<Null> run() async {
     checkSharding();
@@ -48,12 +41,12 @@ class DriveExamplesCommand extends PluginCommand {
           p.relative(example.path, from: packagesDir.path);
       // If macos is specified, filter out plugins that don't have a macos implementation yet.
       if (isMacos) {
-        if (_platformDirectoryExists('macos', example)) {
+        if (platformDirectoryExists('macos', example)) {
           continue;
         }
       }
       if (isWindows) {
-        if (_platformDirectoryExists('windows', example)) {
+        if (platformDirectoryExists('windows', example)) {
           continue;
         }
       }

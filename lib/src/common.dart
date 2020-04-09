@@ -50,9 +50,18 @@ bool isFlutterPackage(FileSystemEntity entity, FileSystem fileSystem) {
 ///     flutter:
 ///       plugin:
 ///         platforms:
-///           web:
-bool isWebPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+///           [platform]:
+bool pluginSupportsPlatform(String platform, FileSystemEntity entity, FileSystem fileSystem) {
+  assert(
+    platform == 'ios' ||
+    platform == 'android' ||
+    platform == 'web' ||
+    platform == 'macos' ||
+    platform == 'windows' ||
+    platform == 'linux'
+  );
   if (entity == null || entity is! Directory) {
+    print('Bad entity');
     return false;
   }
 
@@ -60,6 +69,9 @@ bool isWebPlugin(FileSystemEntity entity, FileSystem fileSystem) {
     final File pubspecFile =
         fileSystem.file(p.join(entity.path, 'pubspec.yaml'));
     final YamlMap pubspecYaml = loadYaml(pubspecFile.readAsStringSync());
+    if (platform == 'windows') {
+      print(pubspecYaml);
+    }
     final YamlMap flutterSection = pubspecYaml['flutter'];
     if (flutterSection == null) {
       return false;
@@ -69,15 +81,37 @@ bool isWebPlugin(FileSystemEntity entity, FileSystem fileSystem) {
       return false;
     }
     final YamlMap platforms = pluginSection['platforms'];
+    if (platform == 'windows') {
+      print(platforms);
+    }
     if (platforms == null) {
       return false;
     }
-    return platforms.containsKey('web');
+    return platforms.containsKey(platform);
   } on FileSystemException {
     return false;
   } on YamlException {
     return false;
   }
+}
+
+/// Returns whether the given directory contains a Flutter web plugin.
+bool isWebPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+  return pluginSupportsPlatform('web', entity, fileSystem);
+}
+/// Returns whether the given directory contains a Flutter Windows plugin.
+bool isWindowsPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+  return pluginSupportsPlatform('windows', entity, fileSystem);
+}
+
+/// Returns whether the given directory contains a Flutter macOS plugin.
+bool isMacOsPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+  return pluginSupportsPlatform('macos', entity, fileSystem);
+}
+
+/// Returns whether the given directory contains a Flutter linux plugin.
+bool isLinuxPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+  return pluginSupportsPlatform('linux', entity, fileSystem);
 }
 
 /// Error thrown when a command needs to exit with a non-zero exit code.
@@ -241,7 +275,7 @@ abstract class PluginCommand extends Command<Null> {
   /// Returns the example Dart package folders of the plugins involved in this
   /// command execution.
   Stream<Directory> getExamples() =>
-      getPlugins().expand<Directory>(_getExamplesForPlugin);
+      getPlugins().expand<Directory>(getExamplesForPlugin);
 
   /// Returns all Dart package folders (typically, plugin + example) of the
   /// plugins involved in this command execution.
@@ -273,7 +307,7 @@ abstract class PluginCommand extends Command<Null> {
 
   /// Returns the example Dart packages contained in the specified plugin, or
   /// an empty List, if the plugin has no examples.
-  Iterable<Directory> _getExamplesForPlugin(Directory plugin) {
+  Iterable<Directory> getExamplesForPlugin(Directory plugin) {
     final Directory exampleFolder =
         fileSystem.directory(p.join(plugin.path, 'example'));
     if (!exampleFolder.existsSync()) {

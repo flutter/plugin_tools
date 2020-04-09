@@ -39,16 +39,14 @@ class DriveExamplesCommand extends PluginCommand {
       final String packageName =
           p.relative(example.path, from: packagesDir.path);
       // Filter out plugins that don't have the required platform implementation yet.
-      if (isMacos) {
-        if (platformDirectoryExists(kMacos, example)) {
-          continue;
-        }
+      if (isMacos && !isMacOsPlugin(example, fileSystem)) {
+        continue;
       }
-      if (isWindows) {
-        if (platformDirectoryExists(kWindows, example)) {
-          continue;
-        }
+
+      if (isWindows && !isWindowsPlugin(example, fileSystem)) {
+        continue;
       }
+
       final Directory driverTests =
           fileSystem.directory(p.join(example.path, 'test_driver'));
       if (!driverTests.existsSync()) {

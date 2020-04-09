@@ -40,69 +40,86 @@ class BuildExamplesCommand extends PluginCommand {
 
     checkSharding();
     final List<String> failingPackages = <String>[];
-    await for (io.Directory example in getExamples()) {
-      final String packageName =
-          p.relative(example.path, from: packagesDir.path);
+    await for (Directory plugin in getPlugins()) {
+      for (Directory example in getExamplesForPlugin(plugin)) {
+        final String packageName =
+            p.relative(example.path, from: packagesDir.path);
 
-      if (argResults[kMacos]) {
-        print('\nBUILDING macos for $packageName');;
-        if (platformDirectoryExists(kMacos, example)) {
-          // TODO(https://github.com/flutter/flutter/issues/46236):
-          // Builing macos without running flutter pub get first results
-          // in an error.
-          int exitCode = await processRunner.runAndStream(
-              'flutter', <String>['pub', 'get'],
-              workingDir: example);
-          if (exitCode != 0) {
-            failingPackages.add('$packageName (macos)');
-          } else {
-            exitCode = await processRunner.runAndStream(
-              'flutter', <String>['build', kMacos],
-              workingDir: example);
+        if (argResults[kMacos]) {
+          print('\nBUILDING macos for $packageName');;
+          if (isMacOsPlugin(plugin, fileSystem)) {
+            // TODO(https://github.com/flutter/flutter/issues/46236):
+            // Builing macos without running flutter pub get first results
+            // in an error.
+            int exitCode = await processRunner.runAndStream(
+                'flutter', <String>['pub', 'get'],
+                workingDir: example);
             if (exitCode != 0) {
               failingPackages.add('$packageName (macos)');
+            } else {
+              exitCode = await processRunner.runAndStream(
+                'flutter', <String>['build', kMacos],
+                workingDir: example);
+              if (exitCode != 0) {
+                failingPackages.add('$packageName (macos)');
+              }
             }
+          } else {
+            print('macOS is not supported by this plugin');
           }
-        } else {
-          print('No macos implementation found.');
         }
-      }
 
-      if (argResults[kWindows]) {
-        print('\nBUILDING windows for $packageName');
-        if (platformDirectoryExists(kWindows, example)) {
+        if (argResults[kWindows]) {
+          print('\nBUILDING windows for $packageName');
+          print(example);
+          if (isWindowsPlugin(plugin, fileSystem)) {
+            final Directory windowsFolder =
+              fileSystem.directory(p.join(example.path, 'windows'));
+            if (windowsFolder.existsSync()) {
+              print('deleting');
+              windowsFolder.deleteSync();
+            }
+            print('Trying ===');
+            print(example.existsSync());
+            final int createCode = await processRunner.runAndStream(
+                'flutter', <String>['create', '.'],
+                workingDir: example);
+                print('Create code: $createCode');
+
+            final int exitCode = await processRunner.runAndStream(
+                'flutter', <String>['build', kWindows],
+                workingDir: example);
+            if (exitCode != 0) {
+              print('Exit code $exitCode');
+              failingPackages.add('$packageName (windows)');
+            }
+          } else {
+            print('Windows is not supported by this plugin');
+          }
+          print('afger');
+        }
+
+        if (argResults[kIpa]) {
+          print('\nBUILDING IPA for $packageName');
           final int exitCode = await processRunner.runAndStream(
-              'flutter', <String>['build', kWindows],
+              'flutter', <String>['build', 'ios', '--no-codesign'],
               workingDir: example);
           if (exitCode != 0) {
-            failingPackages.add('$packageName (windows)');
+            failingPackages.add('$packageName (ipa)');
           }
-        } else {
-          print('No windows implementation found.');
         }
-      }
 
-      if (argResults[kIpa]) {
-        print('\nBUILDING IPA for $packageName');
-        final int exitCode = await processRunner.runAndStream(
-            'flutter', <String>['build', 'ios', '--no-codesign'],
-            workingDir: example);
-        if (exitCode != 0) {
-          failingPackages.add('$packageName (ipa)');
-        }
-      }
-
-      if (argResults[kApk]) {
-        print('\nBUILDING APK for $packageName');
-        final int exitCode = await processRunner.runAndStream(
-            'flutter', <String>['build', 'apk'],
-            workingDir: example);
-        if (exitCode != 0) {
-          failingPackages.add('$packageName (apk)');
+        if (argResults[kApk]) {
+          print('\nBUILDING APK for $packageName');
+          final int exitCode = await processRunner.runAndStream(
+              'flutter', <String>['build', 'apk'],
+              workingDir: example);
+          if (exitCode != 0) {
+            failingPackages.add('$packageName (apk)');
+          }
         }
       }
     }
-
     print('\n\n');
 
     if (failingPackages.isNotEmpty) {

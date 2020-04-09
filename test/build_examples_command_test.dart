@@ -119,6 +119,69 @@ void main() {
       cleanupPackages();
     });
 
+    test('runs build for Windows when plugin is not setup for Windows results in no-op',
+        () async {
+      createFakePlugin('plugin', withExtraFiles: <List<String>>[
+        <String>['example', 'test'],
+      ], isWindowsPlugin: false);
+
+      final Directory pluginExampleDirectory =
+          mockPackagesDir.childDirectory('plugin').childDirectory('example');
+
+      createFakePubspec(pluginExampleDirectory, isFlutter: true);
+
+      final List<String> output = await runCapturingPrint(
+          runner, <String>['build-examples', '--windows']);
+
+      expect(
+        output,
+        orderedEquals(<String>[
+          '\n\n',
+          'All builds successful!',
+        ]),
+      );
+
+      print(processRunner.recordedCalls);
+      // Output should be empty since running build-examples --macos with no macos
+      // implementation is a no-op.
+      expect(processRunner.recordedCalls, orderedEquals(<ProcessCall>[]));
+      cleanupPackages();
+    });
+    test('runs build for windows', () async {
+      createFakePlugin('plugin', withExtraFiles: <List<String>>[
+        <String>['example', 'test'],
+      ], isWindowsPlugin: true);
+
+      final Directory pluginExampleDirectory =
+          mockPackagesDir.childDirectory('plugin').childDirectory('example');
+
+      createFakePubspec(pluginExampleDirectory, isFlutter: true);
+
+      final List<String> output = await runCapturingPrint(
+          runner, <String>['build-examples', '--windows']);
+
+      expect(
+        output,
+        orderedEquals(<String>[
+          '\nBUILDING windows for plugin/example',
+          '\n\n',
+          'All builds successful!',
+        ]),
+      );
+
+      print(processRunner.recordedCalls);
+      expect(
+          processRunner.recordedCalls,
+          orderedEquals(<ProcessCall>[
+            ProcessCall(
+                'flutter.bat', <String>['create', '.'], pluginExampleDirectory.path),
+            ProcessCall('flutter.bat', <String>['build', 'windows'],
+                pluginExampleDirectory.path),
+          ]));
+      cleanupPackages();
+    });
+
+
     test('runs build for android', () async {
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test'],

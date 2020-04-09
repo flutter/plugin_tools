@@ -28,6 +28,8 @@ Directory createFakePlugin(
   List<List<String>> withExtraFiles = const <List<String>>[],
   bool isFlutter = true,
   bool isWebPlugin = false,
+  bool isMacOsPlugin = false,
+  bool isWindowsPlugin = false,
 }) {
   assert(!(withSingleExample && withExamples.isNotEmpty),
       'cannot pass withSingleExample and withExamples simultaneously');
@@ -39,7 +41,10 @@ Directory createFakePlugin(
     name: name,
     isFlutter: isFlutter,
     isWebPlugin: isWebPlugin,
+    isMacOsPlugin: isMacOsPlugin,
+    isWindowsPlugin: isWindowsPlugin,
   );
+  print(pluginDirectory);
 
   if (withSingleExample) {
     final Directory exampleDir = pluginDirectory.childDirectory('example')
@@ -70,23 +75,37 @@ Directory createFakePlugin(
 /// Creates a `pubspec.yaml` file with a flutter dependency.
 void createFakePubspec(
   Directory parent, {
-  String name: 'fake_package',
+  String name = 'fake_package',
   bool isFlutter = true,
   bool includeVersion = false,
   bool isWebPlugin = false,
+  bool isMacOsPlugin = false,
+  bool isWindowsPlugin = false,
 }) {
   parent.childFile('pubspec.yaml').createSync();
   String yaml = '''
 name: $name
-''';
-  if (isWebPlugin) {
-    yaml += '''
 flutter:
   plugin:
     platforms:
+''';
+  if (isWebPlugin) {
+    yaml += '''
       web:
         pluginClass: FakePlugin
         fileName: ${name}_web.dart
+''';
+  }
+  if (isMacOsPlugin) {
+    yaml += '''
+      macos:
+        pluginClass: FakePlugin
+''';
+  }
+if (isWindowsPlugin) {
+    yaml += '''
+      windows:
+        pluginClass: FakePlugin
 ''';
   }
   if (isFlutter) {
@@ -102,6 +121,7 @@ version: 0.0.1
 publish_to: none # Hardcoded safeguard to prevent this from somehow being published by a broken test.
 ''';
   }
+print(yaml);
   parent.childFile('pubspec.yaml').writeAsStringSync(yaml);
 }
 

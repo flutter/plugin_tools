@@ -40,13 +40,15 @@ class BuildExamplesCommand extends PluginCommand {
 
     checkSharding();
     final List<String> failingPackages = <String>[];
+    print('Before plugins');
     await for (Directory plugin in getPlugins()) {
+      print(plugin);
       for (Directory example in getExamplesForPlugin(plugin)) {
         final String packageName =
             p.relative(example.path, from: packagesDir.path);
 
         if (argResults[kMacos]) {
-          print('\nBUILDING macos for $packageName');;
+          print('\nBUILDING macos for $packageName');
           if (isMacOsPlugin(plugin, fileSystem)) {
             // TODO(https://github.com/flutter/flutter/issues/46236):
             // Builing macos without running flutter pub get first results

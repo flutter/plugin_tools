@@ -35,70 +35,91 @@ class DriveExamplesCommand extends PluginCommand {
     final List<String> failingTests = <String>[];
     final bool isMacos = argResults[kMacos];
     final bool isWindows = argResults[kWindows];
-    await for (Directory example in getExamples()) {
-      final String packageName =
-          p.relative(example.path, from: packagesDir.path);
-      // Filter out plugins that don't have the required platform implementation yet.
-      if (isMacos && !isMacOsPlugin(example, fileSystem)) {
-        continue;
-      }
+    await for (Directory plugin in getPlugins()) {
+      for (Directory example in getExamplesForPlugin(plugin)) {
+        final String packageName =
+            p.relative(example.path, from: packagesDir.path);
+        String flutterCommand = 'flutter';
 
-      if (isWindows && !isWindowsPlugin(example, fileSystem)) {
-        continue;
-      }
-
-      final Directory driverTests =
-          fileSystem.directory(p.join(example.path, 'test_driver'));
-      if (!driverTests.existsSync()) {
-        // No driver tests available for this example
-        continue;
-      }
-      // Look for driver tests ending in _test.dart in test_driver/
-      await for (FileSystemEntity test in driverTests.list()) {
-        final String driverTestName =
-            p.relative(test.path, from: driverTests.path);
-        if (!driverTestName.endsWith("_test.dart")) {
-          continue;
-        }
-        // Try to find a matching app to drive without the _test.dart
-        final String deviceTestName = driverTestName.replaceAll(
-          RegExp(r'_test.dart$'),
-          '.dart',
-        );
-        String deviceTestPath = p.join('test', deviceTestName);
-        if (!fileSystem
-            .file(p.join(example.path, deviceTestPath))
-            .existsSync()) {
-          // If the app isn't in test/ folder, look in test_driver/ instead.
-          deviceTestPath = p.join('test_driver', deviceTestName);
-        }
-        if (!fileSystem
-            .file(p.join(example.path, deviceTestPath))
-            .existsSync()) {
-          print('Unable to find an application for $driverTestName to drive');
-          failingTests.add(p.join(example.path, driverTestName));
+        // Filter out plugins that don't have the required platform implementation yet.
+        if (isMacos && !isMacOsPlugin(plugin, fileSystem)) {
           continue;
         }
 
-        final List<String> driveArgs = <String>['drive'];
-        if (isMacos) {
-          driveArgs.addAll(<String>[
-            '-d',
-            'macos',
-          ]);
+        if (isWindows && isWindowsPlugin(plugin, fileSystem)) {
+          flutterCommand = 'flutter.bat';
+          // The Windows tooling is not yet stable, so we need to
+          // delete any existing windows directory and create a new one
+          // with 'flutter create .'
+            final Directory windowsFolder =
+              fileSystem.directory(p.join(example.path, 'windows'));
+            if (windowsFolder.existsSync()) {
+              windowsFolder.deleteSync(recursive: true);
+            }
+            int exitCode = await processRunner.runAndStream(
+                flutterCommand, <String>['create', '.'],
+                workingDir: example);
+            if (exitCode != 0) {
+              print('Failed to create a windows directory for $packageName');
+              continue;
+            }
+        } else {
+          continue;
         }
-        if (isWindows) {
-          driveArgs.addAll(<String>[
-            '-d',
-            'windows',
-          ]);
+
+        final Directory driverTests =
+            fileSystem.directory(p.join(example.path, 'test_driver'));
+        if (!driverTests.existsSync()) {
+          // No driver tests available for this example
+          continue;
         }
-        driveArgs.add(deviceTestPath);
-        final int exitCode = await processRunner.runAndStream(
-            'flutter', driveArgs,
-            workingDir: example, exitOnError: true);
-        if (exitCode != 0) {
-          failingTests.add(p.join(packageName, deviceTestPath));
+        // Look for driver tests ending in _test.dart in test_driver/
+        await for (FileSystemEntity test in driverTests.list()) {
+          final String driverTestName =
+              p.relative(test.path, from: driverTests.path);
+          if (!driverTestName.endsWith("_test.dart")) {
+            continue;
+          }
+          // Try to find a matching app to drive without the _test.dart
+          final String deviceTestName = driverTestName.replaceAll(
+            RegExp(r'_test.dart$'),
+            '.dart',
+          );
+          String deviceTestPath = p.join('test', deviceTestName);
+          if (!fileSystem
+              .file(p.join(example.path, deviceTestPath))
+              .existsSync()) {
+            // If the app isn't in test/ folder, look in test_driver/ instead.
+            deviceTestPath = p.join('test_driver', deviceTestName);
+          }
+          if (!fileSystem
+              .file(p.join(example.path, deviceTestPath))
+              .existsSync()) {
+            print('Unable to find an application for $driverTestName to drive');
+            failingTests.add(p.join(example.path, driverTestName));
+            continue;
+          }
+
+          final List<String> driveArgs = <String>['drive'];
+          if (isMacos) {
+            driveArgs.addAll(<String>[
+              '-d',
+              'macos',
+            ]);
+          }
+          if (isWindows) {
+            driveArgs.addAll(<String>[
+              '-d',
+              'windows',
+            ]);
+          }
+          driveArgs.add(deviceTestPath);
+          final int exitCode = await processRunner.runAndStream(
+              flutterCommand, driveArgs,
+              workingDir: example, exitOnError: true);
+          if (exitCode != 0) {
+            failingTests.add(p.join(packageName, deviceTestPath));
+          }
         }
       }
     }

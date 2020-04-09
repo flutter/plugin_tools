@@ -61,7 +61,6 @@ bool pluginSupportsPlatform(String platform, FileSystemEntity entity, FileSystem
     platform == 'linux'
   );
   if (entity == null || entity is! Directory) {
-    print('Bad entity');
     return false;
   }
 
@@ -69,9 +68,6 @@ bool pluginSupportsPlatform(String platform, FileSystemEntity entity, FileSystem
     final File pubspecFile =
         fileSystem.file(p.join(entity.path, 'pubspec.yaml'));
     final YamlMap pubspecYaml = loadYaml(pubspecFile.readAsStringSync());
-    if (platform == 'windows') {
-      print(pubspecYaml);
-    }
     final YamlMap flutterSection = pubspecYaml['flutter'];
     if (flutterSection == null) {
       return false;
@@ -81,9 +77,6 @@ bool pluginSupportsPlatform(String platform, FileSystemEntity entity, FileSystem
       return false;
     }
     final YamlMap platforms = pluginSection['platforms'];
-    if (platform == 'windows') {
-      print(platforms);
-    }
     if (platforms == null) {
       return false;
     }

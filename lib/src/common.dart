@@ -43,7 +43,7 @@ bool isFlutterPackage(FileSystemEntity entity, FileSystem fileSystem) {
   }
 }
 
-/// Returns whether the given directory contains a Flutter web plugin.
+/// Returns whether the given directory contains a Flutter [platform] plugin.
 ///
 /// It checks this by looking for the following pattern in the pubspec:
 ///

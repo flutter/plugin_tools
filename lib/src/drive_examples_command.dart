@@ -41,16 +41,17 @@ class DriveExamplesCommand extends PluginCommand {
             p.relative(example.path, from: packagesDir.path);
         String flutterCommand = 'flutter';
 
-        // Filter out plugins that don't have the required platform implementation yet.
-        if (isMacos && !isMacOsPlugin(plugin, fileSystem)) {
-          continue;
+        if (isMacos) {
+          if (!isMacOsPlugin(plugin, fileSystem)) {
+            continue;
+          }
         }
-
-        if (isWindows && isWindowsPlugin(plugin, fileSystem)) {
-          flutterCommand = 'flutter.bat';
-          // The Windows tooling is not yet stable, so we need to
-          // delete any existing windows directory and create a new one
-          // with 'flutter create .'
+        if (isWindows) {
+          if (isWindowsPlugin(plugin, fileSystem)) {
+            flutterCommand = 'flutter.bat';
+            // The Windows tooling is not yet stable, so we need to
+            // delete any existing windows directory and create a new one
+            // with 'flutter create .'
             final Directory windowsFolder =
               fileSystem.directory(p.join(example.path, 'windows'));
             if (windowsFolder.existsSync()) {
@@ -63,8 +64,9 @@ class DriveExamplesCommand extends PluginCommand {
               print('Failed to create a windows directory for $packageName');
               continue;
             }
-        } else {
-          continue;
+          } else {
+            continue;
+          }
         }
 
         final Directory driverTests =
@@ -101,13 +103,13 @@ class DriveExamplesCommand extends PluginCommand {
           }
 
           final List<String> driveArgs = <String>['drive'];
-          if (isMacos) {
+          if (isMacos && isMacOsPlugin(plugin, fileSystem)) {
             driveArgs.addAll(<String>[
               '-d',
               'macos',
             ]);
           }
-          if (isWindows) {
+          if (isWindows && isWindowsPlugin(plugin, fileSystem)) {
             driveArgs.addAll(<String>[
               '-d',
               'windows',

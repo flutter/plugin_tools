@@ -105,7 +105,7 @@ flutter:
         pluginClass: FakePlugin
 ''';
   }
-if (isWindowsPlugin) {
+  if (isWindowsPlugin) {
     yaml += '''
       windows:
         pluginClass: FakePlugin

@@ -11,7 +11,8 @@ void main() {
   group('test drive_example_command', () {
     CommandRunner<Null> runner;
     RecordingProcessRunner processRunner;
-    final String flutterCommand = LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
+    final String flutterCommand =
+        LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
     setUp(() {
       initializeFakePackages();
       processRunner = RecordingProcessRunner();
@@ -125,11 +126,13 @@ void main() {
       cleanupPackages();
     });
     test('runs drive on a macOS plugin', () async {
-      createFakePlugin('plugin', withExtraFiles: <List<String>>[
-        <String>['example', 'test_driver', 'plugin_test.dart'],
-        <String>['example', 'test_driver', 'plugin.dart'],
-        <String>['example', 'macos', 'macos.swift'],
-      ], isMacOsPlugin: true);
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test_driver', 'plugin_test.dart'],
+            <String>['example', 'test_driver', 'plugin.dart'],
+            <String>['example', 'macos', 'macos.swift'],
+          ],
+          isMacOsPlugin: true);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');
@@ -162,11 +165,14 @@ void main() {
 
       cleanupPackages();
     });
-    test('runs drive when plugin does not suppport windows is a no-op', () async {
-      createFakePlugin('plugin', withExtraFiles: <List<String>>[
-        <String>['example', 'test_driver', 'plugin_test.dart'],
-        <String>['example', 'test_driver', 'plugin.dart'],
-      ], isMacOsPlugin: false);
+    test('runs drive when plugin does not suppport windows is a no-op',
+        () async {
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test_driver', 'plugin_test.dart'],
+            <String>['example', 'test_driver', 'plugin.dart'],
+          ],
+          isMacOsPlugin: false);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');
@@ -195,10 +201,12 @@ void main() {
     });
 
     test('runs drive on a Windows plugin', () async {
-      createFakePlugin('plugin', withExtraFiles: <List<String>>[
-        <String>['example', 'test_driver', 'plugin_test.dart'],
-        <String>['example', 'test_driver', 'plugin.dart'],
-      ], isWindowsPlugin: true);
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test_driver', 'plugin_test.dart'],
+            <String>['example', 'test_driver', 'plugin.dart'],
+          ],
+          isWindowsPlugin: true);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');
@@ -223,9 +231,7 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
-            ProcessCall(
-                flutterCommand,
-                <String>['create', '.'],
+            ProcessCall(flutterCommand, <String>['create', '.'],
                 pluginExampleDirectory.path),
             ProcessCall(
                 flutterCommand,

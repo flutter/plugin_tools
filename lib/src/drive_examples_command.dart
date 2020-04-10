@@ -40,7 +40,8 @@ class DriveExamplesCommand extends PluginCommand {
       for (Directory example in getExamplesForPlugin(plugin)) {
         final String packageName =
             p.relative(example.path, from: packagesDir.path);
-        final String flutterCommand = LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
+        final String flutterCommand =
+            LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
 
         if (isMacos) {
           if (!isMacOsPlugin(plugin, fileSystem)) {
@@ -53,7 +54,7 @@ class DriveExamplesCommand extends PluginCommand {
             // delete any existing windows directory and create a new one
             // with 'flutter create .'
             final Directory windowsFolder =
-              fileSystem.directory(p.join(example.path, 'windows'));
+                fileSystem.directory(p.join(example.path, 'windows'));
             if (windowsFolder.existsSync()) {
               windowsFolder.deleteSync(recursive: true);
             }

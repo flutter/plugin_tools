@@ -11,7 +11,8 @@ void main() {
   group('test build_example_command', () {
     CommandRunner<Null> runner;
     RecordingProcessRunner processRunner;
-    final String flutterCommand = LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
+    final String flutterCommand =
+        LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
 
     setUp(() {
       initializeFakePackages();
@@ -54,7 +55,9 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
-            ProcessCall(flutterCommand, <String>['build', 'ios', '--no-codesign'],
+            ProcessCall(
+                flutterCommand,
+                <String>['build', 'ios', '--no-codesign'],
                 pluginExampleDirectory.path),
           ]));
       cleanupPackages();
@@ -93,10 +96,12 @@ void main() {
       cleanupPackages();
     });
     test('runs build for macos', () async {
-      createFakePlugin('plugin', withExtraFiles: <List<String>>[
-        <String>['example', 'test'],
-        <String>['example', 'macos', 'macos.swift'],
-      ], isMacOsPlugin: true);
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test'],
+            <String>['example', 'macos', 'macos.swift'],
+          ],
+          isMacOsPlugin: true);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');
@@ -121,19 +126,22 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
-            ProcessCall(
-                flutterCommand, <String>['pub', 'get'], pluginExampleDirectory.path),
+            ProcessCall(flutterCommand, <String>['pub', 'get'],
+                pluginExampleDirectory.path),
             ProcessCall(flutterCommand, <String>['build', 'macos'],
                 pluginExampleDirectory.path),
           ]));
       cleanupPackages();
     });
 
-    test('runs build for Windows when plugin is not setup for Windows results in no-op',
+    test(
+        'runs build for Windows when plugin is not setup for Windows results in no-op',
         () async {
-      createFakePlugin('plugin', withExtraFiles: <List<String>>[
-        <String>['example', 'test'],
-      ], isWindowsPlugin: false);
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test'],
+          ],
+          isWindowsPlugin: false);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');
@@ -163,9 +171,11 @@ void main() {
     });
 
     test('runs build for windows', () async {
-      createFakePlugin('plugin', withExtraFiles: <List<String>>[
-        <String>['example', 'test'],
-      ], isWindowsPlugin: true);
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test'],
+          ],
+          isWindowsPlugin: true);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');
@@ -190,8 +200,8 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
-            ProcessCall(
-                flutterCommand, <String>['create', '.'], pluginExampleDirectory.path),
+            ProcessCall(flutterCommand, <String>['create', '.'],
+                pluginExampleDirectory.path),
             ProcessCall(flutterCommand, <String>['build', 'windows'],
                 pluginExampleDirectory.path),
           ]));

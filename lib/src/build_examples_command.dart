@@ -33,12 +33,17 @@ class BuildExamplesCommand extends PluginCommand {
 
   @override
   Future<Null> run() async {
-    if (!argResults[kIpa] && !argResults[kApk] && !argResults[kMacos] && !argResults[kWindows]) {
-      print('None of --windows, --macos, --apk nor --ipa were specified, so not building '
+    if (!argResults[kIpa] &&
+        !argResults[kApk] &&
+        !argResults[kMacos] &&
+        !argResults[kWindows]) {
+      print(
+          'None of --windows, --macos, --apk nor --ipa were specified, so not building '
           'anything.');
       return;
     }
-    final String flutterCommand = LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
+    final String flutterCommand =
+        LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
 
     checkSharding();
     final List<String> failingPackages = <String>[];
@@ -60,8 +65,8 @@ class BuildExamplesCommand extends PluginCommand {
               failingPackages.add('$packageName (macos)');
             } else {
               exitCode = await processRunner.runAndStream(
-                flutterCommand, <String>['build', kMacos],
-                workingDir: example);
+                  flutterCommand, <String>['build', kMacos],
+                  workingDir: example);
               if (exitCode != 0) {
                 failingPackages.add('$packageName (macos)');
               }
@@ -78,7 +83,7 @@ class BuildExamplesCommand extends PluginCommand {
             // delete any existing windows directory and create a new one
             // with 'flutter create .'
             final Directory windowsFolder =
-              fileSystem.directory(p.join(example.path, 'windows'));
+                fileSystem.directory(p.join(example.path, 'windows'));
             if (windowsFolder.existsSync()) {
               windowsFolder.deleteSync(recursive: true);
             }

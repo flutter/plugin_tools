@@ -12,12 +12,16 @@ import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
 typedef void Print(Object object);
+
 /// Key for windows platform.
 const String kWindows = 'windows';
+
 /// Key for macos platform.
 const String kMacos = 'macos';
+
 /// Key for ipa platform.
 const String kIpa = 'ipa';
+
 /// Key for apk platform.
 const String kApk = 'apk';
 
@@ -51,15 +55,14 @@ bool isFlutterPackage(FileSystemEntity entity, FileSystem fileSystem) {
 ///       plugin:
 ///         platforms:
 ///           [platform]:
-bool pluginSupportsPlatform(String platform, FileSystemEntity entity, FileSystem fileSystem) {
-  assert(
-    platform == 'ios' ||
-    platform == 'android' ||
-    platform == 'web' ||
-    platform == 'macos' ||
-    platform == 'windows' ||
-    platform == 'linux'
-  );
+bool pluginSupportsPlatform(
+    String platform, FileSystemEntity entity, FileSystem fileSystem) {
+  assert(platform == 'ios' ||
+      platform == 'android' ||
+      platform == 'web' ||
+      platform == 'macos' ||
+      platform == 'windows' ||
+      platform == 'linux');
   if (entity == null || entity is! Directory) {
     return false;
   }
@@ -92,6 +95,7 @@ bool pluginSupportsPlatform(String platform, FileSystemEntity entity, FileSystem
 bool isWebPlugin(FileSystemEntity entity, FileSystem fileSystem) {
   return pluginSupportsPlatform('web', entity, fileSystem);
 }
+
 /// Returns whether the given directory contains a Flutter Windows plugin.
 bool isWindowsPlugin(FileSystemEntity entity, FileSystem fileSystem) {
   return pluginSupportsPlatform('windows', entity, fileSystem);

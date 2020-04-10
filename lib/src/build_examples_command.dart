@@ -33,7 +33,7 @@ class BuildExamplesCommand extends PluginCommand {
   @override
   Future<Null> run() async {
     if (!argResults[kIpa] && !argResults[kApk] && !argResults[kMacos] && !argResults[kWindows]) {
-      print('Neither --windows, --macos, --apk nor --ipa were specified, so not building '
+      print('None of --windows, --macos, --apk nor --ipa were specified, so not building '
           'anything.');
       return;
     }

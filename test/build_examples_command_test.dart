@@ -191,8 +191,8 @@ void main() {
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
             ProcessCall(
-                'flutter.bat', <String>['create', '.'], pluginExampleDirectory.path),
-            ProcessCall('flutter.bat', <String>['build', 'windows'],
+                flutterCommand, <String>['create', '.'], pluginExampleDirectory.path),
+            ProcessCall(flutterCommand, <String>['build', 'windows'],
                 pluginExampleDirectory.path),
           ]));
       cleanupPackages();

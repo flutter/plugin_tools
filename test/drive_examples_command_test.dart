@@ -224,11 +224,11 @@ void main() {
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
             ProcessCall(
-                'flutter.bat',
+                flutterCommand,
                 <String>['create', '.'],
                 pluginExampleDirectory.path),
             ProcessCall(
-                'flutter.bat',
+                flutterCommand,
                 <String>['drive', '-d', 'windows', deviceTestPath],
                 pluginExampleDirectory.path),
           ]));

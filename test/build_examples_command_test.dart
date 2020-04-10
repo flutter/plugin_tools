@@ -139,7 +139,7 @@ void main() {
       createFakePubspec(pluginExampleDirectory, isFlutter: true);
 
       final List<String> output = await runCapturingPrint(
-          runner, <String>['build-examples', '--windows']);
+          runner, <String>['build-examples', '--no-ipa', '--windows']);
       final String packageName =
           p.relative(pluginExampleDirectory.path, from: mockPackagesDir.path);
 
@@ -171,7 +171,7 @@ void main() {
       createFakePubspec(pluginExampleDirectory, isFlutter: true);
 
       final List<String> output = await runCapturingPrint(
-          runner, <String>['build-examples', '--windows']);
+          runner, <String>['build-examples', '--no-ipa', '--windows']);
       final String packageName =
           p.relative(pluginExampleDirectory.path, from: mockPackagesDir.path);
 

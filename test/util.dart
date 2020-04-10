@@ -4,20 +4,21 @@ import 'dart:io' as io;
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
 import 'package:flutter_plugin_tools/src/common.dart';
 import 'package:quiver/collection.dart';
 
-FileSystem mockFileSystem = MemoryFileSystem();
+FileSystem mockFileSystem = MemoryFileSystem(
+    style: LocalPlatform().isWindows
+        ? FileSystemStyle.windows
+        : FileSystemStyle.posix);
 Directory mockPackagesDir;
 
 /// Creates a mock packages directory in the mock file system.
 ///
 /// If [parentDir] is set the mock packages dir will be creates as a child of
 /// it. If not [mockFileSystem] will be used instead.
-void initializeFakePackages({Directory parentDir, FileSystem mockFs}) {
-  if (mockFileSystem != null) {
-    mockFileSystem = mockFs ?? mockFileSystem;
-  }
+void initializeFakePackages({Directory parentDir}) {
   mockPackagesDir =
       (parentDir ?? mockFileSystem.currentDirectory).childDirectory('packages');
   mockPackagesDir.createSync();

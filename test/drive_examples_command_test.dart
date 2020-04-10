@@ -2,6 +2,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:flutter_plugin_tools/src/drive_examples_command.dart';
 import 'package:path/path.dart' as p;
+import 'package:platform/platform.dart';
 import 'package:test/test.dart';
 
 import 'util.dart';
@@ -10,7 +11,7 @@ void main() {
   group('test drive_example_command', () {
     CommandRunner<Null> runner;
     RecordingProcessRunner processRunner;
-
+    final String flutterCommand = LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
     setUp(() {
       initializeFakePackages();
       processRunner = RecordingProcessRunner();
@@ -52,7 +53,7 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
-            ProcessCall('flutter', <String>['drive', deviceTestPath],
+            ProcessCall(flutterCommand, <String>['drive', deviceTestPath],
                 pluginExampleDirectory.path),
           ]));
       cleanupPackages();
@@ -86,7 +87,7 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
-            ProcessCall('flutter', <String>['drive', deviceTestPath],
+            ProcessCall(flutterCommand, <String>['drive', deviceTestPath],
                 pluginExampleDirectory.path),
           ]));
 
@@ -154,7 +155,7 @@ void main() {
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
             ProcessCall(
-                'flutter',
+                flutterCommand,
                 <String>['drive', '-d', 'macos', deviceTestPath],
                 pluginExampleDirectory.path),
           ]));

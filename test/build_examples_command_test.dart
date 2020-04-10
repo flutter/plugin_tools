@@ -2,6 +2,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:flutter_plugin_tools/src/build_examples_command.dart';
 import 'package:path/path.dart' as p;
+import 'package:platform/platform.dart';
 import 'package:test/test.dart';
 
 import 'util.dart';
@@ -10,6 +11,7 @@ void main() {
   group('test build_example_command', () {
     CommandRunner<Null> runner;
     RecordingProcessRunner processRunner;
+    final String flutterCommand = LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
 
     setUp(() {
       initializeFakePackages();
@@ -52,7 +54,7 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
-            ProcessCall('flutter', <String>['build', 'ios', '--no-codesign'],
+            ProcessCall(flutterCommand, <String>['build', 'ios', '--no-codesign'],
                 pluginExampleDirectory.path),
           ]));
       cleanupPackages();
@@ -120,8 +122,8 @@ void main() {
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
             ProcessCall(
-                'flutter', <String>['pub', 'get'], pluginExampleDirectory.path),
-            ProcessCall('flutter', <String>['build', 'macos'],
+                flutterCommand, <String>['pub', 'get'], pluginExampleDirectory.path),
+            ProcessCall(flutterCommand, <String>['build', 'macos'],
                 pluginExampleDirectory.path),
           ]));
       cleanupPackages();
@@ -224,7 +226,7 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
-            ProcessCall('flutter', <String>['build', 'apk'],
+            ProcessCall(flutterCommand, <String>['build', 'apk'],
                 pluginExampleDirectory.path),
           ]));
       cleanupPackages();

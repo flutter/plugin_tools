@@ -7,6 +7,7 @@ import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
+import 'package:platform/platform.dart';
 
 import 'common.dart';
 
@@ -37,6 +38,7 @@ class BuildExamplesCommand extends PluginCommand {
           'anything.');
       return;
     }
+    final String flutterCommand = LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
 
     checkSharding();
     final List<String> failingPackages = <String>[];
@@ -52,13 +54,13 @@ class BuildExamplesCommand extends PluginCommand {
             // Builing macos without running flutter pub get first results
             // in an error.
             int exitCode = await processRunner.runAndStream(
-                'flutter', <String>['pub', 'get'],
+                flutterCommand, <String>['pub', 'get'],
                 workingDir: example);
             if (exitCode != 0) {
               failingPackages.add('$packageName (macos)');
             } else {
               exitCode = await processRunner.runAndStream(
-                'flutter', <String>['build', kMacos],
+                flutterCommand, <String>['build', kMacos],
                 workingDir: example);
               if (exitCode != 0) {
                 failingPackages.add('$packageName (macos)');
@@ -81,13 +83,13 @@ class BuildExamplesCommand extends PluginCommand {
               windowsFolder.deleteSync(recursive: true);
             }
             int exitCode = await processRunner.runAndStream(
-                'flutter.bat', <String>['create', '.'],
+                flutterCommand, <String>['create', '.'],
                 workingDir: example);
             if (exitCode != 0) {
               failingPackages.add('$packageName (windows)');
             } else {
               exitCode = await processRunner.runAndStream(
-                  'flutter.bat', <String>['build', kWindows],
+                  flutterCommand, <String>['build', kWindows],
                   workingDir: example);
               if (exitCode != 0) {
                 failingPackages.add('$packageName (windows)');
@@ -104,7 +106,7 @@ class BuildExamplesCommand extends PluginCommand {
         if (argResults[kIpa]) {
           print('\nBUILDING IPA for $packageName');
           final int exitCode = await processRunner.runAndStream(
-              'flutter', <String>['build', 'ios', '--no-codesign'],
+              flutterCommand, <String>['build', 'ios', '--no-codesign'],
               workingDir: example);
           if (exitCode != 0) {
             failingPackages.add('$packageName (ipa)');
@@ -114,7 +116,7 @@ class BuildExamplesCommand extends PluginCommand {
         if (argResults[kApk]) {
           print('\nBUILDING APK for $packageName');
           final int exitCode = await processRunner.runAndStream(
-              'flutter', <String>['build', 'apk'],
+              flutterCommand, <String>['build', 'apk'],
               workingDir: example);
           if (exitCode != 0) {
             failingPackages.add('$packageName (apk)');

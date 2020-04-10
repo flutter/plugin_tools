@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
+import 'package:platform/platform.dart';
 import 'common.dart';
 
 class DriveExamplesCommand extends PluginCommand {
@@ -39,7 +40,7 @@ class DriveExamplesCommand extends PluginCommand {
       for (Directory example in getExamplesForPlugin(plugin)) {
         final String packageName =
             p.relative(example.path, from: packagesDir.path);
-        String flutterCommand = 'flutter';
+        final String flutterCommand = LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
 
         if (isMacos) {
           if (!isMacOsPlugin(plugin, fileSystem)) {
@@ -48,7 +49,6 @@ class DriveExamplesCommand extends PluginCommand {
         }
         if (isWindows) {
           if (isWindowsPlugin(plugin, fileSystem)) {
-            flutterCommand = 'flutter.bat';
             // The Windows tooling is not yet stable, so we need to
             // delete any existing windows directory and create a new one
             // with 'flutter create .'

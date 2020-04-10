@@ -1,5 +1,6 @@
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_plugin_tools/src/build_examples_command.dart';
 import 'package:test/test.dart';
 
@@ -10,8 +11,8 @@ void main() {
     CommandRunner<Null> runner;
     RecordingProcessRunner processRunner;
 
-    setUp(() {
-      initializeFakePackages();
+    void _initialize([FileSystem fileSystem]) {
+      initializeFakePackages(mockFs: fileSystem);
       processRunner = RecordingProcessRunner();
       final BuildExamplesCommand command = BuildExamplesCommand(
           mockPackagesDir, mockFileSystem,
@@ -21,6 +22,10 @@ void main() {
           'build_examples_command', 'Test for build_example_command');
       runner.addCommand(command);
       cleanupPackages();
+    }
+
+    setUp(() {
+      _initialize();
     });
 
     test('runs build for ios', () async {
@@ -85,6 +90,9 @@ void main() {
       cleanupPackages();
     });
     test('runs build for macos', () async {
+      mockFileSystem = MemoryFileSystem(style: FileSystemStyle.posix);
+      _initialize(mockFileSystem);
+
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test'],
         <String>['example', 'macos', 'macos.swift'],
@@ -121,6 +129,9 @@ void main() {
 
     test('runs build for Windows when plugin is not setup for Windows results in no-op',
         () async {
+      mockFileSystem = MemoryFileSystem(style: FileSystemStyle.windows);
+      _initialize(mockFileSystem);
+
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test'],
       ], isWindowsPlugin: false);
@@ -136,6 +147,8 @@ void main() {
       expect(
         output,
         orderedEquals(<String>[
+          '\nBUILDING windows for plugin\\example',
+          'Windows is not supported by this plugin',
           '\n\n',
           'All builds successful!',
         ]),
@@ -163,7 +176,7 @@ void main() {
       expect(
         output,
         orderedEquals(<String>[
-          '\nBUILDING windows for plugin/example',
+          '\nBUILDING windows for plugin\\example',
           '\n\n',
           'All builds successful!',
         ]),

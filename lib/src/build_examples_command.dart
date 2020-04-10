@@ -40,9 +40,7 @@ class BuildExamplesCommand extends PluginCommand {
 
     checkSharding();
     final List<String> failingPackages = <String>[];
-    print('Before plugins');
     await for (Directory plugin in getPlugins()) {
-      print(plugin);
       for (Directory example in getExamplesForPlugin(plugin)) {
         final String packageName =
             p.relative(example.path, from: packagesDir.path);
@@ -94,7 +92,9 @@ class BuildExamplesCommand extends PluginCommand {
               if (exitCode != 0) {
                 failingPackages.add('$packageName (windows)');
               }
-              windowsFolder.deleteSync(recursive: true);
+              if (windowsFolder.existsSync()) {
+                windowsFolder.deleteSync(recursive: true);
+              }
             }
           } else {
             print('Windows is not supported by this plugin');

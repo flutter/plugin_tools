@@ -7,14 +7,17 @@ import 'package:file/memory.dart';
 import 'package:flutter_plugin_tools/src/common.dart';
 import 'package:quiver/collection.dart';
 
-final FileSystem mockFileSystem = MemoryFileSystem();
+FileSystem mockFileSystem = MemoryFileSystem();
 Directory mockPackagesDir;
 
 /// Creates a mock packages directory in the mock file system.
 ///
 /// If [parentDir] is set the mock packages dir will be creates as a child of
 /// it. If not [mockFileSystem] will be used instead.
-void initializeFakePackages({Directory parentDir}) {
+void initializeFakePackages({Directory parentDir, FileSystem mockFs}) {
+  if (mockFileSystem != null) {
+    mockFileSystem = mockFs ?? mockFileSystem;
+  }
   mockPackagesDir =
       (parentDir ?? mockFileSystem.currentDirectory).childDirectory('packages');
   mockPackagesDir.createSync();
@@ -44,7 +47,6 @@ Directory createFakePlugin(
     isMacOsPlugin: isMacOsPlugin,
     isWindowsPlugin: isWindowsPlugin,
   );
-  print(pluginDirectory);
 
   if (withSingleExample) {
     final Directory exampleDir = pluginDirectory.childDirectory('example')
@@ -121,7 +123,6 @@ version: 0.0.1
 publish_to: none # Hardcoded safeguard to prevent this from somehow being published by a broken test.
 ''';
   }
-print(yaml);
   parent.childFile('pubspec.yaml').writeAsStringSync(yaml);
 }
 

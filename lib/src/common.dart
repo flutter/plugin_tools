@@ -212,7 +212,6 @@ abstract class PluginCommand extends Command<Null> {
         (allPlugins.length % shardCount == 0 ? 0 : 1);
     final int start = min(shardIndex * shardSize, allPlugins.length);
     final int end = min(start + shardSize, allPlugins.length);
-        print('All Plugins $allPlugins');
 
     for (Directory plugin in allPlugins.sublist(start, end)) {
       yield plugin;
@@ -234,27 +233,18 @@ abstract class PluginCommand extends Command<Null> {
   ///    "client library" package, which declares the API for the plugin, as
   ///    well as one or more platform-specific implementations.
   Stream<Directory> _getAllPlugins() async* {
-    print('argResult ${argResults.arguments}');
-    print(_pluginsArg);
     final Set<String> plugins = Set<String>.from(argResults[_pluginsArg]);
-    print('plugins: $plugins');
     await for (FileSystemEntity entity
         in packagesDir.list(followLinks: false)) {
-          print(entity);
       // A top-level Dart package is a plugin package.
       if (_isDartPackage(entity)) {
-        print('Is dart package');
         if (plugins.isEmpty || plugins.contains(p.basename(entity.path))) {
-          print('Is empty $plugins');
           yield entity;
         }
       } else if (entity is Directory) {
-        print('Is directory');
         // Look for Dart packages under this top-level directory.
         await for (FileSystemEntity subdir in entity.list(followLinks: false)) {
-          print('Sub idr $subdir');
           if (_isDartPackage(subdir)) {
-            print('Sub is Dart package');
             // If --plugin=my_plugin is passed, then match all federated
             // plugins under 'my_plugin'. Also match if the exact plugin is
             // passed.

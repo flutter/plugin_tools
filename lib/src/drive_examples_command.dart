@@ -55,15 +55,14 @@ class DriveExamplesCommand extends PluginCommand {
             // with 'flutter create .'
             final Directory windowsFolder =
                 fileSystem.directory(p.join(example.path, 'windows'));
-            if (windowsFolder.existsSync()) {
-              windowsFolder.deleteSync(recursive: true);
-            }
-            int exitCode = await processRunner.runAndStream(
-                flutterCommand, <String>['create', '.'],
-                workingDir: example);
-            if (exitCode != 0) {
-              print('Failed to create a windows directory for $packageName');
-              continue;
+            if (!windowsFolder.existsSync()) {
+              int exitCode = await processRunner.runAndStream(
+                  flutterCommand, <String>['create', '.'],
+                  workingDir: example);
+              if (exitCode != 0) {
+                print('Failed to create a windows directory for $packageName');
+                continue;
+              }
             }
           } else {
             continue;

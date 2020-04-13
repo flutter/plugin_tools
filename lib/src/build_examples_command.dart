@@ -84,24 +84,24 @@ class BuildExamplesCommand extends PluginCommand {
             // with 'flutter create .'
             final Directory windowsFolder =
                 fileSystem.directory(p.join(example.path, 'windows'));
-            if (windowsFolder.existsSync()) {
-              windowsFolder.deleteSync(recursive: true);
-            }
-            int exitCode = await processRunner.runAndStream(
-                flutterCommand, <String>['create', '.'],
-                workingDir: example);
-            if (exitCode != 0) {
-              failingPackages.add('$packageName (windows)');
-            } else {
-              exitCode = await processRunner.runAndStream(
-                  flutterCommand, <String>['build', kWindows],
+            bool exampleCreated = false;
+            if (!windowsFolder.existsSync()) {
+              int exampleCreateCode = await processRunner.runAndStream(
+                  flutterCommand, <String>['create', '.'],
                   workingDir: example);
-              if (exitCode != 0) {
-                failingPackages.add('$packageName (windows)');
+              if (exampleCreateCode == 0) {
+                exampleCreated = true;
               }
-              if (windowsFolder.existsSync()) {
-                windowsFolder.deleteSync(recursive: true);
-              }
+            }
+            int buildExitCode = await processRunner.runAndStream(
+                flutterCommand, <String>['build', kWindows],
+                workingDir: example);
+            if (buildExitCode != 0) {
+              failingPackages.add('$packageName (windows)');
+            }
+
+            if (exampleCreated && windowsFolder.existsSync()) {
+              windowsFolder.deleteSync(recursive: true);
             }
           } else {
             print('Windows is not supported by this plugin');

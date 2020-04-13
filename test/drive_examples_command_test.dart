@@ -241,5 +241,46 @@ void main() {
 
       cleanupPackages();
     });
+    test('runs drive on a Windows plugin with a windows direactory does not call flutter create', () async {
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test_driver', 'plugin_test.dart'],
+            <String>['example', 'test_driver', 'plugin.dart'],
+            <String>['example', 'windows', 'test.h'],
+          ],
+          isWindowsPlugin: true);
+
+      final Directory pluginExampleDirectory =
+          mockPackagesDir.childDirectory('plugin').childDirectory('example');
+
+      createFakePubspec(pluginExampleDirectory, isFlutter: true);
+
+      final List<String> output = await runCapturingPrint(runner, <String>[
+        'drive-examples',
+        '--windows',
+      ]);
+
+      expect(
+        output,
+        orderedEquals(<String>[
+          '\n\n',
+          'All driver tests successful!',
+        ]),
+      );
+
+      String deviceTestPath = p.join('test_driver', 'plugin.dart');
+      print(processRunner.recordedCalls);
+      // flutter create . should NOT be called.
+      expect(
+          processRunner.recordedCalls,
+          orderedEquals(<ProcessCall>[
+            ProcessCall(
+                flutterCommand,
+                <String>['drive', '-d', 'windows', deviceTestPath],
+                pluginExampleDirectory.path),
+          ]));
+
+      cleanupPackages();
+    });
   });
 }

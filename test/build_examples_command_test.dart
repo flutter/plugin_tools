@@ -208,7 +208,9 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs build for windows does not call flutter create if a directory exists', () async {
+    test(
+        'runs build for windows does not call flutter create if a directory exists',
+        () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test'],

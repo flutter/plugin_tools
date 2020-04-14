@@ -241,7 +241,9 @@ void main() {
 
       cleanupPackages();
     });
-    test('runs drive on a Windows plugin with a windows direactory does not call flutter create', () async {
+    test(
+        'runs drive on a Windows plugin with a windows direactory does not call flutter create',
+        () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test_driver', 'plugin_test.dart'],

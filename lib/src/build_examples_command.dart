@@ -99,7 +99,6 @@ class BuildExamplesCommand extends PluginCommand {
             if (buildExitCode != 0) {
               failingPackages.add('$packageName (windows)');
             }
-
             if (exampleCreated && windowsFolder.existsSync()) {
               windowsFolder.deleteSync(recursive: true);
             }

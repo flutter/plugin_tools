@@ -79,7 +79,7 @@ class DriveExamplesCommand extends PluginCommand {
         await for (FileSystemEntity test in driverTests.list()) {
           final String driverTestName =
               p.relative(test.path, from: driverTests.path);
-          if (!driverTestName.endsWith("_test.dart")) {
+          if (!driverTestName.endsWith('_test.dart')) {
             continue;
           }
           // Try to find a matching app to drive without the _test.dart

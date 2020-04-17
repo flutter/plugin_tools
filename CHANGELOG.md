@@ -1,3 +1,7 @@
+## v.0.0.36+1
+
+- Serialize linting podspecs.
+
 ## v.0.0.36
 
 - Remove retry on Firebase Test Lab's call to gcloud set.

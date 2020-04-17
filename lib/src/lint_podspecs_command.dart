@@ -22,19 +22,19 @@ class LintPodspecsCommand extends PluginCommand {
   LintPodspecsCommand(
     Directory packagesDir,
     FileSystem fileSystem, {
-    ProcessRunner processRunner = const ProcessRunner(),
-    this.platform = const LocalPlatform(),
-    Print print = print,
-  })  : _print = print,
-        super(packagesDir, fileSystem, processRunner: processRunner) {
+      ProcessRunner processRunner = const ProcessRunner(),
+      this.platform = const LocalPlatform(),
+      Print print = print,
+    })  : _print = print,
+      super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addMultiOption('skip',
-        help:
-            'Skip all linting for podspecs with this basename (example: federated plugins with placeholder podspecs)',
-        valueHelp: 'podspec_file_name');
+      help:
+      'Skip all linting for podspecs with this basename (example: federated plugins with placeholder podspecs)',
+      valueHelp: 'podspec_file_name');
     argParser.addMultiOption('no-analyze',
-        help:
-            'Do not pass --analyze flag to "pod lib lint" for podspecs with this basename (example: plugins with known analyzer warnings)',
-        valueHelp: 'podspec_file_name');
+      help:
+      'Do not pass --analyze flag to "pod lib lint" for podspecs with this basename (example: plugins with known analyzer warnings)',
+      valueHelp: 'podspec_file_name');
   }
 
   @override
@@ -45,8 +45,8 @@ class LintPodspecsCommand extends PluginCommand {
 
   @override
   final String description =
-      'Runs "pod lib lint" on all iOS and macOS plugin podspecs.\n\n'
-      'This command requires "pod" and "flutter" to be in your path. Runs on macOS only.';
+    'Runs "pod lib lint" on all iOS and macOS plugin podspecs.\n\n'
+    'This command requires "pod" and "flutter" to be in your path. Runs on macOS only.';
 
   final Platform platform;
 
@@ -62,7 +62,7 @@ class LintPodspecsCommand extends PluginCommand {
     checkSharding();
 
     await processRunner.runAndExitOnError('which', <String>['pod'],
-        workingDir: packagesDir);
+      workingDir: packagesDir);
 
     _print('Starting podspec lint test');
 
@@ -87,7 +87,7 @@ class LintPodspecsCommand extends PluginCommand {
     final List<File> podspecs = await getFiles().where((File entity) {
       final String filePath = entity.path;
       return p.extension(filePath) == '.podspec' &&
-          !argResults['skip'].contains(p.basenameWithoutExtension(filePath));
+        !argResults['skip'].contains(p.basenameWithoutExtension(filePath));
     }).toList();
 
     podspecs.sort(
@@ -99,7 +99,7 @@ class LintPodspecsCommand extends PluginCommand {
     // Do not run the static analyzer on plugins with known analyzer issues.
     final String podspecPath = podspec.path;
     final bool runAnalyzer = !argResults['no-analyze']
-        .contains(p.basenameWithoutExtension(podspecPath));
+      .contains(p.basenameWithoutExtension(podspecPath));
 
     final String podspecBasename = p.basename(podspecPath);
     if (runAnalyzer) {
@@ -109,12 +109,14 @@ class LintPodspecsCommand extends PluginCommand {
     }
 
     // Lint plugin as framework (use_frameworks!).
-    final ProcessResult frameworkResult = await _runPodLint(podspecPath, runAnalyzer: runAnalyzer, libraryLint: true);
+    final ProcessResult frameworkResult = await _runPodLint(podspecPath,
+      runAnalyzer: runAnalyzer, libraryLint: true);
     _print(frameworkResult.stdout);
     _print(frameworkResult.stderr);
 
     // Lint plugin as library.
-    final ProcessResult libraryResult = await _runPodLint(podspecPath, runAnalyzer: runAnalyzer, libraryLint: false);
+    final ProcessResult libraryResult = await _runPodLint(podspecPath,
+      runAnalyzer: runAnalyzer, libraryLint: false);
     _print(libraryResult.stdout);
     _print(libraryResult.stderr);
 
@@ -122,7 +124,7 @@ class LintPodspecsCommand extends PluginCommand {
   }
 
   Future<ProcessResult> _runPodLint(String podspecPath,
-      {bool runAnalyzer, bool libraryLint}) async {
+    {bool runAnalyzer, bool libraryLint}) async {
     final List<String> arguments = <String>[
       'lib',
       'lint',
@@ -133,6 +135,6 @@ class LintPodspecsCommand extends PluginCommand {
     ];
 
     return processRunner.run('pod', arguments,
-        workingDir: packagesDir, stdoutEncoding: utf8, stderrEncoding: utf8);
+      workingDir: packagesDir, stdoutEncoding: utf8, stderrEncoding: utf8);
   }
 }

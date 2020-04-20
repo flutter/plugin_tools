@@ -37,7 +37,6 @@ const String kIpa = 'ipa';
 /// Key for APK.
 const String kApk = 'apk';
 
-
 /// Returns whether the given directory contains a Flutter package.
 bool isFlutterPackage(FileSystemEntity entity, FileSystem fileSystem) {
   if (entity == null || entity is! Directory) {

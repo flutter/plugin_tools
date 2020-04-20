@@ -19,11 +19,24 @@ const String kWindows = 'windows';
 /// Key for macos platform.
 const String kMacos = 'macos';
 
-/// Key for ipa platform.
+/// Key for linux platform.
+const String kLinux = 'linux';
+
+/// Key for IPA (iOS) platform.
+const String kIos = 'ios';
+
+/// Key for APK (Android) platform.
+const String kAndroid = 'android';
+
+/// Key for Web platform.
+const String kWeb = 'web';
+
+/// Key for IPA.
 const String kIpa = 'ipa';
 
-/// Key for apk platform.
+/// Key for APK.
 const String kApk = 'apk';
+
 
 /// Returns whether the given directory contains a Flutter package.
 bool isFlutterPackage(FileSystemEntity entity, FileSystem fileSystem) {
@@ -57,12 +70,12 @@ bool isFlutterPackage(FileSystemEntity entity, FileSystem fileSystem) {
 ///           [platform]:
 bool pluginSupportsPlatform(
     String platform, FileSystemEntity entity, FileSystem fileSystem) {
-  assert(platform == 'ios' ||
-      platform == 'android' ||
-      platform == 'web' ||
-      platform == 'macos' ||
-      platform == 'windows' ||
-      platform == 'linux');
+  assert(platform == kIos ||
+      platform == kAndroid ||
+      platform == kWeb ||
+      platform == kMacos ||
+      platform == kWindows ||
+      platform == kLinux);
   if (entity == null || entity is! Directory) {
     return false;
   }
@@ -93,22 +106,22 @@ bool pluginSupportsPlatform(
 
 /// Returns whether the given directory contains a Flutter web plugin.
 bool isWebPlugin(FileSystemEntity entity, FileSystem fileSystem) {
-  return pluginSupportsPlatform('web', entity, fileSystem);
+  return pluginSupportsPlatform(kWeb, entity, fileSystem);
 }
 
 /// Returns whether the given directory contains a Flutter Windows plugin.
 bool isWindowsPlugin(FileSystemEntity entity, FileSystem fileSystem) {
-  return pluginSupportsPlatform('windows', entity, fileSystem);
+  return pluginSupportsPlatform(kWindows, entity, fileSystem);
 }
 
 /// Returns whether the given directory contains a Flutter macOS plugin.
 bool isMacOsPlugin(FileSystemEntity entity, FileSystem fileSystem) {
-  return pluginSupportsPlatform('macos', entity, fileSystem);
+  return pluginSupportsPlatform(kMacos, entity, fileSystem);
 }
 
 /// Returns whether the given directory contains a Flutter linux plugin.
 bool isLinuxPlugin(FileSystemEntity entity, FileSystem fileSystem) {
-  return pluginSupportsPlatform('linux', entity, fileSystem);
+  return pluginSupportsPlatform(kLinux, entity, fileSystem);
 }
 
 /// Error thrown when a command needs to exit with a non-zero exit code.

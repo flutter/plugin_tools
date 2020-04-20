@@ -4,10 +4,14 @@ import 'dart:io' as io;
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
 import 'package:flutter_plugin_tools/src/common.dart';
 import 'package:quiver/collection.dart';
 
-final FileSystem mockFileSystem = MemoryFileSystem();
+FileSystem mockFileSystem = MemoryFileSystem(
+    style: LocalPlatform().isWindows
+        ? FileSystemStyle.windows
+        : FileSystemStyle.posix);
 Directory mockPackagesDir;
 
 /// Creates a mock packages directory in the mock file system.
@@ -28,6 +32,8 @@ Directory createFakePlugin(
   List<List<String>> withExtraFiles = const <List<String>>[],
   bool isFlutter = true,
   bool isWebPlugin = false,
+  bool isMacOsPlugin = false,
+  bool isWindowsPlugin = false,
 }) {
   assert(!(withSingleExample && withExamples.isNotEmpty),
       'cannot pass withSingleExample and withExamples simultaneously');
@@ -39,6 +45,8 @@ Directory createFakePlugin(
     name: name,
     isFlutter: isFlutter,
     isWebPlugin: isWebPlugin,
+    isMacOsPlugin: isMacOsPlugin,
+    isWindowsPlugin: isWindowsPlugin,
   );
 
   if (withSingleExample) {
@@ -70,23 +78,37 @@ Directory createFakePlugin(
 /// Creates a `pubspec.yaml` file with a flutter dependency.
 void createFakePubspec(
   Directory parent, {
-  String name: 'fake_package',
+  String name = 'fake_package',
   bool isFlutter = true,
   bool includeVersion = false,
   bool isWebPlugin = false,
+  bool isMacOsPlugin = false,
+  bool isWindowsPlugin = false,
 }) {
   parent.childFile('pubspec.yaml').createSync();
   String yaml = '''
 name: $name
-''';
-  if (isWebPlugin) {
-    yaml += '''
 flutter:
   plugin:
     platforms:
+''';
+  if (isWebPlugin) {
+    yaml += '''
       web:
         pluginClass: FakePlugin
         fileName: ${name}_web.dart
+''';
+  }
+  if (isMacOsPlugin) {
+    yaml += '''
+      macos:
+        pluginClass: FakePlugin
+''';
+  }
+  if (isWindowsPlugin) {
+    yaml += '''
+      windows:
+        pluginClass: FakePlugin
 ''';
   }
   if (isFlutter) {

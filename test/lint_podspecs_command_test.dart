@@ -81,7 +81,6 @@ void main() {
                 'lib',
                 'lint',
                 p.join(plugin1Dir.path, 'ios', 'plugin1.podspec'),
-                '--allow-warnings',
                 '--analyze',
                 '--use-libraries'
               ],
@@ -92,7 +91,6 @@ void main() {
                 'lib',
                 'lint',
                 p.join(plugin1Dir.path, 'ios', 'plugin1.podspec'),
-                '--allow-warnings',
                 '--analyze',
               ],
               mockPackagesDir.path),
@@ -105,7 +103,7 @@ void main() {
       expect(printedMessages, contains('Bar'));
     });
 
-    test('skips podspecs with known warnings', () async {
+    test('skips podspecs with known issues', () async {
       createFakePlugin('plugin1', withExtraFiles: <List<String>>[
         <String>['plugin1.podspec']
       ]);
@@ -142,7 +140,43 @@ void main() {
                 'lib',
                 'lint',
                 p.join(plugin1Dir.path, 'plugin1.podspec'),
+                '--use-libraries'
+              ],
+              mockPackagesDir.path),
+          ProcessCall(
+              'pod',
+              <String>[
+                'lib',
+                'lint',
+                p.join(plugin1Dir.path, 'plugin1.podspec'),
+              ],
+              mockPackagesDir.path),
+        ]),
+      );
+
+      expect(printedMessages, contains('Linting plugin1.podspec'));
+    });
+
+    test('allow warnings for podspecs with known warnings', () async {
+      Directory plugin1Dir =
+          createFakePlugin('plugin1', withExtraFiles: <List<String>>[
+        <String>['plugin1.podspec'],
+      ]);
+
+      await runner.run(<String>['podspecs', '--no-warnings=plugin1']);
+
+      expect(
+        processRunner.recordedCalls,
+        orderedEquals(<ProcessCall>[
+          ProcessCall('which', <String>['pod'], mockPackagesDir.path),
+          ProcessCall(
+              'pod',
+              <String>[
+                'lib',
+                'lint',
+                p.join(plugin1Dir.path, 'plugin1.podspec'),
                 '--allow-warnings',
+                '--analyze',
                 '--use-libraries'
               ],
               mockPackagesDir.path),
@@ -153,12 +187,14 @@ void main() {
                 'lint',
                 p.join(plugin1Dir.path, 'plugin1.podspec'),
                 '--allow-warnings',
+                '--analyze',
               ],
               mockPackagesDir.path),
         ]),
       );
 
-      expect(printedMessages, contains('Linting plugin1.podspec'));
+      expect(
+          printedMessages, contains('Linting and analyzing plugin1.podspec'));
     });
   });
 }

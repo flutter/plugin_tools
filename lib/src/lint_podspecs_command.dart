@@ -31,7 +31,7 @@ class LintPodspecsCommand extends PluginCommand {
         help:
             'Skip all linting for podspecs with this basename (example: federated plugins with placeholder podspecs)',
         valueHelp: 'podspec_file_name');
-    argParser.addMultiOption('no-warnings',
+    argParser.addMultiOption('ignore-warnings',
         help:
             'Do not pass --allow-warnings flag to "pod lib lint" for podspecs with this basename (example: plugins with known warnings)',
         valueHelp: 'podspec_file_name');
@@ -129,7 +129,7 @@ class LintPodspecsCommand extends PluginCommand {
 
   Future<ProcessResult> _runPodLint(String podspecPath,
       {bool runAnalyzer, bool libraryLint}) async {
-    final bool allowWarnings = argResults['no-warnings']
+    final bool allowWarnings = argResults['ignore-warnings']
         .contains(p.basenameWithoutExtension(podspecPath));
     final List<String> arguments = <String>[
       'lib',

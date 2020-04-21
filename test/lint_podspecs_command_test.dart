@@ -163,7 +163,7 @@ void main() {
         <String>['plugin1.podspec'],
       ]);
 
-      await runner.run(<String>['podspecs', '--no-warnings=plugin1']);
+      await runner.run(<String>['podspecs', '--ignore-warnings=plugin1']);
 
       expect(
         processRunner.recordedCalls,

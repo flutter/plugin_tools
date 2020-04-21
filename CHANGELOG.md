@@ -1,3 +1,7 @@
+## v.0.0.36+2
+
+- Default to showing podspec lint warnings
+
 ## v.0.0.36+1
 
 - Serialize linting podspecs.

@@ -14,6 +14,8 @@ class DriveExamplesCommand extends PluginCommand {
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
+    argParser.addFlag(kLinux,
+        help: 'Runs the Linux implementation of the examples');
     argParser.addFlag(kMacos,
         help: 'Runs the macOS implementation of the examples');
     argParser.addFlag(kWindows,
@@ -34,6 +36,7 @@ class DriveExamplesCommand extends PluginCommand {
   Future<Null> run() async {
     checkSharding();
     final List<String> failingTests = <String>[];
+    final bool isLinux = argResults[kLinux];
     final bool isMacos = argResults[kMacos];
     final bool isWindows = argResults[kWindows];
     await for (Directory plugin in getPlugins()) {
@@ -43,6 +46,26 @@ class DriveExamplesCommand extends PluginCommand {
         final String flutterCommand =
             LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
 
+        if (isLinux) {
+          if (isLinuxPlugin(plugin, fileSystem)) {
+            // The Linux tooling is not yet stable, so we need to
+            // delete any existing linux directory and create a new one
+            // with 'flutter create .'
+            final Directory linuxFolder =
+                fileSystem.directory(p.join(example.path, 'linux'));
+            if (!linuxFolder.existsSync()) {
+              int exitCode = await processRunner.runAndStream(
+                  flutterCommand, <String>['create', '.'],
+                  workingDir: example);
+              if (exitCode != 0) {
+                print('Failed to create a linux directory for $packageName');
+                continue;
+              }
+            }
+          } else {
+            continue;
+          }
+        }
         if (isMacos) {
           if (!isMacOsPlugin(plugin, fileSystem)) {
             continue;
@@ -103,6 +126,12 @@ class DriveExamplesCommand extends PluginCommand {
           }
 
           final List<String> driveArgs = <String>['drive'];
+          if (isLinux && isLinuxPlugin(plugin, fileSystem)) {
+            driveArgs.addAll(<String>[
+              '-d',
+              'linux',
+            ]);
+          }
           if (isMacos && isMacOsPlugin(plugin, fileSystem)) {
             driveArgs.addAll(<String>[
               '-d',

@@ -95,8 +95,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs drive when plugin does not suppport Linux is a no-op',
-        () async {
+    test('runs drive when plugin does not suppport Linux is a no-op', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test_driver', 'plugin_test.dart'],

@@ -32,6 +32,7 @@ Directory createFakePlugin(
   List<List<String>> withExtraFiles = const <List<String>>[],
   bool isFlutter = true,
   bool isWebPlugin = false,
+  bool isLinuxPlugin = false,
   bool isMacOsPlugin = false,
   bool isWindowsPlugin = false,
 }) {
@@ -45,6 +46,7 @@ Directory createFakePlugin(
     name: name,
     isFlutter: isFlutter,
     isWebPlugin: isWebPlugin,
+    isLinuxPlugin: isLinuxPlugin,
     isMacOsPlugin: isMacOsPlugin,
     isWindowsPlugin: isWindowsPlugin,
   );
@@ -82,6 +84,7 @@ void createFakePubspec(
   bool isFlutter = true,
   bool includeVersion = false,
   bool isWebPlugin = false,
+  bool isLinuxPlugin = false,
   bool isMacOsPlugin = false,
   bool isWindowsPlugin = false,
 }) {
@@ -97,6 +100,12 @@ flutter:
       web:
         pluginClass: FakePlugin
         fileName: ${name}_web.dart
+''';
+  }
+  if (isLinuxPlugin) {
+    yaml += '''
+      linux:
+        pluginClass: FakePlugin
 ''';
   }
   if (isMacOsPlugin) {

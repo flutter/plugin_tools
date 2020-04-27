@@ -63,6 +63,120 @@ void main() {
       cleanupPackages();
     });
 
+    test(
+        'runs build for Linux when plugin is not setup for Linux results in no-op',
+        () async {
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test'],
+          ],
+          isLinuxPlugin: false);
+
+      final Directory pluginExampleDirectory =
+          mockPackagesDir.childDirectory('plugin').childDirectory('example');
+
+      createFakePubspec(pluginExampleDirectory, isFlutter: true);
+
+      final List<String> output = await runCapturingPrint(
+          runner, <String>['build-examples', '--no-ipa', '--linux']);
+      final String packageName =
+          p.relative(pluginExampleDirectory.path, from: mockPackagesDir.path);
+
+      expect(
+        output,
+        orderedEquals(<String>[
+          '\nBUILDING Linux for $packageName',
+          'Linux is not supported by this plugin',
+          '\n\n',
+          'All builds successful!',
+        ]),
+      );
+
+      print(processRunner.recordedCalls);
+      // Output should be empty since running build-examples --macos with no macos
+      // implementation is a no-op.
+      expect(processRunner.recordedCalls, orderedEquals(<ProcessCall>[]));
+      cleanupPackages();
+    });
+
+    test('runs build for Linux', () async {
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test'],
+          ],
+          isLinuxPlugin: true);
+
+      final Directory pluginExampleDirectory =
+          mockPackagesDir.childDirectory('plugin').childDirectory('example');
+
+      createFakePubspec(pluginExampleDirectory, isFlutter: true);
+
+      final List<String> output = await runCapturingPrint(
+          runner, <String>['build-examples', '--no-ipa', '--linux']);
+      final String packageName =
+          p.relative(pluginExampleDirectory.path, from: mockPackagesDir.path);
+
+      expect(
+        output,
+        orderedEquals(<String>[
+          '\nBUILDING Linux for $packageName',
+          '\n\n',
+          'All builds successful!',
+        ]),
+      );
+
+      print(processRunner.recordedCalls);
+      expect(
+          processRunner.recordedCalls,
+          orderedEquals(<ProcessCall>[
+            ProcessCall(flutterCommand, <String>['create', '.'],
+                pluginExampleDirectory.path),
+            ProcessCall(flutterCommand, <String>['build', 'linux'],
+                pluginExampleDirectory.path),
+          ]));
+      cleanupPackages();
+    });
+
+    test(
+        'runs build for Linux does not call flutter create if a directory exists',
+        () async {
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test'],
+            <String>['example', 'linux', 'test.h']
+          ],
+          isLinuxPlugin: true);
+
+      final Directory pluginExampleDirectory =
+          mockPackagesDir.childDirectory('plugin').childDirectory('example');
+
+      createFakePubspec(pluginExampleDirectory, isFlutter: true);
+
+      final List<String> output = await runCapturingPrint(
+          runner, <String>['build-examples', '--no-ipa', '--linux']);
+      final String packageName =
+          p.relative(pluginExampleDirectory.path, from: mockPackagesDir.path);
+
+      expect(
+        output,
+        orderedEquals(<String>[
+          '\nBUILDING Linux for $packageName',
+          '\n\n',
+          'All builds successful!',
+        ]),
+      );
+
+      print(processRunner.recordedCalls);
+      // flutter create . should NOT be called.
+      expect(
+          processRunner.recordedCalls,
+          orderedEquals(<ProcessCall>[
+            ProcessCall(flutterCommand, <String>['build', 'linux'],
+                pluginExampleDirectory.path),
+          ]));
+      cleanupPackages();
+    });
+
     test('runs build for macos with no implementation results in no-op',
         () async {
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
@@ -82,7 +196,7 @@ void main() {
       expect(
         output,
         orderedEquals(<String>[
-          '\nBUILDING macos for $packageName',
+          '\nBUILDING macOS for $packageName',
           '\macOS is not supported by this plugin',
           '\n\n',
           'All builds successful!',
@@ -116,7 +230,7 @@ void main() {
       expect(
         output,
         orderedEquals(<String>[
-          '\nBUILDING macos for $packageName',
+          '\nBUILDING macOS for $packageName',
           '\n\n',
           'All builds successful!',
         ]),
@@ -156,7 +270,7 @@ void main() {
       expect(
         output,
         orderedEquals(<String>[
-          '\nBUILDING windows for $packageName',
+          '\nBUILDING Windows for $packageName',
           'Windows is not supported by this plugin',
           '\n\n',
           'All builds successful!',
@@ -190,7 +304,7 @@ void main() {
       expect(
         output,
         orderedEquals(<String>[
-          '\nBUILDING windows for $packageName',
+          '\nBUILDING Windows for $packageName',
           '\n\n',
           'All builds successful!',
         ]),
@@ -231,7 +345,7 @@ void main() {
       expect(
         output,
         orderedEquals(<String>[
-          '\nBUILDING windows for $packageName',
+          '\nBUILDING Windows for $packageName',
           '\n\n',
           'All builds successful!',
         ]),

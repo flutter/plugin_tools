@@ -17,8 +17,9 @@ class BuildExamplesCommand extends PluginCommand {
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
-    argParser.addFlag(kWindows, defaultsTo: false);
+    argParser.addFlag(kLinux, defaultsTo: false);
     argParser.addFlag(kMacos, defaultsTo: false);
+    argParser.addFlag(kWindows, defaultsTo: false);
     argParser.addFlag(kIpa, defaultsTo: io.Platform.isMacOS);
     argParser.addFlag(kApk);
   }
@@ -35,11 +36,12 @@ class BuildExamplesCommand extends PluginCommand {
   Future<Null> run() async {
     if (!argResults[kIpa] &&
         !argResults[kApk] &&
+        !argResults[kLinux] &&
         !argResults[kMacos] &&
         !argResults[kWindows]) {
       print(
-          'None of --windows, --macos, --apk nor --ipa were specified, so not building '
-          'anything.');
+          'None of --linux, --macos, --windows, --apk nor --ipa were specified, '
+          'so not building anything.');
       return;
     }
     final String flutterCommand =
@@ -52,8 +54,39 @@ class BuildExamplesCommand extends PluginCommand {
         final String packageName =
             p.relative(example.path, from: packagesDir.path);
 
+        if (argResults[kLinux]) {
+          print('\nBUILDING Linux for $packageName');
+          if (isLinuxPlugin(plugin, fileSystem)) {
+            // The Linux tooling is not yet stable, so we need to
+            // delete any existing linux directory and create a new one
+            // with 'flutter create .'
+            final Directory linuxFolder =
+                fileSystem.directory(p.join(example.path, 'linux'));
+            bool exampleCreated = false;
+            if (!linuxFolder.existsSync()) {
+              int exampleCreateCode = await processRunner.runAndStream(
+                  flutterCommand, <String>['create', '.'],
+                  workingDir: example);
+              if (exampleCreateCode == 0) {
+                exampleCreated = true;
+              }
+            }
+            int buildExitCode = await processRunner.runAndStream(
+                flutterCommand, <String>['build', kLinux],
+                workingDir: example);
+            if (buildExitCode != 0) {
+              failingPackages.add('$packageName (linux)');
+            }
+            if (exampleCreated && linuxFolder.existsSync()) {
+              linuxFolder.deleteSync(recursive: true);
+            }
+          } else {
+            print('Linux is not supported by this plugin');
+          }
+        }
+
         if (argResults[kMacos]) {
-          print('\nBUILDING macos for $packageName');
+          print('\nBUILDING macOS for $packageName');
           if (isMacOsPlugin(plugin, fileSystem)) {
             // TODO(https://github.com/flutter/flutter/issues/46236):
             // Builing macos without running flutter pub get first results
@@ -77,7 +110,7 @@ class BuildExamplesCommand extends PluginCommand {
         }
 
         if (argResults[kWindows]) {
-          print('\nBUILDING windows for $packageName');
+          print('\nBUILDING Windows for $packageName');
           if (isWindowsPlugin(plugin, fileSystem)) {
             // The Windows tooling is not yet stable, so we need to
             // delete any existing windows directory and create a new one

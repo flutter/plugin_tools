@@ -1,3 +1,7 @@
+## v.0.0.36+3
+
+- Add support for Linux plugins.
+
 ## v.0.0.36+2
 
 - Default to showing podspec lint warnings

@@ -142,21 +142,29 @@ class BuildExamplesCommand extends PluginCommand {
 
         if (argResults[kIpa]) {
           print('\nBUILDING IPA for $packageName');
-          final int exitCode = await processRunner.runAndStream(
-              flutterCommand, <String>['build', 'ios', '--no-codesign'],
-              workingDir: example);
-          if (exitCode != 0) {
-            failingPackages.add('$packageName (ipa)');
+          if (isIosPlugin(plugin, fileSystem)) {
+            final int exitCode = await processRunner.runAndStream(
+                flutterCommand, <String>['build', 'ios', '--no-codesign'],
+                workingDir: example);
+            if (exitCode != 0) {
+              failingPackages.add('$packageName (ipa)');
+            }
+          } else {
+            print('iOS is not supported by this plugin');
           }
         }
 
         if (argResults[kApk]) {
           print('\nBUILDING APK for $packageName');
-          final int exitCode = await processRunner.runAndStream(
-              flutterCommand, <String>['build', 'apk'],
-              workingDir: example);
-          if (exitCode != 0) {
-            failingPackages.add('$packageName (apk)');
+          if (isAndroidPlugin(plugin, fileSystem)) {
+            final int exitCode = await processRunner.runAndStream(
+                flutterCommand, <String>['build', 'apk'],
+                workingDir: example);
+            if (exitCode != 0) {
+              failingPackages.add('$packageName (apk)');
+            }
+          } else {
+            print('Android is not supported by this plugin');
           }
         }
       }

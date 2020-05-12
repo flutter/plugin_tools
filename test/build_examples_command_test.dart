@@ -27,10 +27,47 @@ void main() {
       cleanupPackages();
     });
 
+    test(
+        'runs build for iOS when plugin is not setup for iOS results in no-op',
+        () async {
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test'],
+          ],
+          isLinuxPlugin: false);
+
+      final Directory pluginExampleDirectory =
+          mockPackagesDir.childDirectory('plugin').childDirectory('example');
+
+      createFakePubspec(pluginExampleDirectory, isFlutter: true);
+
+      final List<String> output = await runCapturingPrint(
+          runner, <String>['build-examples', '--ipa', '--no-macos']);
+      final String packageName =
+          p.relative(pluginExampleDirectory.path, from: mockPackagesDir.path);
+
+      expect(
+        output,
+        orderedEquals(<String>[
+          '\nBUILDING IPA for $packageName',
+          'iOS is not supported by this plugin',
+          '\n\n',
+          'All builds successful!',
+        ]),
+      );
+
+      print(processRunner.recordedCalls);
+      // Output should be empty since running build-examples --macos with no macos
+      // implementation is a no-op.
+      expect(processRunner.recordedCalls, orderedEquals(<ProcessCall>[]));
+      cleanupPackages();
+    });
+
     test('runs build for ios', () async {
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test'],
-      ]);
+      ],
+      isIosPlugin: true);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');
@@ -93,8 +130,8 @@ void main() {
       );
 
       print(processRunner.recordedCalls);
-      // Output should be empty since running build-examples --macos with no macos
-      // implementation is a no-op.
+      // Output should be empty since running build-examples --linux with no
+      // Linux implementation is a no-op.
       expect(processRunner.recordedCalls, orderedEquals(<ProcessCall>[]));
       cleanupPackages();
     });
@@ -362,10 +399,47 @@ void main() {
       cleanupPackages();
     });
 
+    test(
+        'runs build for Android when plugin is not setup for Android results in no-op',
+        () async {
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test'],
+          ],
+          isLinuxPlugin: false);
+
+      final Directory pluginExampleDirectory =
+          mockPackagesDir.childDirectory('plugin').childDirectory('example');
+
+      createFakePubspec(pluginExampleDirectory, isFlutter: true);
+
+      final List<String> output = await runCapturingPrint(
+          runner, <String>['build-examples', '--apk', '--no-ipa']);
+      final String packageName =
+          p.relative(pluginExampleDirectory.path, from: mockPackagesDir.path);
+
+      expect(
+        output,
+        orderedEquals(<String>[
+          '\nBUILDING APK for $packageName',
+          'Android is not supported by this plugin',
+          '\n\n',
+          'All builds successful!',
+        ]),
+      );
+
+      print(processRunner.recordedCalls);
+      // Output should be empty since running build-examples --macos with no macos
+      // implementation is a no-op.
+      expect(processRunner.recordedCalls, orderedEquals(<ProcessCall>[]));
+      cleanupPackages();
+    });
+
     test('runs build for android', () async {
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test'],
-      ]);
+      ],
+      isAndroidPlugin: true);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');

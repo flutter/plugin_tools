@@ -31,6 +31,8 @@ Directory createFakePlugin(
   List<String> withExamples = const <String>[],
   List<List<String>> withExtraFiles = const <List<String>>[],
   bool isFlutter = true,
+  bool isAndroidPlugin = false,
+  bool isIosPlugin = false,
   bool isWebPlugin = false,
   bool isLinuxPlugin = false,
   bool isMacOsPlugin = false,
@@ -45,6 +47,8 @@ Directory createFakePlugin(
     pluginDirectory,
     name: name,
     isFlutter: isFlutter,
+    isAndroidPlugin: isAndroidPlugin,
+    isIosPlugin: isIosPlugin,
     isWebPlugin: isWebPlugin,
     isLinuxPlugin: isLinuxPlugin,
     isMacOsPlugin: isMacOsPlugin,
@@ -83,6 +87,8 @@ void createFakePubspec(
   String name = 'fake_package',
   bool isFlutter = true,
   bool includeVersion = false,
+  bool isAndroidPlugin = false,
+  bool isIosPlugin = false,
   bool isWebPlugin = false,
   bool isLinuxPlugin = false,
   bool isMacOsPlugin = false,
@@ -95,6 +101,19 @@ flutter:
   plugin:
     platforms:
 ''';
+  if (isAndroidPlugin) {
+    yaml += '''
+      android:
+        package: io.flutter.plugins.fake
+        pluginClass: FakePlugin
+''';
+  }
+  if (isIosPlugin) {
+    yaml += '''
+      ios:
+        pluginClass: FLTFakePlugin
+''';
+  }
   if (isWebPlugin) {
     yaml += '''
       web:

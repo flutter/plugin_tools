@@ -1,3 +1,7 @@
+## v.0.0.36+4
+
+- Only builds mobile example apps when necessary.
+
 ## v.0.0.36+3
 
 - Add support for Linux plugins.

@@ -14,6 +14,8 @@ class DriveExamplesCommand extends PluginCommand {
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
+    // TODO(cyanglaz): Make mobile platforms flags also required like other platforms (breaking change).
+    // https://github.com/flutter/flutter/issues/58285
     argParser.addFlag(kLinux,
         help: 'Runs the Linux implementation of the examples');
     argParser.addFlag(kMacos,

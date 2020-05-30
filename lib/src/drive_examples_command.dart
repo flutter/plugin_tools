@@ -41,55 +41,15 @@ class DriveExamplesCommand extends PluginCommand {
     final bool isWindows = argResults[kWindows];
     await for (Directory plugin in getPlugins()) {
       for (Directory example in getExamplesForPlugin(plugin)) {
+
+        if (!(await pluginSupportedOnCurrentPlatform(plugin, fileSystem, example))) {
+          continue;
+        }
+
         final String packageName =
             p.relative(example.path, from: packagesDir.path);
         final String flutterCommand =
             LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
-
-        if (isLinux) {
-          if (!isLinuxPlugin(plugin, fileSystem)) {
-            continue;
-          }
-          // The Linux tooling is not yet stable, so we need to
-          // delete any existing linux directory and create a new one
-          // with 'flutter create .'
-          final Directory linuxFolder =
-              fileSystem.directory(p.join(example.path, 'linux'));
-          if (!linuxFolder.existsSync()) {
-            int exitCode = await processRunner.runAndStream(
-                flutterCommand, <String>['create', '.'],
-                workingDir: example);
-            if (exitCode != 0) {
-              print('Failed to create a linux directory for $packageName');
-              continue;
-            }
-          }
-        }
-        if (isMacos) {
-          if (!isMacOsPlugin(plugin, fileSystem)) {
-            continue;
-          }
-        }
-        if (isWindows) {
-          if (!isWindowsPlugin(plugin, fileSystem)) {
-            continue;
-          }
-          // The Windows tooling is not yet stable, so we need to
-          // delete any existing windows directory and create a new one
-          // with 'flutter create .'
-          final Directory windowsFolder =
-              fileSystem.directory(p.join(example.path, 'windows'));
-          if (!windowsFolder.existsSync()) {
-            int exitCode = await processRunner.runAndStream(
-                flutterCommand, <String>['create', '.'],
-                workingDir: example);
-            if (exitCode != 0) {
-              print('Failed to create a windows directory for $packageName');
-              continue;
-            }
-          }
-        }
-
         final Directory driverTests =
             fileSystem.directory(p.join(example.path, 'test_driver'));
         if (!driverTests.existsSync()) {
@@ -163,5 +123,65 @@ class DriveExamplesCommand extends PluginCommand {
     }
 
     print('All driver tests successful!');
+  }
+
+  Future<bool> pluginSupportedOnCurrentPlatform(FileSystemEntity plugin, FileSystem fileSystem, Directory example) async {
+    final String packageName =
+            p.relative(example.path, from: packagesDir.path);
+        final String flutterCommand =
+            LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
+
+    final bool isLinux = argResults[kLinux];
+    final bool isMacos = argResults[kMacos];
+    final bool isWindows = argResults[kWindows];
+    if (isLinux) {
+      if (!isLinuxPlugin(plugin, fileSystem)) {
+        return false;
+      }
+      // The Linux tooling is not yet stable, so we need to
+      // delete any existing linux directory and create a new one
+      // with 'flutter create .'
+      final Directory linuxFolder =
+          fileSystem.directory(p.join(example.path, 'linux'));
+      if (!linuxFolder.existsSync()) {
+        int exitCode = await processRunner.runAndStream(
+            flutterCommand, <String>['create', '.'],
+            workingDir: example);
+        if (exitCode != 0) {
+          print('Failed to create a linux directory for $packageName');
+          return false;
+        }
+      }
+      return true;
+    }
+    if (isMacos) {
+      if (!isMacOsPlugin(plugin, fileSystem)) {
+        return false;
+      }
+      return true;
+    }
+    if (isWindows) {
+      if (!isWindowsPlugin(plugin, fileSystem)) {
+        return false;
+      }
+      // The Windows tooling is not yet stable, so we need to
+      // delete any existing windows directory and create a new one
+      // with 'flutter create .'
+      final Directory windowsFolder =
+          fileSystem.directory(p.join(example.path, 'windows'));
+      if (!windowsFolder.existsSync()) {
+        int exitCode = await processRunner.runAndStream(
+            flutterCommand, <String>['create', '.'],
+            workingDir: example);
+        if (exitCode != 0) {
+          print('Failed to create a windows directory for $packageName');
+          return false;
+        }
+      }
+      return true;
+    }
+    // When we are here, only return true if the plugin supports mobile. 
+    final bool isMobilePlugin = isIosPlugin(plugin, fileSystem) || isAndroidPlugin(plugin, fileSystem);
+    return isMobilePlugin;
   }
 }

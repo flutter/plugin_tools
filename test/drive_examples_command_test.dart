@@ -30,7 +30,7 @@ void main() {
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test_driver', 'plugin_test.dart'],
         <String>['example', 'test', 'plugin.dart'],
-      ]);
+      ], isIosPlugin: true, isAndroidPlugin: true);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');
@@ -64,7 +64,7 @@ void main() {
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test_driver', 'plugin_test.dart'],
         <String>['example', 'test_driver', 'plugin.dart'],
-      ]);
+      ], isAndroidPlugin: true, isIosPlugin: true);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');
@@ -95,7 +95,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs drive when plugin does not suppport Linux is a no-op', () async {
+    test('runs drive when plugin does not support Linux is a no-op', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test_driver', 'plugin_test.dart'],
@@ -402,6 +402,37 @@ void main() {
                 <String>['drive', '-d', 'windows', deviceTestPath],
                 pluginExampleDirectory.path),
           ]));
+
+      cleanupPackages();
+    });
+
+    test('runs drive when plugin does not support mobile is no-op', () async {
+      createFakePlugin('plugin', withExtraFiles: <List<String>>[
+        <String>['example', 'test_driver', 'plugin_test.dart'],
+        <String>['example', 'test_driver', 'plugin.dart'],
+      ], isMacOsPlugin: true);
+
+      final Directory pluginExampleDirectory =
+          mockPackagesDir.childDirectory('plugin').childDirectory('example');
+
+      createFakePubspec(pluginExampleDirectory, isFlutter: true);
+
+      final List<String> output = await runCapturingPrint(runner, <String>[
+        'drive-examples',
+      ]);
+
+      expect(
+        output,
+        orderedEquals(<String>[
+          '\n\n',
+          'All driver tests successful!',
+        ]),
+      );
+
+      print(processRunner.recordedCalls);
+      // Output should be empty since running drive-examples --macos with no macos
+      // implementation is a no-op.
+      expect(processRunner.recordedCalls, <ProcessCall>[]);
 
       cleanupPackages();
     });

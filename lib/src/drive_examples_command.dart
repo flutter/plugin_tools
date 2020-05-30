@@ -43,8 +43,8 @@ class DriveExamplesCommand extends PluginCommand {
     final bool isWindows = argResults[kWindows];
     await for (Directory plugin in getPlugins()) {
       for (Directory example in getExamplesForPlugin(plugin)) {
-
-        if (!(await pluginSupportedOnCurrentPlatform(plugin, fileSystem, example))) {
+        if (!(await pluginSupportedOnCurrentPlatform(
+            plugin, fileSystem, example))) {
           continue;
         }
 
@@ -127,11 +127,11 @@ class DriveExamplesCommand extends PluginCommand {
     print('All driver tests successful!');
   }
 
-  Future<bool> pluginSupportedOnCurrentPlatform(FileSystemEntity plugin, FileSystem fileSystem, Directory example) async {
-    final String packageName =
-            p.relative(example.path, from: packagesDir.path);
-        final String flutterCommand =
-            LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
+  Future<bool> pluginSupportedOnCurrentPlatform(
+      FileSystemEntity plugin, FileSystem fileSystem, Directory example) async {
+    final String packageName = p.relative(example.path, from: packagesDir.path);
+    final String flutterCommand =
+        LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
 
     final bool isLinux = argResults[kLinux];
     final bool isMacos = argResults[kMacos];
@@ -182,8 +182,9 @@ class DriveExamplesCommand extends PluginCommand {
       }
       return true;
     }
-    // When we are here, only return true if the plugin supports mobile. 
-    final bool isMobilePlugin = isIosPlugin(plugin, fileSystem) || isAndroidPlugin(plugin, fileSystem);
+    // When we are here, only return true if the plugin supports mobile.
+    final bool isMobilePlugin =
+        isIosPlugin(plugin, fileSystem) || isAndroidPlugin(plugin, fileSystem);
     return isMobilePlugin;
   }
 }

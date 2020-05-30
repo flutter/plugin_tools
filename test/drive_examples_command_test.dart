@@ -27,10 +27,13 @@ void main() {
     });
 
     test('runs drive under folder "test"', () async {
-      createFakePlugin('plugin', withExtraFiles: <List<String>>[
-        <String>['example', 'test_driver', 'plugin_test.dart'],
-        <String>['example', 'test', 'plugin.dart'],
-      ], isIosPlugin: true, isAndroidPlugin: true);
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test_driver', 'plugin_test.dart'],
+            <String>['example', 'test', 'plugin.dart'],
+          ],
+          isIosPlugin: true,
+          isAndroidPlugin: true);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');
@@ -61,10 +64,13 @@ void main() {
     });
 
     test('runs drive under folder "test_driver"', () async {
-      createFakePlugin('plugin', withExtraFiles: <List<String>>[
-        <String>['example', 'test_driver', 'plugin_test.dart'],
-        <String>['example', 'test_driver', 'plugin.dart'],
-      ], isAndroidPlugin: true, isIosPlugin: true);
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test_driver', 'plugin_test.dart'],
+            <String>['example', 'test_driver', 'plugin.dart'],
+          ],
+          isAndroidPlugin: true,
+          isIosPlugin: true);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');
@@ -407,10 +413,12 @@ void main() {
     });
 
     test('runs drive when plugin does not support mobile is no-op', () async {
-      createFakePlugin('plugin', withExtraFiles: <List<String>>[
-        <String>['example', 'test_driver', 'plugin_test.dart'],
-        <String>['example', 'test_driver', 'plugin.dart'],
-      ], isMacOsPlugin: true);
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test_driver', 'plugin_test.dart'],
+            <String>['example', 'test_driver', 'plugin.dart'],
+          ],
+          isMacOsPlugin: true);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');

@@ -27,8 +27,7 @@ void main() {
       cleanupPackages();
     });
 
-    test(
-        'runs build for iOS when plugin is not setup for iOS results in no-op',
+    test('runs build for iOS when plugin is not setup for iOS results in no-op',
         () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
@@ -64,10 +63,11 @@ void main() {
     });
 
     test('runs build for ios', () async {
-      createFakePlugin('plugin', withExtraFiles: <List<String>>[
-        <String>['example', 'test'],
-      ],
-      isIosPlugin: true);
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test'],
+          ],
+          isIosPlugin: true);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');
@@ -436,10 +436,11 @@ void main() {
     });
 
     test('runs build for android', () async {
-      createFakePlugin('plugin', withExtraFiles: <List<String>>[
-        <String>['example', 'test'],
-      ],
-      isAndroidPlugin: true);
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test'],
+          ],
+          isAndroidPlugin: true);
 
       final Directory pluginExampleDirectory =
           mockPackagesDir.childDirectory('plugin').childDirectory('example');

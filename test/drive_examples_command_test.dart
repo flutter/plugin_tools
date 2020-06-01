@@ -26,7 +26,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs drive under folder "test"', () async {
+    test('driving under folder "test"', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test_driver', 'plugin_test.dart'],
@@ -63,7 +63,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs drive under folder "test_driver"', () async {
+    test('driving under folder "test_driver"', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test_driver', 'plugin_test.dart'],
@@ -101,7 +101,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs drive when plugin does not support Linux is a no-op', () async {
+    test('driving when plugin does not support Linux is a no-op', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test_driver', 'plugin_test.dart'],
@@ -135,7 +135,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs drive on a Linux plugin', () async {
+    test('driving on a Linux plugin', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test_driver', 'plugin_test.dart'],
@@ -178,7 +178,7 @@ void main() {
     });
 
     test(
-        'runs drive on a Linux plugin with a Linux direactory does not call flutter create',
+        'driving on a Linux plugin with a Linux direactory does not call flutter create',
         () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
@@ -221,7 +221,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs drive when plugin does not suppport macOS is a no-op', () async {
+    test('driving when plugin does not suppport macOS is a no-op', () async {
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test_driver', 'plugin_test.dart'],
         <String>['example', 'test_driver', 'plugin.dart'],
@@ -252,7 +252,7 @@ void main() {
 
       cleanupPackages();
     });
-    test('runs drive on a macOS plugin', () async {
+    test('driving on a macOS plugin', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test_driver', 'plugin_test.dart'],
@@ -292,7 +292,7 @@ void main() {
 
       cleanupPackages();
     });
-    test('runs drive when plugin does not suppport windows is a no-op',
+    test('driving when plugin does not suppport windows is a no-op',
         () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
@@ -327,7 +327,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs drive on a Windows plugin', () async {
+    test('driving on a Windows plugin', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test_driver', 'plugin_test.dart'],
@@ -369,7 +369,7 @@ void main() {
       cleanupPackages();
     });
     test(
-        'runs drive on a Windows plugin with a windows direactory does not call flutter create',
+        'driving on a Windows plugin with a windows direactory does not call flutter create',
         () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
@@ -412,7 +412,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs drive when plugin does not support mobile is no-op', () async {
+    test('driving when plugin does not support mobile is no-op', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test_driver', 'plugin_test.dart'],

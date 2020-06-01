@@ -1,4 +1,4 @@
-## v.0.0.36+4
+## v.0.0.37
 
 - Only builds mobile example apps when necessary.
 

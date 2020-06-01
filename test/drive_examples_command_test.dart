@@ -292,8 +292,7 @@ void main() {
 
       cleanupPackages();
     });
-    test('driving when plugin does not suppport windows is a no-op',
-        () async {
+    test('driving when plugin does not suppport windows is a no-op', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test_driver', 'plugin_test.dart'],

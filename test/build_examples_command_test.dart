@@ -14,7 +14,7 @@ void main() {
     final String flutterCommand =
         LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
 
-    setUp(() {
+    set up(() {
       initializeFakePackages();
       processRunner = RecordingProcessRunner();
       final BuildExamplesCommand command = BuildExamplesCommand(
@@ -27,7 +27,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs build for iOS when plugin is not setup for iOS results in no-op',
+    test('building for iOS when plugin is not set up for iOS results in no-op',
         () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
@@ -62,7 +62,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs build for ios', () async {
+    test('building for ios', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test'],
@@ -101,7 +101,7 @@ void main() {
     });
 
     test(
-        'runs build for Linux when plugin is not setup for Linux results in no-op',
+        'building for Linux when plugin is not set up for Linux results in no-op',
         () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
@@ -136,7 +136,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs build for Linux', () async {
+    test('building for Linux', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test'],
@@ -175,7 +175,7 @@ void main() {
     });
 
     test(
-        'runs build for Linux does not call flutter create if a directory exists',
+        'building for Linux does not call flutter create if a directory exists',
         () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
@@ -214,7 +214,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs build for macos with no implementation results in no-op',
+    test('building for macos with no implementation results in no-op',
         () async {
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test'],
@@ -246,7 +246,7 @@ void main() {
       expect(processRunner.recordedCalls, orderedEquals(<ProcessCall>[]));
       cleanupPackages();
     });
-    test('runs build for macos', () async {
+    test('building for macos', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test'],
@@ -286,7 +286,7 @@ void main() {
     });
 
     test(
-        'runs build for Windows when plugin is not setup for Windows results in no-op',
+        'building for Windows when plugin is not set up for Windows results in no-op',
         () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
@@ -321,7 +321,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs build for windows', () async {
+    test('building for windows', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test'],
@@ -360,7 +360,7 @@ void main() {
     });
 
     test(
-        'runs build for windows does not call flutter create if a directory exists',
+        'building for windows does not call flutter create if a directory exists',
         () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
@@ -400,7 +400,7 @@ void main() {
     });
 
     test(
-        'runs build for Android when plugin is not setup for Android results in no-op',
+        'building for Android when plugin is not set up for Android results in no-op',
         () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
@@ -435,7 +435,7 @@ void main() {
       cleanupPackages();
     });
 
-    test('runs build for android', () async {
+    test('building for android', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test'],

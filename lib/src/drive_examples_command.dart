@@ -14,14 +14,16 @@ class DriveExamplesCommand extends PluginCommand {
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
-    // TODO(cyanglaz): Make mobile platforms flags also required like other platforms (breaking change).
-    // https://github.com/flutter/flutter/issues/58285
     argParser.addFlag(kLinux,
         help: 'Runs the Linux implementation of the examples');
     argParser.addFlag(kMacos,
         help: 'Runs the macOS implementation of the examples');
     argParser.addFlag(kWindows,
         help: 'Runs the Windows implementation of the examples');
+    argParser.addFlag(kIos,
+        help: 'Runs the iOS implementation of the examples');
+    argParser.addFlag(kAndroid,
+        help: 'Runs the Android implementation of the examples');
   }
 
   @override
@@ -42,16 +44,44 @@ class DriveExamplesCommand extends PluginCommand {
     final bool isMacos = argResults[kMacos];
     final bool isWindows = argResults[kWindows];
     await for (Directory plugin in getPlugins()) {
+      final String flutterCommand =
+          LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
       for (Directory example in getExamplesForPlugin(plugin)) {
-        if (!(await pluginSupportedOnCurrentPlatform(
-            plugin, fileSystem, example))) {
-          continue;
-        }
-
         final String packageName =
             p.relative(example.path, from: packagesDir.path);
-        final String flutterCommand =
-            LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
+        if (!(await pluginSupportedOnCurrentPlatform(plugin, fileSystem))) {
+          continue;
+        }
+        if (isLinux) {
+          // The Linux tooling is not yet stable, so we make sure
+          // if the directory exists. If not, we create a new one.
+          final Directory linuxFolder =
+              fileSystem.directory(p.join(example.path, 'linux'));
+          if (!linuxFolder.existsSync()) {
+            int exitCode = await processRunner.runAndStream(
+                flutterCommand, <String>['create', '.'],
+                workingDir: example);
+            if (exitCode != 0) {
+              print('Failed to create a linux directory for $packageName');
+              continue;
+            }
+          }
+        }
+        if (isWindows) {
+          // The Windows tooling is not yet stable, so we make sure
+          // if the directory exists. If not, we create a new one.
+          final Directory windowsFolder =
+              fileSystem.directory(p.join(example.path, 'windows'));
+          if (!windowsFolder.existsSync()) {
+            int exitCode = await processRunner.runAndStream(
+                flutterCommand, <String>['create', '.'],
+                workingDir: example);
+            if (exitCode != 0) {
+              print('Failed to create a windows directory for $packageName');
+              continue;
+            }
+          }
+        }
         final Directory driverTests =
             fileSystem.directory(p.join(example.path, 'test_driver'));
         if (!driverTests.existsSync()) {
@@ -128,61 +158,30 @@ class DriveExamplesCommand extends PluginCommand {
   }
 
   Future<bool> pluginSupportedOnCurrentPlatform(
-      FileSystemEntity plugin, FileSystem fileSystem, Directory example) async {
-    final String packageName = p.relative(example.path, from: packagesDir.path);
-    final String flutterCommand =
-        LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
-
+      FileSystemEntity plugin, FileSystem fileSystem) async {
     final bool isLinux = argResults[kLinux];
     final bool isMacos = argResults[kMacos];
     final bool isWindows = argResults[kWindows];
+    final bool isIOS = argResults[kIos];
+    final bool isAndroid = argResults[kAndroid];
     if (isLinux) {
-      if (!isLinuxPlugin(plugin, fileSystem)) {
-        return false;
-      }
-      // The Linux tooling is not yet stable, so we need to
-      // delete any existing linux directory and create a new one
-      // with 'flutter create .'
-      final Directory linuxFolder =
-          fileSystem.directory(p.join(example.path, 'linux'));
-      if (!linuxFolder.existsSync()) {
-        int exitCode = await processRunner.runAndStream(
-            flutterCommand, <String>['create', '.'],
-            workingDir: example);
-        if (exitCode != 0) {
-          print('Failed to create a linux directory for $packageName');
-          return false;
-        }
-      }
-      return true;
+      return isLinuxPlugin(plugin, fileSystem);
     }
     if (isMacos) {
-      if (!isMacOsPlugin(plugin, fileSystem)) {
-        return false;
-      }
-      return true;
+      return isMacOsPlugin(plugin, fileSystem);
     }
     if (isWindows) {
-      if (!isWindowsPlugin(plugin, fileSystem)) {
-        return false;
-      }
-      // The Windows tooling is not yet stable, so we need to
-      // delete any existing windows directory and create a new one
-      // with 'flutter create .'
-      final Directory windowsFolder =
-          fileSystem.directory(p.join(example.path, 'windows'));
-      if (!windowsFolder.existsSync()) {
-        int exitCode = await processRunner.runAndStream(
-            flutterCommand, <String>['create', '.'],
-            workingDir: example);
-        if (exitCode != 0) {
-          print('Failed to create a windows directory for $packageName');
-          return false;
-        }
-      }
-      return true;
+      return isWindowsPlugin(plugin, fileSystem);
     }
-    // When we are here, only return true if the plugin supports mobile.
+    if (isIOS) {
+      return isIosPlugin(plugin, fileSystem);
+    }
+    if (isAndroid) {
+      return (isAndroidPlugin(plugin, fileSystem));
+    }
+    // When we are here, no flags are specified. Only return true if the plugin supports mobile for legacy command support.
+    // TODO(cyanglaz): Make mobile platforms flags also required like other platforms (breaking change).
+    // https://github.com/flutter/flutter/issues/58285
     final bool isMobilePlugin =
         isIosPlugin(plugin, fileSystem) || isAndroidPlugin(plugin, fileSystem);
     return isMobilePlugin;

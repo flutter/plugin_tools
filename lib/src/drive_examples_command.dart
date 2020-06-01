@@ -53,8 +53,8 @@ class DriveExamplesCommand extends PluginCommand {
           continue;
         }
         if (isLinux) {
-          // The Linux tooling is not yet stable, so we make sure
-          // if the directory exists. If not, we create a new one.
+          // The Linux tooling is not yet stable, so the platform directory for the application
+          // might not exist, to prevent it from becoming stale. If it doesn't, create one.
           final Directory linuxFolder =
               fileSystem.directory(p.join(example.path, 'linux'));
           if (!linuxFolder.existsSync()) {
@@ -68,8 +68,8 @@ class DriveExamplesCommand extends PluginCommand {
           }
         }
         if (isWindows) {
-          // The Windows tooling is not yet stable, so we make sure
-          // if the directory exists. If not, we create a new one.
+          // The Windows tooling is not yet stable, so the platform directory for the application
+          // might not exist, to prevent it from becoming stale. If it doesn't, create one.
           final Directory windowsFolder =
               fileSystem.directory(p.join(example.path, 'windows'));
           if (!windowsFolder.existsSync()) {

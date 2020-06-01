@@ -14,7 +14,7 @@ void main() {
     final String flutterCommand =
         LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
 
-    set up(() {
+    setUp(() {
       initializeFakePackages();
       processRunner = RecordingProcessRunner();
       final BuildExamplesCommand command = BuildExamplesCommand(

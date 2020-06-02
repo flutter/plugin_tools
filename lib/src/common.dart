@@ -93,6 +93,10 @@ bool pluginSupportsPlatform(
     }
     final YamlMap platforms = pluginSection['platforms'];
     if (platforms == null) {
+      // Legacy plugin specs are assumed to support iOS and Android.
+      if (!pluginSection.containsKey('platforms')) {
+        return platform == kIos || platform == kAndroid;
+      }
       return false;
     }
     return platforms.containsKey(platform);
@@ -101,6 +105,16 @@ bool pluginSupportsPlatform(
   } on YamlException {
     return false;
   }
+}
+
+/// Returns whether the given directory contains a Flutter Android plugin.
+bool isAndroidPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+  return pluginSupportsPlatform(kAndroid, entity, fileSystem);
+}
+
+/// Returns whether the given directory contains a Flutter iOS plugin.
+bool isIosPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+  return pluginSupportsPlatform(kIos, entity, fileSystem);
 }
 
 /// Returns whether the given directory contains a Flutter web plugin.

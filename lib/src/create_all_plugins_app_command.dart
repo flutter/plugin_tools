@@ -12,6 +12,8 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 
 import 'common.dart';
 
+// TODO(cyanglaz): Add tests for this command.
+// https://github.com/flutter/flutter/issues/61049
 class CreateAllPluginsAppCommand extends PluginCommand {
   CreateAllPluginsAppCommand(Directory packagesDir, FileSystem fileSystem)
       : super(packagesDir, fileSystem) {
@@ -153,7 +155,8 @@ class CreateAllPluginsAppCommand extends PluginCommand {
       },
       dependencies: <String, Dependency>{
         'flutter': SdkDependency('flutter'),
-      }..addAll(await _getValidPathDependencies()),
+      },
+      dependencyOverrides: await _getValidPathDependencies(),
       devDependencies: <String, Dependency>{
         'flutter_test': SdkDependency('flutter'),
       },

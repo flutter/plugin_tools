@@ -1,3 +1,7 @@
+## v.0.0.32+7
+
+- All_plugin test puts the plugin dependencies into dependency_overrides.
+
 ## v.0.0.32+6
 
 - Ensure that Firebase Test Lab tests have a unique storage bucket for each package.

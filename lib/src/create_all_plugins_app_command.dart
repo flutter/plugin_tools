@@ -56,7 +56,6 @@ class CreateAllPluginsAppCommand extends PluginCommand {
         'create',
         '--template=app',
         '--project-name=all_plugins',
-        '--androidx',
         '--android-language=java',
         './all_plugins',
       ],

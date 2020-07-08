@@ -4,10 +4,14 @@ import 'dart:io' as io;
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
 import 'package:flutter_plugin_tools/src/common.dart';
 import 'package:quiver/collection.dart';
 
-final FileSystem mockFileSystem = MemoryFileSystem();
+FileSystem mockFileSystem = MemoryFileSystem(
+    style: LocalPlatform().isWindows
+        ? FileSystemStyle.windows
+        : FileSystemStyle.posix);
 Directory mockPackagesDir;
 
 /// Creates a mock packages directory in the mock file system.
@@ -27,7 +31,12 @@ Directory createFakePlugin(
   List<String> withExamples = const <String>[],
   List<List<String>> withExtraFiles = const <List<String>>[],
   bool isFlutter = true,
+  bool isAndroidPlugin = false,
+  bool isIosPlugin = false,
   bool isWebPlugin = false,
+  bool isLinuxPlugin = false,
+  bool isMacOsPlugin = false,
+  bool isWindowsPlugin = false,
 }) {
   assert(!(withSingleExample && withExamples.isNotEmpty),
       'cannot pass withSingleExample and withExamples simultaneously');
@@ -36,21 +45,28 @@ Directory createFakePlugin(
     ..createSync();
   createFakePubspec(
     pluginDirectory,
+    name: name,
     isFlutter: isFlutter,
+    isAndroidPlugin: isAndroidPlugin,
+    isIosPlugin: isIosPlugin,
     isWebPlugin: isWebPlugin,
+    isLinuxPlugin: isLinuxPlugin,
+    isMacOsPlugin: isMacOsPlugin,
+    isWindowsPlugin: isWindowsPlugin,
   );
 
   if (withSingleExample) {
     final Directory exampleDir = pluginDirectory.childDirectory('example')
       ..createSync();
-    createFakePubspec(exampleDir, isFlutter: isFlutter);
+    createFakePubspec(exampleDir,
+        name: "${name}_example", isFlutter: isFlutter);
   } else if (withExamples.isNotEmpty) {
     final Directory exampleDir = pluginDirectory.childDirectory('example')
       ..createSync();
     for (String example in withExamples) {
       final Directory currentExample = exampleDir.childDirectory(example)
         ..createSync();
-      createFakePubspec(currentExample, isFlutter: isFlutter);
+      createFakePubspec(currentExample, name: example, isFlutter: isFlutter);
     }
   }
 
@@ -68,22 +84,59 @@ Directory createFakePlugin(
 /// Creates a `pubspec.yaml` file with a flutter dependency.
 void createFakePubspec(
   Directory parent, {
+  String name = 'fake_package',
   bool isFlutter = true,
   bool includeVersion = false,
+  bool isAndroidPlugin = false,
+  bool isIosPlugin = false,
   bool isWebPlugin = false,
+  bool isLinuxPlugin = false,
+  bool isMacOsPlugin = false,
+  bool isWindowsPlugin = false,
 }) {
   parent.childFile('pubspec.yaml').createSync();
   String yaml = '''
-name: fake_package
-''';
-  if (isWebPlugin) {
-    yaml += '''
+name: $name
 flutter:
   plugin:
     platforms:
+''';
+  if (isAndroidPlugin) {
+    yaml += '''
+      android:
+        package: io.flutter.plugins.fake
+        pluginClass: FakePlugin
+''';
+  }
+  if (isIosPlugin) {
+    yaml += '''
+      ios:
+        pluginClass: FLTFakePlugin
+''';
+  }
+  if (isWebPlugin) {
+    yaml += '''
       web:
         pluginClass: FakePlugin
-        fileName: fake_plugin_web.dart
+        fileName: ${name}_web.dart
+''';
+  }
+  if (isLinuxPlugin) {
+    yaml += '''
+      linux:
+        pluginClass: FakePlugin
+''';
+  }
+  if (isMacOsPlugin) {
+    yaml += '''
+      macos:
+        pluginClass: FakePlugin
+''';
+  }
+  if (isWindowsPlugin) {
+    yaml += '''
+      windows:
+        pluginClass: FakePlugin
 ''';
   }
   if (isFlutter) {
@@ -143,9 +196,10 @@ class RecordingProcessRunner extends ProcessRunner {
     List<String> args, {
     Directory workingDir,
     bool exitOnError = false,
-  }) {
+  }) async {
     recordedCalls.add(ProcessCall(executable, args, workingDir?.path));
-    return Future<int>.value(0);
+    return Future<int>.value(
+        processToReturn == null ? 0 : await processToReturn.exitCode);
   }
 
   /// Returns [io.ProcessResult] created from [processToReturn], [resultStdout], and [resultStderr].
@@ -173,9 +227,17 @@ class RecordingProcessRunner extends ProcessRunner {
     String executable,
     List<String> args, {
     Directory workingDir,
-  }) {
+  }) async {
     recordedCalls.add(ProcessCall(executable, args, workingDir?.path));
-    return Future<io.ProcessResult>.value(null);
+    io.ProcessResult result;
+    if (processToReturn != null) {
+      result = io.ProcessResult(
+          processToReturn.pid,
+          await processToReturn.exitCode,
+          resultStdout ?? processToReturn.stdout,
+          resultStderr ?? processToReturn.stderr);
+    }
+    return Future<io.ProcessResult>.value(result);
   }
 
   @override

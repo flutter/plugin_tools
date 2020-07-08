@@ -1,6 +1,59 @@
-## v.0.0.32+7
+## v.0.0.37+1
 
 - All_plugin test puts the plugin dependencies into dependency_overrides.
+
+## v.0.0.37
+
+- Only builds mobile example apps when necessary.
+
+## v.0.0.36+3
+
+- Add support for Linux plugins.
+
+## v.0.0.36+2
+
+- Default to showing podspec lint warnings
+
+## v.0.0.36+1
+
+- Serialize linting podspecs.
+
+## v.0.0.36
+
+- Remove retry on Firebase Test Lab's call to gcloud set.
+- Remove quiet flag from Firebase Test Lab's gcloud set command.
+- Allow Firebase Test Lab command to continue past gcloud set network failures.
+  This is a mitigation for the network service sometimes not responding,
+  but it isn't actually necessary to have a network connection for this command.
+
+## v.0.0.35+1
+
+- Minor cleanup to the analyze test.
+
+## v.0.0.35
+
+- Firebase Test Lab command generates a configurable unique path suffix for results.
+
+## v.0.0.34
+
+- Firebase Test Lab command now only tries to configure the project once
+- Firebase Test Lab command now retries project configuration up to five times.
+
+## v.0.0.33+1
+
+- Fixes formatting issues that got past our CI due to 
+  https://github.com/flutter/flutter/issues/51585.
+- Changes the default package name for testing method `createFakePubspec` back
+  its previous behavior.
+
+## v.0.0.33
+
+- Version check command now fails on breaking changes to platform interfaces.
+- Updated version check test to be more flexible.
+
+## v.0.0.32+7
+
+- Ensure that Firebase Test Lab tests have a unique storage bucket for each test run.
 
 ## v.0.0.32+6
 

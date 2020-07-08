@@ -11,6 +11,32 @@ import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
+typedef void Print(Object object);
+
+/// Key for windows platform.
+const String kWindows = 'windows';
+
+/// Key for macos platform.
+const String kMacos = 'macos';
+
+/// Key for linux platform.
+const String kLinux = 'linux';
+
+/// Key for IPA (iOS) platform.
+const String kIos = 'ios';
+
+/// Key for APK (Android) platform.
+const String kAndroid = 'android';
+
+/// Key for Web platform.
+const String kWeb = 'web';
+
+/// Key for IPA.
+const String kIpa = 'ipa';
+
+/// Key for APK.
+const String kApk = 'apk';
+
 /// Returns whether the given directory contains a Flutter package.
 bool isFlutterPackage(FileSystemEntity entity, FileSystem fileSystem) {
   if (entity == null || entity is! Directory) {
@@ -33,15 +59,22 @@ bool isFlutterPackage(FileSystemEntity entity, FileSystem fileSystem) {
   }
 }
 
-/// Returns whether the given directory contains a Flutter web plugin.
+/// Returns whether the given directory contains a Flutter [platform] plugin.
 ///
 /// It checks this by looking for the following pattern in the pubspec:
 ///
 ///     flutter:
 ///       plugin:
 ///         platforms:
-///           web:
-bool isWebPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+///           [platform]:
+bool pluginSupportsPlatform(
+    String platform, FileSystemEntity entity, FileSystem fileSystem) {
+  assert(platform == kIos ||
+      platform == kAndroid ||
+      platform == kWeb ||
+      platform == kMacos ||
+      platform == kWindows ||
+      platform == kLinux);
   if (entity == null || entity is! Directory) {
     return false;
   }
@@ -60,14 +93,48 @@ bool isWebPlugin(FileSystemEntity entity, FileSystem fileSystem) {
     }
     final YamlMap platforms = pluginSection['platforms'];
     if (platforms == null) {
+      // Legacy plugin specs are assumed to support iOS and Android.
+      if (!pluginSection.containsKey('platforms')) {
+        return platform == kIos || platform == kAndroid;
+      }
       return false;
     }
-    return platforms.containsKey('web');
+    return platforms.containsKey(platform);
   } on FileSystemException {
     return false;
   } on YamlException {
     return false;
   }
+}
+
+/// Returns whether the given directory contains a Flutter Android plugin.
+bool isAndroidPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+  return pluginSupportsPlatform(kAndroid, entity, fileSystem);
+}
+
+/// Returns whether the given directory contains a Flutter iOS plugin.
+bool isIosPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+  return pluginSupportsPlatform(kIos, entity, fileSystem);
+}
+
+/// Returns whether the given directory contains a Flutter web plugin.
+bool isWebPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+  return pluginSupportsPlatform(kWeb, entity, fileSystem);
+}
+
+/// Returns whether the given directory contains a Flutter Windows plugin.
+bool isWindowsPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+  return pluginSupportsPlatform(kWindows, entity, fileSystem);
+}
+
+/// Returns whether the given directory contains a Flutter macOS plugin.
+bool isMacOsPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+  return pluginSupportsPlatform(kMacos, entity, fileSystem);
+}
+
+/// Returns whether the given directory contains a Flutter linux plugin.
+bool isLinuxPlugin(FileSystemEntity entity, FileSystem fileSystem) {
+  return pluginSupportsPlatform(kLinux, entity, fileSystem);
 }
 
 /// Error thrown when a command needs to exit with a non-zero exit code.
@@ -175,6 +242,7 @@ abstract class PluginCommand extends Command<Null> {
         (allPlugins.length % shardCount == 0 ? 0 : 1);
     final int start = min(shardIndex * shardSize, allPlugins.length);
     final int end = min(start + shardSize, allPlugins.length);
+
     for (Directory plugin in allPlugins.sublist(start, end)) {
       yield plugin;
     }
@@ -225,7 +293,7 @@ abstract class PluginCommand extends Command<Null> {
   /// Returns the example Dart package folders of the plugins involved in this
   /// command execution.
   Stream<Directory> getExamples() =>
-      getPlugins().expand<Directory>(_getExamplesForPlugin);
+      getPlugins().expand<Directory>(getExamplesForPlugin);
 
   /// Returns all Dart package folders (typically, plugin + example) of the
   /// plugins involved in this command execution.
@@ -257,7 +325,7 @@ abstract class PluginCommand extends Command<Null> {
 
   /// Returns the example Dart packages contained in the specified plugin, or
   /// an empty List, if the plugin has no examples.
-  Iterable<Directory> _getExamplesForPlugin(Directory plugin) {
+  Iterable<Directory> getExamplesForPlugin(Directory plugin) {
     final Directory exampleFolder =
         fileSystem.directory(p.join(plugin.path, 'example'));
     if (!exampleFolder.existsSync()) {

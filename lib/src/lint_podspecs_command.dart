@@ -31,6 +31,10 @@ class LintPodspecsCommand extends PluginCommand {
         help:
             'Skip all linting for podspecs with this basename (example: federated plugins with placeholder podspecs)',
         valueHelp: 'podspec_file_name');
+    argParser.addMultiOption('ignore-warnings',
+        help:
+            'Do not pass --allow-warnings flag to "pod lib lint" for podspecs with this basename (example: plugins with known warnings)',
+        valueHelp: 'podspec_file_name');
     argParser.addMultiOption('no-analyze',
         help:
             'Do not pass --analyze flag to "pod lib lint" for podspecs with this basename (example: plugins with known analyzer warnings)',
@@ -108,31 +112,30 @@ class LintPodspecsCommand extends PluginCommand {
       _print('Linting $podspecBasename');
     }
 
-    // Lint two at a time.
-    final Iterable<ProcessResult> results =
-        await Future.wait(<Future<ProcessResult>>[
-      // Lint plugin as framework (use_frameworks!).
-      _runPodLint(podspecPath, runAnalyzer: runAnalyzer, libraryLint: true),
+    // Lint plugin as framework (use_frameworks!).
+    final ProcessResult frameworkResult = await _runPodLint(podspecPath,
+        runAnalyzer: runAnalyzer, libraryLint: true);
+    _print(frameworkResult.stdout);
+    _print(frameworkResult.stderr);
 
-      // Lint plugin as library.
-      _runPodLint(podspecPath, runAnalyzer: runAnalyzer, libraryLint: false)
-    ]);
+    // Lint plugin as library.
+    final ProcessResult libraryResult = await _runPodLint(podspecPath,
+        runAnalyzer: runAnalyzer, libraryLint: false);
+    _print(libraryResult.stdout);
+    _print(libraryResult.stderr);
 
-    for (ProcessResult result in results) {
-      _print(result.stdout);
-      _print(result.stderr);
-    }
-
-    return results.every((ProcessResult result) => result.exitCode == 0);
+    return frameworkResult.exitCode == 0 && libraryResult.exitCode == 0;
   }
 
   Future<ProcessResult> _runPodLint(String podspecPath,
       {bool runAnalyzer, bool libraryLint}) async {
+    final bool allowWarnings = argResults['ignore-warnings']
+        .contains(p.basenameWithoutExtension(podspecPath));
     final List<String> arguments = <String>[
       'lib',
       'lint',
       podspecPath,
-      '--allow-warnings',
+      if (allowWarnings) '--allow-warnings',
       if (runAnalyzer) '--analyze',
       if (libraryLint) '--use-libraries'
     ];

@@ -1,3 +1,7 @@
+## v.0.0.37+1
+
+- All_plugin test puts the plugin dependencies into dependency_overrides.
+
 ## v.0.0.37
 
 - Only builds mobile example apps when necessary.

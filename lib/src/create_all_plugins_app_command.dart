@@ -12,6 +12,8 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 
 import 'common.dart';
 
+// TODO(cyanglaz): Add tests for this command.
+// https://github.com/flutter/flutter/issues/61049
 class CreateAllPluginsAppCommand extends PluginCommand {
   CreateAllPluginsAppCommand(Directory packagesDir, FileSystem fileSystem)
       : super(packagesDir, fileSystem) {
@@ -141,6 +143,8 @@ class CreateAllPluginsAppCommand extends PluginCommand {
   }
 
   Future<void> _genPubspecWithAllPlugins() async {
+    final Map<String, PathDependency> pluginDeps =
+        await _getValidPathDependencies();
     final Pubspec pubspec = Pubspec(
       'all_plugins',
       description: 'Flutter app containing all 1st party plugins.',
@@ -152,12 +156,12 @@ class CreateAllPluginsAppCommand extends PluginCommand {
       },
       dependencies: <String, Dependency>{
         'flutter': SdkDependency('flutter'),
-      }..addAll(await _getValidPathDependencies()),
+      }..addAll(pluginDeps),
       devDependencies: <String, Dependency>{
         'flutter_test': SdkDependency('flutter'),
       },
+      dependencyOverrides: pluginDeps,
     );
-
     final File pubspecFile =
         fileSystem.file(p.join('all_plugins', 'pubspec.yaml'));
     pubspecFile.writeAsStringSync(_pubspecToString(pubspec));
@@ -181,7 +185,6 @@ class CreateAllPluginsAppCommand extends PluginCommand {
         pathDependencies[pluginName] = PathDependency(package.path);
       }
     }
-
     return pathDependencies;
   }
 
@@ -196,6 +199,8 @@ version: ${pubspec.version}
 environment:${_pubspecMapString(pubspec.environment)}
 
 dependencies:${_pubspecMapString(pubspec.dependencies)}
+
+dependency_overrides:${_pubspecMapString(pubspec.dependencyOverrides)}
 
 dev_dependencies:${_pubspecMapString(pubspec.devDependencies)}
 ###''';

@@ -156,12 +156,11 @@ class CreateAllPluginsAppCommand extends PluginCommand {
       dependencies: <String, Dependency>{
         'flutter': SdkDependency('flutter'),
       },
-      dependencyOverrides: await _getValidPathDependencies(),
       devDependencies: <String, Dependency>{
         'flutter_test': SdkDependency('flutter'),
       },
+      dependencyOverrides: (await _getValidPathDependencies()),
     );
-
     final File pubspecFile =
         fileSystem.file(p.join('all_plugins', 'pubspec.yaml'));
     pubspecFile.writeAsStringSync(_pubspecToString(pubspec));
@@ -185,7 +184,6 @@ class CreateAllPluginsAppCommand extends PluginCommand {
         pathDependencies[pluginName] = PathDependency(package.path);
       }
     }
-
     return pathDependencies;
   }
 
@@ -200,6 +198,8 @@ version: ${pubspec.version}
 environment:${_pubspecMapString(pubspec.environment)}
 
 dependencies:${_pubspecMapString(pubspec.dependencies)}
+
+dependency_overrides:${_pubspecMapString(pubspec.dependencyOverrides)}
 
 dev_dependencies:${_pubspecMapString(pubspec.devDependencies)}
 ###''';

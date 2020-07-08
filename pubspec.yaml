@@ -6,7 +6,7 @@ version: 0.0.37+1
 dependencies:
   args: "^1.4.3"
   path: "^1.6.1"
-  http: "^0.11.3+17"
+  http: "0.12.1"
   async: "^2.0.7"
   yaml: "^2.1.15"
   quiver: "^2.0.2"
@@ -19,6 +19,7 @@ dependencies:
   meta: ^1.1.7
   file: ^5.0.10
   uuid: ^2.0.4
+  http_multi_server: 2.2.0
 
 dev_dependencies:
   matcher: ^0.12.6

@@ -143,6 +143,7 @@ class CreateAllPluginsAppCommand extends PluginCommand {
   }
 
   Future<void> _genPubspecWithAllPlugins() async {
+    final Map<String, PathDependency> pluginDeps = await _getValidPathDependencies();
     final Pubspec pubspec = Pubspec(
       'all_plugins',
       description: 'Flutter app containing all 1st party plugins.',
@@ -154,11 +155,11 @@ class CreateAllPluginsAppCommand extends PluginCommand {
       },
       dependencies: <String, Dependency>{
         'flutter': SdkDependency('flutter'),
-      },
+      }..addAll(pluginDeps),
       devDependencies: <String, Dependency>{
         'flutter_test': SdkDependency('flutter'),
       },
-      dependencyOverrides: (await _getValidPathDependencies()),
+      dependencyOverrides: pluginDeps,
     );
     final File pubspecFile =
         fileSystem.file(p.join('all_plugins', 'pubspec.yaml'));

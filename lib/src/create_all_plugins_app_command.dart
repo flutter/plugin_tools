@@ -143,7 +143,8 @@ class CreateAllPluginsAppCommand extends PluginCommand {
   }
 
   Future<void> _genPubspecWithAllPlugins() async {
-    final Map<String, PathDependency> pluginDeps = await _getValidPathDependencies();
+    final Map<String, PathDependency> pluginDeps =
+        await _getValidPathDependencies();
     final Pubspec pubspec = Pubspec(
       'all_plugins',
       description: 'Flutter app containing all 1st party plugins.',

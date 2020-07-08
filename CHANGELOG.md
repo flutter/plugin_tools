@@ -1,3 +1,7 @@
+## v.0.0.37+2
+
+- Make `http` and `http_multi_server` dependency version constraint more flexible.
+
 ## v.0.0.37+1
 
 - All_plugin test puts the plugin dependencies into dependency_overrides.

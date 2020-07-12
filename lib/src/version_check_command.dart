@@ -46,8 +46,11 @@ class GitVersionFinder {
 
 enum NextVersionType {
   BREAKING_MAJOR,
+  BREAKING_MAJOR_PRE,
   MINOR,
+  MINOR_PRE,
   PATCH,
+  PATCH_PRE,
   RELEASE,
 }
 
@@ -61,7 +64,25 @@ Map<Version, NextVersionType> getAllowedNextVersions(
     masterVersion.nextPatch: NextVersionType.PATCH,
   };
 
-  if (masterVersion.major < 1 && headVersion.major < 1) {
+  if (headVersion.isPreRelease) {
+    allowedNextVersions.addEntries([
+      _incrementPrerelease(
+        NextVersionType.BREAKING_MAJOR_PRE,
+        masterVersion,
+        headVersion,
+      ),
+      _incrementPrerelease(
+        NextVersionType.MINOR_PRE,
+        masterVersion,
+        headVersion,
+      ),
+      _incrementPrerelease(
+        NextVersionType.PATCH_PRE,
+        masterVersion,
+        headVersion,
+      ),
+    ]);
+  } else if (masterVersion.major < 1 && headVersion.major < 1) {
     int nextBuildNumber = -1;
     if (masterVersion.build.isEmpty) {
       nextBuildNumber = 1;
@@ -69,7 +90,7 @@ Map<Version, NextVersionType> getAllowedNextVersions(
       final int currentBuildNumber = masterVersion.build.first;
       nextBuildNumber = currentBuildNumber + 1;
     }
-    final Version preReleaseVersion = Version(
+    final Version nextBuildVersion = Version(
       masterVersion.major,
       masterVersion.minor,
       masterVersion.patch,
@@ -80,9 +101,57 @@ Map<Version, NextVersionType> getAllowedNextVersions(
     allowedNextVersions[masterVersion.nextMinor] =
         NextVersionType.BREAKING_MAJOR;
     allowedNextVersions[masterVersion.nextPatch] = NextVersionType.MINOR;
-    allowedNextVersions[preReleaseVersion] = NextVersionType.PATCH;
+    allowedNextVersions[nextBuildVersion] = NextVersionType.PATCH;
   }
+
   return allowedNextVersions;
+}
+
+MapEntry<Version, NextVersionType> _incrementPrerelease(
+    NextVersionType type, Version masterVersion, Version headVersion) {
+  Version iteratedVersion;
+  if (type == NextVersionType.BREAKING_MAJOR_PRE) {
+    iteratedVersion = masterVersion.nextMajor;
+  } else if (type == NextVersionType.MINOR_PRE) {
+    iteratedVersion = masterVersion.nextMinor;
+  } else {
+    iteratedVersion = masterVersion.nextPatch;
+  }
+
+  final prePrefixContains = masterVersion.preRelease.isNotEmpty &&
+      headVersion.preRelease.isNotEmpty &&
+      masterVersion.preRelease.first == headVersion.preRelease.first;
+
+  int nextPreNumber;
+  if (headVersion.preRelease.length == 1 &&
+      (masterVersion.preRelease.length <= 1 || !prePrefixContains)) {
+    // -dev
+    nextPreNumber = null;
+  } else if (masterVersion.preRelease.length == 2 && prePrefixContains) {
+    // -dev.{N}
+    final int currentBuildNumber = masterVersion.preRelease.last;
+    nextPreNumber = currentBuildNumber + 1;
+  } else {
+    // -dev.1
+    nextPreNumber = 1;
+  }
+
+  final preReleaseSuffix = [
+    headVersion.preRelease.first.toString(),
+  ];
+  if (nextPreNumber != null) {
+    preReleaseSuffix.add(nextPreNumber.toString());
+  }
+
+  return MapEntry(
+    Version(
+      iteratedVersion.major,
+      iteratedVersion.minor,
+      iteratedVersion.patch,
+      pre: preReleaseSuffix.join('.'),
+    ),
+    type,
+  );
 }
 
 class VersionCheckCommand extends PluginCommand {

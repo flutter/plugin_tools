@@ -1,3 +1,7 @@
+## v.0.0.38
+
+- Add C++ and ObjC++ to clang-format.
+
 ## v.0.0.37+2
 
 - Make `http` and `http_multi_server` dependency version constraint more flexible.

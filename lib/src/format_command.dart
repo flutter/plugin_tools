@@ -33,7 +33,7 @@ class FormatCommand extends PluginCommand {
 
   @override
   final String description =
-      'Formats the code of all packages (Java, Objective-C, and Dart).\n\n'
+      'Formats the code of all packages (Java, Objective-C, C++, and Dart).\n\n'
       'This command requires "git", "flutter" and "clang-format" v5 to be in '
       'your path.';
 
@@ -44,7 +44,7 @@ class FormatCommand extends PluginCommand {
 
     await _formatDart();
     await _formatJava(googleFormatterPath);
-    await _formatObjectiveC();
+    await _formatCppAndObjectiveC();
 
     if (argResults['travis']) {
       final bool modified = await _didModifyAnything();
@@ -83,15 +83,16 @@ class FormatCommand extends PluginCommand {
     return true;
   }
 
-  Future<Null> _formatObjectiveC() async {
-    print('Formatting all .m and .h files...');
-    final Iterable<String> hFiles = await _getFilesWithExtension('.h');
-    final Iterable<String> mFiles = await _getFilesWithExtension('.m');
-    // Split this into multiple invocations to avoid a
-    // 'ProcessException: Argument list too long'
+  Future<Null> _formatCppAndObjectiveC() async {
+    print('Formatting all .cc, .cpp, .mm, .m, and .h files...');
     final Iterable<String> allFiles = <String>[]
-      ..addAll(hFiles)
-      ..addAll(mFiles);
+      ..addAll(await _getFilesWithExtension('.h'))
+      ..addAll(await _getFilesWithExtension('.m'))
+      ..addAll(await _getFilesWithExtension('.mm'))
+      ..addAll(await _getFilesWithExtension('.cc'))
+      ..addAll(await _getFilesWithExtension('.cpp'));
+    // Split this into multiple invocations to avoid a
+    // 'ProcessException: Argument list too long'.
     final Iterable<List<String>> batches = partition(allFiles, 100);
     for (List<String> batch in batches) {
       await processRunner.runAndStream(argResults['clang-format'],

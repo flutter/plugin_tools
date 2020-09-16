@@ -151,7 +151,8 @@ class FirebaseTestLabCommand extends PluginCommand {
       // Look for tests recursively in folders that start with 'test' and that
       // live in the root or example folders.
       bool isTestDir(FileSystemEntity dir) {
-        return p.basename(dir.path).startsWith('test');
+        return p.basename(dir.path).startsWith('test') ||
+            p.basename(dir.path) == 'integration_test';
       }
 
       final List<FileSystemEntity> testDirs =
@@ -161,7 +162,9 @@ class FirebaseTestLabCommand extends PluginCommand {
       testDirs.addAll(example.listSync().where(isTestDir).toList());
       for (Directory testDir in testDirs) {
         bool isE2ETest(FileSystemEntity file) {
-          return file.path.endsWith('_e2e.dart');
+          return file.path.endsWith('_e2e.dart') ||
+              (file.parent.basename == 'integration_test' &&
+                  file.path.endsWith('_test.dart'));
         }
 
         final List<FileSystemEntity> testFiles = testDir

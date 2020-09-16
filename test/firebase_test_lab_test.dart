@@ -68,6 +68,8 @@ void main() {
         <String>['example', 'test', 'plugin_e2e.dart'],
         <String>['example', 'test_driver', 'plugin_e2e.dart'],
         <String>['example', 'test_driver', 'plugin_e2e_test.dart'],
+        <String>['example', 'integration_test', 'foo_test.dart'],
+        <String>['example', 'integration_test', 'should_not_run.dart'],
         <String>['example', 'android', 'gradlew'],
         <String>['example', 'should_not_run_e2e.dart'],
         <String>[
@@ -142,6 +144,16 @@ void main() {
           ProcessCall(
               'gcloud',
               'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/testRunId/2/ --device model=flame,version=29 --device model=seoul,version=26'
+                  .split(' '),
+              '/packages/plugin/example'),
+          ProcessCall(
+              '/packages/plugin/example/android/gradlew',
+              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/example/integration_test/foo_test.dart'
+                  .split(' '),
+              '/packages/plugin/example/android'),
+          ProcessCall(
+              'gcloud',
+              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/testRunId/3/ --device model=flame,version=29 --device model=seoul,version=26'
                   .split(' '),
               '/packages/plugin/example'),
         ]),

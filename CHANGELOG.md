@@ -1,3 +1,7 @@
+## v.0.0.39
+
+- Support `integration_test/` directory for `package:integration_test`
+
 ## v.0.0.38
 
 - Add C++ and ObjC++ to clang-format.
@@ -49,7 +53,7 @@
 
 ## v.0.0.33+1
 
-- Fixes formatting issues that got past our CI due to 
+- Fixes formatting issues that got past our CI due to
   https://github.com/flutter/flutter/issues/51585.
 - Changes the default package name for testing method `createFakePubspec` back
   its previous behavior.

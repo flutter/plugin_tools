@@ -35,8 +35,9 @@ class DriveExamplesCommand extends PluginCommand {
       'corresponding name in the test/ or test_driver/ directories.\n\n'
       'For example, test_driver/app_test.dart would match test/app.dart.\n\n'
       'This command requires "flutter" to be in your path.\n\n'
-      'If a file with a corresponding name cannot be found, it will reuse'
-      'this file to drive the tests that match integration_test/*_test.dart.';
+      'If a file with a corresponding name cannot be found, this driver file'
+      'will be used to drive the tests that match '
+      'integration_test/*_test.dart.';
 
   @override
   Future<Null> run() async {
@@ -131,8 +132,13 @@ class DriveExamplesCommand extends PluginCommand {
             }
 
             if (targetPaths.isEmpty) {
-              print(
-                  'Unable to find an application for $driverTestName to drive');
+              print('''
+Unable to infer a target application for $driverTestName to drive.
+Tried searching for the following:
+1. test/$deviceTestName
+2. test_driver/$deviceTestName
+3. test_driver/*_test.dart
+''');
               failingTests.add(p.relative(test.path, from: example.path));
               continue;
             }

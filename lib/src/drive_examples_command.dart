@@ -34,7 +34,9 @@ class DriveExamplesCommand extends PluginCommand {
       'For each *_test.dart in test_driver/ it drives an application with a '
       'corresponding name in the test/ or test_driver/ directories.\n\n'
       'For example, test_driver/app_test.dart would match test/app.dart.\n\n'
-      'This command requires "flutter" to be in your path.';
+      'This command requires "flutter" to be in your path.\n\n'
+      'If a file with a corresponding name cannot be found, it will reuse'
+      'this file to drive the tests that match integration_test/*_test.dart.';
 
   @override
   Future<Null> run() async {
@@ -112,14 +114,28 @@ class DriveExamplesCommand extends PluginCommand {
           if (fileSystem
               .file(p.join(example.path, deviceTestPath))
               .existsSync()) {
-            print('Found $deviceTestPath');
             targetPaths.add(deviceTestPath);
           } else {
-            // To do Search the integration test dir.
+            final Directory integrationTests =
+                fileSystem.directory(p.join(example.path, 'integration_test'));
 
-            print('Unable to find an application for $driverTestName to drive');
-            failingTests.add(p.join(example.path, driverTestName));
-            continue;
+            if (await integrationTests.exists()) {
+              await for (FileSystemEntity integration_test
+                  in integrationTests.list()) {
+                if (!integration_test.basename.endsWith('_test.dart')) {
+                  continue;
+                }
+                targetPaths
+                    .add(p.relative(integration_test.path, from: example.path));
+              }
+            }
+
+            if (targetPaths.isEmpty) {
+              print(
+                  'Unable to find an application for $driverTestName to drive');
+              failingTests.add(p.relative(test.path, from: example.path));
+              continue;
+            }
           }
 
           final List<String> driveArgs = <String>['drive'];
@@ -143,17 +159,17 @@ class DriveExamplesCommand extends PluginCommand {
           }
 
           for (final targetPath in targetPaths) {
-            driveArgs.addAll(<String>[
-              '--target',
-              targetPath,
-              '--driver',
-              p.join('test_driver', driverTestName)
-            ]);
-            print('Starting process: `$flutterCommand ${driveArgs.join(' ')}`');
             final int exitCode = await processRunner.runAndStream(
-                flutterCommand, driveArgs,
-                workingDir: example, exitOnError: true);
-            print('Process exited with code $exitCode.');
+                flutterCommand,
+                [
+                  ...driveArgs,
+                  '--driver',
+                  p.join('test_driver', driverTestName),
+                  '--target',
+                  targetPath,
+                ],
+                workingDir: example,
+                exitOnError: true);
             if (exitCode != 0) {
               failingTests.add(p.join(packageName, deviceTestPath));
             }

@@ -107,9 +107,16 @@ class DriveExamplesCommand extends PluginCommand {
             // If the app isn't in test/ folder, look in test_driver/ instead.
             deviceTestPath = p.join('test_driver', deviceTestName);
           }
-          if (!fileSystem
+
+          final List<String> targetPaths = <String>[];
+          if (fileSystem
               .file(p.join(example.path, deviceTestPath))
               .existsSync()) {
+            print('Found $deviceTestPath');
+            targetPaths.add(deviceTestPath);
+          } else {
+            // To do Search the integration test dir.
+
             print('Unable to find an application for $driverTestName to drive');
             failingTests.add(p.join(example.path, driverTestName));
             continue;
@@ -134,12 +141,22 @@ class DriveExamplesCommand extends PluginCommand {
               'windows',
             ]);
           }
-          driveArgs.add(deviceTestPath);
-          final int exitCode = await processRunner.runAndStream(
-              flutterCommand, driveArgs,
-              workingDir: example, exitOnError: true);
-          if (exitCode != 0) {
-            failingTests.add(p.join(packageName, deviceTestPath));
+
+          for (final targetPath in targetPaths) {
+            driveArgs.addAll(<String>[
+              '--target',
+              targetPath,
+              '--driver',
+              p.join('test_driver', driverTestName)
+            ]);
+            print('Starting process: `$flutterCommand ${driveArgs.join(' ')}`');
+            final int exitCode = await processRunner.runAndStream(
+                flutterCommand, driveArgs,
+                workingDir: example, exitOnError: true);
+            print('Process exited with code $exitCode.');
+            if (exitCode != 0) {
+              failingTests.add(p.join(packageName, deviceTestPath));
+            }
           }
         }
       }

@@ -1,3 +1,7 @@
+## v.0.0.40
+
+- Support `integration_test/` directory for `drive-examples` command
+
 ## v.0.0.39
 
 - Support `integration_test/` directory for `package:integration_test`

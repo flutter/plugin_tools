@@ -52,21 +52,6 @@ class DriveExamplesCommand extends PluginCommand {
         if (!(await pluginSupportedOnCurrentPlatform(plugin, fileSystem))) {
           continue;
         }
-        if (isLinux) {
-          // The Linux tooling is not yet stable, so the platform directory for the application
-          // might not exist, to prevent it from becoming stale. If it doesn't, create one.
-          final Directory linuxFolder =
-              fileSystem.directory(p.join(example.path, 'linux'));
-          if (!linuxFolder.existsSync()) {
-            int exitCode = await processRunner.runAndStream(
-                flutterCommand, <String>['create', '.'],
-                workingDir: example);
-            if (exitCode != 0) {
-              print('Failed to create a linux directory for $packageName');
-              continue;
-            }
-          }
-        }
         if (isWindows) {
           // The Windows tooling is not yet stable, so the platform directory for the application
           // might not exist, to prevent it from becoming stale. If it doesn't, create one.

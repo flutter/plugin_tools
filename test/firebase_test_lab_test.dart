@@ -89,7 +89,8 @@ void main() {
         '--device',
         'model=seoul,version=26',
         '--test-run-id',
-        'testRunId'
+        'testRunId',
+        '--enable-experiment=exp1',
       ]);
 
       expect(
@@ -114,11 +115,12 @@ void main() {
               'gcloud', 'config set project flutter-infra'.split(' '), null),
           ProcessCall(
               '/packages/plugin/example/android/gradlew',
-              'app:assembleAndroidTest -Pverbose=true'.split(' '),
+              'app:assembleAndroidTest -Pverbose=true -Pextra-front-end-options=--enable-experiment%3Dexp1 -Pextra-gen-snapshot-options=--enable-experiment%3Dexp1'
+                .split(' '),
               '/packages/plugin/example/android'),
           ProcessCall(
               '/packages/plugin/example/android/gradlew',
-              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/test/plugin_e2e.dart'
+              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/test/plugin_e2e.dart -Pextra-front-end-options=--enable-experiment%3Dexp1 -Pextra-gen-snapshot-options=--enable-experiment%3Dexp1'
                   .split(' '),
               '/packages/plugin/example/android'),
           ProcessCall(
@@ -128,7 +130,7 @@ void main() {
               '/packages/plugin/example'),
           ProcessCall(
               '/packages/plugin/example/android/gradlew',
-              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/example/test_driver/plugin_e2e.dart'
+              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/example/test_driver/plugin_e2e.dart -Pextra-front-end-options=--enable-experiment%3Dexp1 -Pextra-gen-snapshot-options=--enable-experiment%3Dexp1'
                   .split(' '),
               '/packages/plugin/example/android'),
           ProcessCall(
@@ -138,7 +140,7 @@ void main() {
               '/packages/plugin/example'),
           ProcessCall(
               '/packages/plugin/example/android/gradlew',
-              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/example/test/plugin_e2e.dart'
+              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/example/test/plugin_e2e.dart -Pextra-front-end-options=--enable-experiment%3Dexp1 -Pextra-gen-snapshot-options=--enable-experiment%3Dexp1'
                   .split(' '),
               '/packages/plugin/example/android'),
           ProcessCall(
@@ -148,7 +150,7 @@ void main() {
               '/packages/plugin/example'),
           ProcessCall(
               '/packages/plugin/example/android/gradlew',
-              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/example/integration_test/foo_test.dart'
+              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/example/integration_test/foo_test.dart -Pextra-front-end-options=--enable-experiment%3Dexp1 -Pextra-gen-snapshot-options=--enable-experiment%3Dexp1'
                   .split(' '),
               '/packages/plugin/example/android'),
           ProcessCall(

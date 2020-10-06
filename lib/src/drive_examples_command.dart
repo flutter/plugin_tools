@@ -24,6 +24,9 @@ class DriveExamplesCommand extends PluginCommand {
         help: 'Runs the iOS implementation of the examples');
     argParser.addFlag(kAndroid,
         help: 'Runs the Android implementation of the examples');
+    argParser.addOption(kEnableExperiment,
+        defaultsTo: '',
+        help: 'Runs the driver tests in Dart VM with the given experiments enabled.');
   }
 
   @override
@@ -145,6 +148,12 @@ Tried searching for the following:
           }
 
           final List<String> driveArgs = <String>['drive'];
+
+          final String enableExperiment = argResults[kEnableExperiment];
+          if (enableExperiment.isNotEmpty) {
+            driveArgs.add('--enable-experiment=$enableExperiment');
+          }
+
           if (isLinux && isLinuxPlugin(plugin, fileSystem)) {
             driveArgs.addAll(<String>[
               '-d',

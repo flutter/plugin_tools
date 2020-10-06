@@ -74,14 +74,14 @@ void main() {
             <String>['test', 'empty_test.dart'],
           ]);
 
-      await runner.run(<String>['test']);
+      await runner.run(<String>['test', '--enable-experiment=exp1']);
 
       expect(
         processRunner.recordedCalls,
         orderedEquals(<ProcessCall>[
-          ProcessCall('flutter', <String>['test', '--color'], plugin1Dir.path),
+          ProcessCall('flutter', <String>['test', '--color', '--enable-experiment=exp1'], plugin1Dir.path),
           ProcessCall('pub', <String>['get'], plugin2Dir.path),
-          ProcessCall('pub', <String>['run', 'test'], plugin2Dir.path),
+          ProcessCall('pub', <String>['run', 'test', '--enable-experiment=exp1'], plugin2Dir.path),
         ]),
       );
 

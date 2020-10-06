@@ -14,7 +14,11 @@ class TestCommand extends PluginCommand {
     Directory packagesDir,
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
-  }) : super(packagesDir, fileSystem, processRunner: processRunner);
+  }) : super(packagesDir, fileSystem, processRunner: processRunner) {
+    argParser.addOption(kEnableExperiment,
+        defaultsTo: '',
+        help: 'Runs the tests in Dart VM with the given experiments enabled.');
+  }
 
   @override
   final String name = 'test';
@@ -36,10 +40,19 @@ class TestCommand extends PluginCommand {
       }
 
       print('RUNNING $packageName tests...');
+
+      final String enableExperiment = argResults[kEnableExperiment];
+
       // `flutter test` automatically gets packages.  `pub run test` does not.  :(
       int exitCode = 0;
       if (isFlutterPackage(packageDir, fileSystem)) {
-        final List<String> args = <String>['test', '--color'];
+        final List<String> args = <String>[
+          'test',
+          '--color',
+          if (enableExperiment.isNotEmpty)
+            '--enable-experiment=$enableExperiment',
+        ];
+
         if (isWebPlugin(packageDir, fileSystem)) {
           args.add('--platform=chrome');
         }
@@ -57,7 +70,12 @@ class TestCommand extends PluginCommand {
         if (exitCode == 0) {
           exitCode = await processRunner.runAndStream(
             'pub',
-            <String>['run', 'test'],
+            <String>[
+              'run',
+              'test',
+              if (enableExperiment.isNotEmpty)
+                '--enable-experiment=$enableExperiment',
+            ],
             workingDir: packageDir,
           );
         }

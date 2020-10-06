@@ -43,6 +43,9 @@ class FirebaseTestLabCommand extends PluginCommand {
             'Device model(s) to test. See https://cloud.google.com/sdk/gcloud/reference/firebase/test/android/run for more info');
     argParser.addOption('results-bucket',
         defaultsTo: 'gs://flutter_firebase_testlab');
+    argParser.addOption(kEnableExperiment,
+        defaultsTo: '',
+        help: 'Enables the given Dart SDK experiments.');
   }
 
   @override
@@ -114,6 +117,10 @@ class FirebaseTestLabCommand extends PluginCommand {
       final Directory androidDirectory =
           fileSystem.directory(p.join(exampleDirectory.path, 'android'));
 
+      final String enableExperiment = argResults[kEnableExperiment];
+      final String encodedEnableExperiment =
+          Uri.encodeComponent('--enable-experiment=$enableExperiment');
+
       // Ensures that gradle wrapper exists
       if (!fileSystem
           .file(p.join(androidDirectory.path, _gradleWrapper))
@@ -123,6 +130,8 @@ class FirebaseTestLabCommand extends PluginCommand {
             <String>[
               'build',
               'apk',
+              if (enableExperiment.isNotEmpty)
+                '--enable-experiment=$enableExperiment',
             ],
             workingDir: androidDirectory);
 
@@ -140,6 +149,10 @@ class FirebaseTestLabCommand extends PluginCommand {
           <String>[
             'app:assembleAndroidTest',
             '-Pverbose=true',
+            if (enableExperiment.isNotEmpty)
+              '-Pextra-front-end-options=$encodedEnableExperiment',
+            if (enableExperiment.isNotEmpty)
+              '-Pextra-gen-snapshot-options=$encodedEnableExperiment',
           ],
           workingDir: androidDirectory);
 
@@ -177,7 +190,11 @@ class FirebaseTestLabCommand extends PluginCommand {
               <String>[
                 'app:assembleDebug',
                 '-Pverbose=true',
-                '-Ptarget=${test.path}'
+                '-Ptarget=${test.path}',
+                if (enableExperiment.isNotEmpty)
+                  '-Pextra-front-end-options=$encodedEnableExperiment',
+                if (enableExperiment.isNotEmpty)
+                  '-Pextra-gen-snapshot-options=$encodedEnableExperiment',
               ],
               workingDir: androidDirectory);
 

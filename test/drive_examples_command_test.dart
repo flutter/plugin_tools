@@ -43,6 +43,7 @@ void main() {
 
       final List<String> output = await runCapturingPrint(runner, <String>[
         'drive-examples',
+        '--enable-experiment=exp1',
       ]);
 
       expect(
@@ -63,6 +64,7 @@ void main() {
                 flutterCommand,
                 <String>[
                   'drive',
+                  '--enable-experiment=exp1',
                   '--driver',
                   driverTestPath,
                   '--target',

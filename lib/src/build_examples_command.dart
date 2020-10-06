@@ -22,9 +22,11 @@ class BuildExamplesCommand extends PluginCommand {
     argParser.addFlag(kWindows, defaultsTo: false);
     argParser.addFlag(kIpa, defaultsTo: io.Platform.isMacOS);
     argParser.addFlag(kApk);
-    argParser.addOption(kEnableExperiment,
-        defaultsTo: '',
-        help: 'Enables the given Dart SDK experiments.');
+    argParser.addOption(
+      kEnableExperiment,
+      defaultsTo: '',
+      help: 'Enables the given Dart SDK experiments.',
+    );
   }
 
   @override
@@ -77,7 +79,8 @@ class BuildExamplesCommand extends PluginCommand {
               }
             }
             int buildExitCode = await processRunner.runAndStream(
-                flutterCommand, <String>[
+                flutterCommand,
+                <String>[
                   'build',
                   kLinux,
                   if (enableExperiment.isNotEmpty)
@@ -108,7 +111,8 @@ class BuildExamplesCommand extends PluginCommand {
               failingPackages.add('$packageName (macos)');
             } else {
               exitCode = await processRunner.runAndStream(
-                  flutterCommand, <String>[
+                  flutterCommand,
+                  <String>[
                     'build',
                     kMacos,
                     if (enableExperiment.isNotEmpty)
@@ -142,7 +146,8 @@ class BuildExamplesCommand extends PluginCommand {
               }
             }
             int buildExitCode = await processRunner.runAndStream(
-                flutterCommand, <String>[
+                flutterCommand,
+                <String>[
                   'build',
                   kWindows,
                   if (enableExperiment.isNotEmpty)
@@ -164,7 +169,8 @@ class BuildExamplesCommand extends PluginCommand {
           print('\nBUILDING IPA for $packageName');
           if (isIosPlugin(plugin, fileSystem)) {
             final int exitCode = await processRunner.runAndStream(
-                flutterCommand, <String>[
+                flutterCommand,
+                <String>[
                   'build',
                   'ios',
                   '--no-codesign',
@@ -184,7 +190,8 @@ class BuildExamplesCommand extends PluginCommand {
           print('\nBUILDING APK for $packageName');
           if (isAndroidPlugin(plugin, fileSystem)) {
             final int exitCode = await processRunner.runAndStream(
-                flutterCommand, <String>[
+                flutterCommand,
+                <String>[
                   'build',
                   'apk',
                   if (enableExperiment.isNotEmpty)

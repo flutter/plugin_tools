@@ -43,9 +43,11 @@ class FirebaseTestLabCommand extends PluginCommand {
             'Device model(s) to test. See https://cloud.google.com/sdk/gcloud/reference/firebase/test/android/run for more info');
     argParser.addOption('results-bucket',
         defaultsTo: 'gs://flutter_firebase_testlab');
-    argParser.addOption(kEnableExperiment,
-        defaultsTo: '',
-        help: 'Enables the given Dart SDK experiments.');
+    argParser.addOption(
+      kEnableExperiment,
+      defaultsTo: '',
+      help: 'Enables the given Dart SDK experiments.',
+    );
   }
 
   @override

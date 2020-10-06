@@ -74,8 +74,12 @@ void main() {
 
       createFakePubspec(pluginExampleDirectory, isFlutter: true);
 
-      final List<String> output = await runCapturingPrint(
-          runner, <String>['build-examples', '--ipa', '--no-macos', '--enable-experiment=exp1']);
+      final List<String> output = await runCapturingPrint(runner, <String>[
+        'build-examples',
+        '--ipa',
+        '--no-macos',
+        '--enable-experiment=exp1'
+      ]);
       final String packageName =
           p.relative(pluginExampleDirectory.path, from: mockPackagesDir.path);
 
@@ -94,7 +98,12 @@ void main() {
           orderedEquals(<ProcessCall>[
             ProcessCall(
                 flutterCommand,
-                <String>['build', 'ios', '--no-codesign', '--enable-experiment=exp1'],
+                <String>[
+                  'build',
+                  'ios',
+                  '--no-codesign',
+                  '--enable-experiment=exp1'
+                ],
                 pluginExampleDirectory.path),
           ]));
       cleanupPackages();
@@ -447,8 +456,13 @@ void main() {
 
       createFakePubspec(pluginExampleDirectory, isFlutter: true);
 
-      final List<String> output = await runCapturingPrint(runner,
-          <String>['build-examples', '--apk', '--no-ipa', '--no-macos', '--enable-experiment=exp1']);
+      final List<String> output = await runCapturingPrint(runner, <String>[
+        'build-examples',
+        '--apk',
+        '--no-ipa',
+        '--no-macos',
+        '--enable-experiment=exp1'
+      ]);
       final String packageName =
           p.relative(pluginExampleDirectory.path, from: mockPackagesDir.path);
 
@@ -465,7 +479,9 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
-            ProcessCall(flutterCommand, <String>['build', 'apk', '--enable-experiment=exp1'],
+            ProcessCall(
+                flutterCommand,
+                <String>['build', 'apk', '--enable-experiment=exp1'],
                 pluginExampleDirectory.path),
           ]));
       cleanupPackages();

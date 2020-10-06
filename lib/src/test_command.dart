@@ -15,9 +15,11 @@ class TestCommand extends PluginCommand {
     FileSystem fileSystem, {
     ProcessRunner processRunner = const ProcessRunner(),
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
-    argParser.addOption(kEnableExperiment,
-        defaultsTo: '',
-        help: 'Runs the tests in Dart VM with the given experiments enabled.');
+    argParser.addOption(
+      kEnableExperiment,
+      defaultsTo: '',
+      help: 'Runs the tests in Dart VM with the given experiments enabled.',
+    );
   }
 
   @override

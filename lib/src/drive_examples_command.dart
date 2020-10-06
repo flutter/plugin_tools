@@ -24,9 +24,12 @@ class DriveExamplesCommand extends PluginCommand {
         help: 'Runs the iOS implementation of the examples');
     argParser.addFlag(kAndroid,
         help: 'Runs the Android implementation of the examples');
-    argParser.addOption(kEnableExperiment,
-        defaultsTo: '',
-        help: 'Runs the driver tests in Dart VM with the given experiments enabled.');
+    argParser.addOption(
+      kEnableExperiment,
+      defaultsTo: '',
+      help:
+          'Runs the driver tests in Dart VM with the given experiments enabled.',
+    );
   }
 
   @override

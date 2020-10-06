@@ -116,7 +116,7 @@ void main() {
           ProcessCall(
               '/packages/plugin/example/android/gradlew',
               'app:assembleAndroidTest -Pverbose=true -Pextra-front-end-options=--enable-experiment%3Dexp1 -Pextra-gen-snapshot-options=--enable-experiment%3Dexp1'
-                .split(' '),
+                  .split(' '),
               '/packages/plugin/example/android'),
           ProcessCall(
               '/packages/plugin/example/android/gradlew',

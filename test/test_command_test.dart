@@ -79,9 +79,15 @@ void main() {
       expect(
         processRunner.recordedCalls,
         orderedEquals(<ProcessCall>[
-          ProcessCall('flutter', <String>['test', '--color', '--enable-experiment=exp1'], plugin1Dir.path),
+          ProcessCall(
+              'flutter',
+              <String>['test', '--color', '--enable-experiment=exp1'],
+              plugin1Dir.path),
           ProcessCall('pub', <String>['get'], plugin2Dir.path),
-          ProcessCall('pub', <String>['run', 'test', '--enable-experiment=exp1'], plugin2Dir.path),
+          ProcessCall(
+              'pub',
+              <String>['run', 'test', '--enable-experiment=exp1'],
+              plugin2Dir.path),
         ]),
       );
 

@@ -461,7 +461,6 @@ void main() {
         '--apk',
         '--no-ipa',
         '--no-macos',
-        '--enable-experiment=exp1'
       ]);
       final String packageName =
           p.relative(pluginExampleDirectory.path, from: mockPackagesDir.path);
@@ -479,9 +478,74 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
+            ProcessCall(flutterCommand, <String>['build', 'apk'],
+                pluginExampleDirectory.path),
+          ]));
+      cleanupPackages();
+    });
+
+    test('enable-experiment flag for Android', () async {
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test'],
+          ],
+          isAndroidPlugin: true);
+
+      final Directory pluginExampleDirectory =
+          mockPackagesDir.childDirectory('plugin').childDirectory('example');
+
+      createFakePubspec(pluginExampleDirectory, isFlutter: true);
+
+      await runCapturingPrint(runner, <String>[
+        'build-examples',
+        '--apk',
+        '--no-ipa',
+        '--no-macos',
+        '--enable-experiment=exp1'
+      ]);
+
+      print(processRunner.recordedCalls);
+      expect(
+          processRunner.recordedCalls,
+          orderedEquals(<ProcessCall>[
             ProcessCall(
                 flutterCommand,
                 <String>['build', 'apk', '--enable-experiment=exp1'],
+                pluginExampleDirectory.path),
+          ]));
+      cleanupPackages();
+    });
+
+    test('enable-experiment flag for ios', () async {
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test'],
+          ],
+          isIosPlugin: true);
+
+      final Directory pluginExampleDirectory =
+          mockPackagesDir.childDirectory('plugin').childDirectory('example');
+
+      createFakePubspec(pluginExampleDirectory, isFlutter: true);
+
+      await runCapturingPrint(runner, <String>[
+        'build-examples',
+        '--ipa',
+        '--no-macos',
+        '--enable-experiment=exp1'
+      ]);
+      print(processRunner.recordedCalls);
+      expect(
+          processRunner.recordedCalls,
+          orderedEquals(<ProcessCall>[
+            ProcessCall(
+                flutterCommand,
+                <String>[
+                  'build',
+                  'ios',
+                  '--no-codesign',
+                  '--enable-experiment=exp1'
+                ],
                 pluginExampleDirectory.path),
           ]));
       cleanupPackages();

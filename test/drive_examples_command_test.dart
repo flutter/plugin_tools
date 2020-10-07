@@ -24,6 +24,9 @@ void main() {
       runner = CommandRunner<Null>(
           'drive_examples_command', 'Test for drive_example_command');
       runner.addCommand(command);
+    });
+
+    tearDown(() {
       cleanupPackages();
     });
 
@@ -43,7 +46,6 @@ void main() {
 
       final List<String> output = await runCapturingPrint(runner, <String>[
         'drive-examples',
-        '--enable-experiment=exp1',
       ]);
 
       expect(
@@ -64,7 +66,6 @@ void main() {
                 flutterCommand,
                 <String>[
                   'drive',
-                  '--enable-experiment=exp1',
                   '--driver',
                   driverTestPath,
                   '--target',
@@ -72,7 +73,6 @@ void main() {
                 ],
                 pluginExampleDirectory.path),
           ]));
-      cleanupPackages();
     });
 
     test('driving under folder "test_driver"', () async {
@@ -118,8 +118,6 @@ void main() {
                 ],
                 pluginExampleDirectory.path),
           ]));
-
-      cleanupPackages();
     });
 
     test('driving under folder "test_driver" when test files are missing"',
@@ -139,7 +137,6 @@ void main() {
       await expectLater(
           () => runCapturingPrint(runner, <String>['drive-examples']),
           throwsA(const TypeMatcher<ToolExit>()));
-      cleanupPackages();
     });
 
     test(
@@ -198,8 +195,6 @@ void main() {
                 ],
                 pluginExampleDirectory.path),
           ]));
-
-      cleanupPackages();
     });
 
     test('driving when plugin does not support Linux is a no-op', () async {
@@ -232,8 +227,6 @@ void main() {
       // Output should be empty since running drive-examples --linux on a non-Linux
       // plugin is a no-op.
       expect(processRunner.recordedCalls, <ProcessCall>[]);
-
-      cleanupPackages();
     });
 
     test('driving on a Linux plugin', () async {
@@ -283,8 +276,6 @@ void main() {
                 ],
                 pluginExampleDirectory.path),
           ]));
-
-      cleanupPackages();
     });
 
     test(
@@ -336,8 +327,6 @@ void main() {
                 ],
                 pluginExampleDirectory.path),
           ]));
-
-      cleanupPackages();
     });
 
     test('driving when plugin does not suppport macOS is a no-op', () async {
@@ -368,8 +357,6 @@ void main() {
       // Output should be empty since running drive-examples --macos with no macos
       // implementation is a no-op.
       expect(processRunner.recordedCalls, <ProcessCall>[]);
-
-      cleanupPackages();
     });
     test('driving on a macOS plugin', () async {
       createFakePlugin('plugin',
@@ -417,8 +404,6 @@ void main() {
                 ],
                 pluginExampleDirectory.path),
           ]));
-
-      cleanupPackages();
     });
     test('driving when plugin does not suppport windows is a no-op', () async {
       createFakePlugin('plugin',
@@ -450,8 +435,6 @@ void main() {
       // Output should be empty since running drive-examples --windows on a non-windows
       // plugin is a no-op.
       expect(processRunner.recordedCalls, <ProcessCall>[]);
-
-      cleanupPackages();
     });
 
     test('driving on a Windows plugin', () async {
@@ -501,8 +484,6 @@ void main() {
                 ],
                 pluginExampleDirectory.path),
           ]));
-
-      cleanupPackages();
     });
     test(
         'driving on a Windows plugin with a windows direactory does not call flutter create',
@@ -553,8 +534,6 @@ void main() {
                 ],
                 pluginExampleDirectory.path),
           ]));
-
-      cleanupPackages();
     });
 
     test('driving when plugin does not support mobile is no-op', () async {
@@ -586,8 +565,45 @@ void main() {
       // Output should be empty since running drive-examples --macos with no macos
       // implementation is a no-op.
       expect(processRunner.recordedCalls, <ProcessCall>[]);
+    });
 
-      cleanupPackages();
+    test('enable-experiment flag', () async {
+      createFakePlugin('plugin',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test_driver', 'plugin_test.dart'],
+            <String>['example', 'test', 'plugin.dart'],
+          ],
+          isIosPlugin: true,
+          isAndroidPlugin: true);
+
+      final Directory pluginExampleDirectory =
+          mockPackagesDir.childDirectory('plugin').childDirectory('example');
+
+      createFakePubspec(pluginExampleDirectory, isFlutter: true);
+
+      await runCapturingPrint(runner, <String>[
+        'drive-examples',
+        '--enable-experiment=exp1',
+      ]);
+
+      String deviceTestPath = p.join('test', 'plugin.dart');
+      String driverTestPath = p.join('test_driver', 'plugin_test.dart');
+      print(processRunner.recordedCalls);
+      expect(
+          processRunner.recordedCalls,
+          orderedEquals(<ProcessCall>[
+            ProcessCall(
+                flutterCommand,
+                <String>[
+                  'drive',
+                  '--enable-experiment=exp1',
+                  '--driver',
+                  driverTestPath,
+                  '--target',
+                  deviceTestPath
+                ],
+                pluginExampleDirectory.path),
+          ]));
     });
   });
 }

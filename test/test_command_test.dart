@@ -143,7 +143,7 @@ void main() {
           ProcessCall('pub', <String>['get'], plugin2Dir.path),
           ProcessCall(
               'pub',
-              <String>['run', 'test', '--enable-experiment=exp1'],
+              <String>['run', '--enable-experiment=exp1', 'test'],
               plugin2Dir.path),
         ]),
       );

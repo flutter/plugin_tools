@@ -1,3 +1,8 @@
+## v.0.0.41
+
+- Support `--enable-experiment` flag in subcommands `test`, `build-examples`, `drive-examples`,
+and `firebase-test-lab`.
+
 ## v.0.0.40
 
 - Support `integration_test/` directory for `drive-examples` command

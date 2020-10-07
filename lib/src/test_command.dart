@@ -74,9 +74,9 @@ class TestCommand extends PluginCommand {
             'pub',
             <String>[
               'run',
-              'test',
               if (enableExperiment.isNotEmpty)
                 '--enable-experiment=$enableExperiment',
+              'test',
             ],
             workingDir: packageDir,
           );

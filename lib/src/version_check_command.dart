@@ -46,17 +46,41 @@ class GitVersionFinder {
 
 enum NextVersionType {
   BREAKING_MAJOR,
+  NULLSAFETY_PRE_RELEASE,
   MINOR,
   PATCH,
   RELEASE,
 }
 
+Version getNextNullSafetyPreRelease(Version current, Version next) {
+  String nextNullsafetyPrerelease = 'nullsafety';
+  if (current.isPreRelease &&
+      current.preRelease.first is String &&
+      current.preRelease.first == 'nullsafety') {
+    if (current.preRelease.length == 1) {
+      nextNullsafetyPrerelease = 'nullsafety.1';
+    } else if (current.preRelease.length == 2 &&
+        current.preRelease.last is int) {
+      nextNullsafetyPrerelease = 'nullsafety.${current.preRelease.last + 1}';
+    }
+  }
+  return Version(
+    next.major,
+    next.minor,
+    next.patch,
+    pre: nextNullsafetyPrerelease,
+  );
+}
+
 @visibleForTesting
 Map<Version, NextVersionType> getAllowedNextVersions(
     Version masterVersion, Version headVersion) {
+  final Version nextNullSafetyMajor =
+      getNextNullSafetyPreRelease(masterVersion, masterVersion.nextMajor);
   final Map<Version, NextVersionType> allowedNextVersions =
       <Version, NextVersionType>{
     masterVersion.nextMajor: NextVersionType.BREAKING_MAJOR,
+    nextNullSafetyMajor: NextVersionType.NULLSAFETY_PRE_RELEASE,
     masterVersion.nextMinor: NextVersionType.MINOR,
     masterVersion.nextPatch: NextVersionType.PATCH,
   };
@@ -81,6 +105,10 @@ Map<Version, NextVersionType> getAllowedNextVersions(
         NextVersionType.BREAKING_MAJOR;
     allowedNextVersions[masterVersion.nextPatch] = NextVersionType.MINOR;
     allowedNextVersions[preReleaseVersion] = NextVersionType.PATCH;
+    final Version nextNullSafetyMinor =
+        getNextNullSafetyPreRelease(masterVersion, masterVersion.nextMinor);
+    allowedNextVersions[nextNullSafetyMinor] =
+        NextVersionType.NULLSAFETY_PRE_RELEASE;
   }
   return allowedNextVersions;
 }

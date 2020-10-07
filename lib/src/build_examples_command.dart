@@ -22,6 +22,11 @@ class BuildExamplesCommand extends PluginCommand {
     argParser.addFlag(kWindows, defaultsTo: false);
     argParser.addFlag(kIpa, defaultsTo: io.Platform.isMacOS);
     argParser.addFlag(kApk);
+    argParser.addOption(
+      kEnableExperiment,
+      defaultsTo: '',
+      help: 'Enables the given Dart SDK experiments.',
+    );
   }
 
   @override
@@ -46,6 +51,8 @@ class BuildExamplesCommand extends PluginCommand {
     }
     final String flutterCommand =
         LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
+
+    final String enableExperiment = argResults[kEnableExperiment];
 
     checkSharding();
     final List<String> failingPackages = <String>[];
@@ -72,7 +79,13 @@ class BuildExamplesCommand extends PluginCommand {
               }
             }
             int buildExitCode = await processRunner.runAndStream(
-                flutterCommand, <String>['build', kLinux],
+                flutterCommand,
+                <String>[
+                  'build',
+                  kLinux,
+                  if (enableExperiment.isNotEmpty)
+                    '--enable-experiment=$enableExperiment',
+                ],
                 workingDir: example);
             if (buildExitCode != 0) {
               failingPackages.add('$packageName (linux)');
@@ -98,7 +111,13 @@ class BuildExamplesCommand extends PluginCommand {
               failingPackages.add('$packageName (macos)');
             } else {
               exitCode = await processRunner.runAndStream(
-                  flutterCommand, <String>['build', kMacos],
+                  flutterCommand,
+                  <String>[
+                    'build',
+                    kMacos,
+                    if (enableExperiment.isNotEmpty)
+                      '--enable-experiment=$enableExperiment',
+                  ],
                   workingDir: example);
               if (exitCode != 0) {
                 failingPackages.add('$packageName (macos)');
@@ -127,7 +146,13 @@ class BuildExamplesCommand extends PluginCommand {
               }
             }
             int buildExitCode = await processRunner.runAndStream(
-                flutterCommand, <String>['build', kWindows],
+                flutterCommand,
+                <String>[
+                  'build',
+                  kWindows,
+                  if (enableExperiment.isNotEmpty)
+                    '--enable-experiment=$enableExperiment',
+                ],
                 workingDir: example);
             if (buildExitCode != 0) {
               failingPackages.add('$packageName (windows)');
@@ -144,7 +169,14 @@ class BuildExamplesCommand extends PluginCommand {
           print('\nBUILDING IPA for $packageName');
           if (isIosPlugin(plugin, fileSystem)) {
             final int exitCode = await processRunner.runAndStream(
-                flutterCommand, <String>['build', 'ios', '--no-codesign'],
+                flutterCommand,
+                <String>[
+                  'build',
+                  'ios',
+                  '--no-codesign',
+                  if (enableExperiment.isNotEmpty)
+                    '--enable-experiment=$enableExperiment',
+                ],
                 workingDir: example);
             if (exitCode != 0) {
               failingPackages.add('$packageName (ipa)');
@@ -158,7 +190,13 @@ class BuildExamplesCommand extends PluginCommand {
           print('\nBUILDING APK for $packageName');
           if (isAndroidPlugin(plugin, fileSystem)) {
             final int exitCode = await processRunner.runAndStream(
-                flutterCommand, <String>['build', 'apk'],
+                flutterCommand,
+                <String>[
+                  'build',
+                  'apk',
+                  if (enableExperiment.isNotEmpty)
+                    '--enable-experiment=$enableExperiment',
+                ],
                 workingDir: example);
             if (exitCode != 0) {
               failingPackages.add('$packageName (apk)');

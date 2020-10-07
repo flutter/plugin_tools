@@ -89,7 +89,7 @@ void main() {
         '--device',
         'model=seoul,version=26',
         '--test-run-id',
-        'testRunId'
+        'testRunId',
       ]);
 
       expect(
@@ -154,6 +154,97 @@ void main() {
           ProcessCall(
               'gcloud',
               'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/testRunId/3/ --device model=flame,version=29 --device model=seoul,version=26'
+                  .split(' '),
+              '/packages/plugin/example'),
+        ]),
+      );
+    });
+
+    test('experimental flag', () async {
+      createFakePlugin('plugin', withExtraFiles: <List<String>>[
+        <String>['test', 'plugin_test.dart'],
+        <String>['test', 'plugin_e2e.dart'],
+        <String>['should_not_run_e2e.dart'],
+        <String>['lib/test/should_not_run_e2e.dart'],
+        <String>['example', 'test', 'plugin_e2e.dart'],
+        <String>['example', 'test_driver', 'plugin_e2e.dart'],
+        <String>['example', 'test_driver', 'plugin_e2e_test.dart'],
+        <String>['example', 'integration_test', 'foo_test.dart'],
+        <String>['example', 'integration_test', 'should_not_run.dart'],
+        <String>['example', 'android', 'gradlew'],
+        <String>['example', 'should_not_run_e2e.dart'],
+        <String>[
+          'example',
+          'android',
+          'app',
+          'src',
+          'androidTest',
+          'MainActivityTest.java'
+        ],
+      ]);
+
+      await runCapturingPrint(runner, <String>[
+        'firebase-test-lab',
+        '--device',
+        'model=flame,version=29',
+        '--test-run-id',
+        'testRunId',
+        '--enable-experiment=exp1',
+      ]);
+
+      expect(
+        processRunner.recordedCalls,
+        orderedEquals(<ProcessCall>[
+          ProcessCall(
+              'gcloud',
+              'auth activate-service-account --key-file=${Platform.environment['HOME']}/gcloud-service-key.json'
+                  .split(' '),
+              null),
+          ProcessCall(
+              'gcloud', 'config set project flutter-infra'.split(' '), null),
+          ProcessCall(
+              '/packages/plugin/example/android/gradlew',
+              'app:assembleAndroidTest -Pverbose=true -Pextra-front-end-options=--enable-experiment%3Dexp1 -Pextra-gen-snapshot-options=--enable-experiment%3Dexp1'
+                  .split(' '),
+              '/packages/plugin/example/android'),
+          ProcessCall(
+              '/packages/plugin/example/android/gradlew',
+              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/test/plugin_e2e.dart -Pextra-front-end-options=--enable-experiment%3Dexp1 -Pextra-gen-snapshot-options=--enable-experiment%3Dexp1'
+                  .split(' '),
+              '/packages/plugin/example/android'),
+          ProcessCall(
+              'gcloud',
+              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/testRunId/0/ --device model=flame,version=29'
+                  .split(' '),
+              '/packages/plugin/example'),
+          ProcessCall(
+              '/packages/plugin/example/android/gradlew',
+              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/example/test_driver/plugin_e2e.dart -Pextra-front-end-options=--enable-experiment%3Dexp1 -Pextra-gen-snapshot-options=--enable-experiment%3Dexp1'
+                  .split(' '),
+              '/packages/plugin/example/android'),
+          ProcessCall(
+              'gcloud',
+              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/testRunId/1/ --device model=flame,version=29'
+                  .split(' '),
+              '/packages/plugin/example'),
+          ProcessCall(
+              '/packages/plugin/example/android/gradlew',
+              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/example/test/plugin_e2e.dart -Pextra-front-end-options=--enable-experiment%3Dexp1 -Pextra-gen-snapshot-options=--enable-experiment%3Dexp1'
+                  .split(' '),
+              '/packages/plugin/example/android'),
+          ProcessCall(
+              'gcloud',
+              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/testRunId/2/ --device model=flame,version=29'
+                  .split(' '),
+              '/packages/plugin/example'),
+          ProcessCall(
+              '/packages/plugin/example/android/gradlew',
+              'app:assembleDebug -Pverbose=true -Ptarget=/packages/plugin/example/integration_test/foo_test.dart -Pextra-front-end-options=--enable-experiment%3Dexp1 -Pextra-gen-snapshot-options=--enable-experiment%3Dexp1'
+                  .split(' '),
+              '/packages/plugin/example/android'),
+          ProcessCall(
+              'gcloud',
+              'firebase test android run --type instrumentation --app build/app/outputs/apk/debug/app-debug.apk --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk --timeout 5m --results-bucket=gs://flutter_firebase_testlab --results-dir=plugins_android_test/plugin/null/testRunId/3/ --device model=flame,version=29'
                   .split(' '),
               '/packages/plugin/example'),
         ]),

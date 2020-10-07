@@ -17,6 +17,10 @@ void main() {
 
       runner = CommandRunner<Null>('test_test', 'Test for $TestCommand');
       runner.addCommand(command);
+    });
+
+    tearDown(() {
+      cleanupPackages();
       processRunner.recordedCalls.clear();
     });
 
@@ -74,14 +78,20 @@ void main() {
             <String>['test', 'empty_test.dart'],
           ]);
 
-      await runner.run(<String>['test']);
+      await runner.run(<String>['test', '--enable-experiment=exp1']);
 
       expect(
         processRunner.recordedCalls,
         orderedEquals(<ProcessCall>[
-          ProcessCall('flutter', <String>['test', '--color'], plugin1Dir.path),
+          ProcessCall(
+              'flutter',
+              <String>['test', '--color', '--enable-experiment=exp1'],
+              plugin1Dir.path),
           ProcessCall('pub', <String>['get'], plugin2Dir.path),
-          ProcessCall('pub', <String>['run', 'test'], plugin2Dir.path),
+          ProcessCall(
+              'pub',
+              <String>['run', 'test', '--enable-experiment=exp1'],
+              plugin2Dir.path),
         ]),
       );
 
@@ -107,6 +117,38 @@ void main() {
               <String>['test', '--color', '--platform=chrome'], pluginDir.path),
         ]),
       );
+    });
+
+    test('enable-experiment flag', () async {
+      final Directory plugin1Dir = createFakePlugin('plugin1',
+          isFlutter: true,
+          withExtraFiles: <List<String>>[
+            <String>['test', 'empty_test.dart'],
+          ]);
+      final Directory plugin2Dir = createFakePlugin('plugin2',
+          isFlutter: false,
+          withExtraFiles: <List<String>>[
+            <String>['test', 'empty_test.dart'],
+          ]);
+
+      await runner.run(<String>['test', '--enable-experiment=exp1']);
+
+      expect(
+        processRunner.recordedCalls,
+        orderedEquals(<ProcessCall>[
+          ProcessCall(
+              'flutter',
+              <String>['test', '--color', '--enable-experiment=exp1'],
+              plugin1Dir.path),
+          ProcessCall('pub', <String>['get'], plugin2Dir.path),
+          ProcessCall(
+              'pub',
+              <String>['run', 'test', '--enable-experiment=exp1'],
+              plugin2Dir.path),
+        ]),
+      );
+
+      cleanupPackages();
     });
   });
 }

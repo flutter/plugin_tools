@@ -1,3 +1,7 @@
+## v.0.0.42
+
+- Allow `*-nullsafety` pre release packages.
+
 ## v.0.0.41
 
 - Support `--enable-experiment` flag in subcommands `test`, `build-examples`, `drive-examples`,

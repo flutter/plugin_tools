@@ -1,3 +1,7 @@
+## v.0.0.43
+
+- Allow minor `*-nullsafety` pre release packages.
+
 ## v.0.0.42+1
 
 - Fix test command when `--enable-experiment` is called.

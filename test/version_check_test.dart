@@ -288,19 +288,27 @@ void main() {
 
     test("nextVersion allows null safety pre prelease", () {
       testAllowedVersion("1.0.1", "2.0.0-nullsafety",
-          nextVersionType: NextVersionType.NULLSAFETY_PRE_RELEASE);
+          nextVersionType: NextVersionType.MAJOR_NULLSAFETY_PRE_RELEASE);
       testAllowedVersion("1.0.0", "2.0.0-nullsafety",
-          nextVersionType: NextVersionType.NULLSAFETY_PRE_RELEASE);
+          nextVersionType: NextVersionType.MAJOR_NULLSAFETY_PRE_RELEASE);
       testAllowedVersion("1.0.0-nullsafety", "1.0.0-nullsafety.1",
-          nextVersionType: NextVersionType.NULLSAFETY_PRE_RELEASE);
+          nextVersionType: NextVersionType.MINOR_NULLSAFETY_PRE_RELEASE);
       testAllowedVersion("1.0.0-nullsafety.1", "1.0.0-nullsafety.2",
-          nextVersionType: NextVersionType.NULLSAFETY_PRE_RELEASE);
+          nextVersionType: NextVersionType.MINOR_NULLSAFETY_PRE_RELEASE);
       testAllowedVersion("0.1.0", "0.2.0-nullsafety",
-          nextVersionType: NextVersionType.NULLSAFETY_PRE_RELEASE);
+          nextVersionType: NextVersionType.MAJOR_NULLSAFETY_PRE_RELEASE);
       testAllowedVersion("0.1.0-nullsafety", "0.1.0-nullsafety.1",
-          nextVersionType: NextVersionType.NULLSAFETY_PRE_RELEASE);
+          nextVersionType: NextVersionType.MINOR_NULLSAFETY_PRE_RELEASE);
       testAllowedVersion("0.1.0-nullsafety.1", "0.1.0-nullsafety.2",
-          nextVersionType: NextVersionType.NULLSAFETY_PRE_RELEASE);
+          nextVersionType: NextVersionType.MINOR_NULLSAFETY_PRE_RELEASE);
+      testAllowedVersion("1.0.0", "1.1.0-nullsafety",
+          nextVersionType: NextVersionType.MINOR_NULLSAFETY_PRE_RELEASE);
+      testAllowedVersion("1.1.0-nullsafety", "1.1.0-nullsafety.1",
+          nextVersionType: NextVersionType.MINOR_NULLSAFETY_PRE_RELEASE);
+      testAllowedVersion("0.1.0", "0.1.1-nullsafety",
+          nextVersionType: NextVersionType.MINOR_NULLSAFETY_PRE_RELEASE);
+      testAllowedVersion("0.1.1-nullsafety", "0.1.1-nullsafety.1",
+          nextVersionType: NextVersionType.MINOR_NULLSAFETY_PRE_RELEASE);
     });
 
     test("nextVersion does not allow skipping major versions", () {

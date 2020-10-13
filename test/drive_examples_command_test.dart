@@ -261,8 +261,6 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
-            ProcessCall(flutterCommand, <String>['create', '.'],
-                pluginExampleDirectory.path),
             ProcessCall(
                 flutterCommand,
                 <String>[

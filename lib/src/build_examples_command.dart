@@ -64,20 +64,6 @@ class BuildExamplesCommand extends PluginCommand {
         if (argResults[kLinux]) {
           print('\nBUILDING Linux for $packageName');
           if (isLinuxPlugin(plugin, fileSystem)) {
-            // The Linux tooling is not yet stable, so we need to
-            // delete any existing linux directory and create a new one
-            // with 'flutter create .'
-            final Directory linuxFolder =
-                fileSystem.directory(p.join(example.path, 'linux'));
-            bool exampleCreated = false;
-            if (!linuxFolder.existsSync()) {
-              int exampleCreateCode = await processRunner.runAndStream(
-                  flutterCommand, <String>['create', '.'],
-                  workingDir: example);
-              if (exampleCreateCode == 0) {
-                exampleCreated = true;
-              }
-            }
             int buildExitCode = await processRunner.runAndStream(
                 flutterCommand,
                 <String>[
@@ -89,9 +75,6 @@ class BuildExamplesCommand extends PluginCommand {
                 workingDir: example);
             if (buildExitCode != 0) {
               failingPackages.add('$packageName (linux)');
-            }
-            if (exampleCreated && linuxFolder.existsSync()) {
-              linuxFolder.deleteSync(recursive: true);
             }
           } else {
             print('Linux is not supported by this plugin');

@@ -114,20 +114,6 @@ class BuildExamplesCommand extends PluginCommand {
         if (argResults[kWindows]) {
           print('\nBUILDING Windows for $packageName');
           if (isWindowsPlugin(plugin, fileSystem)) {
-            // The Windows tooling is not yet stable, so we need to
-            // delete any existing windows directory and create a new one
-            // with 'flutter create .'
-            final Directory windowsFolder =
-                fileSystem.directory(p.join(example.path, 'windows'));
-            bool exampleCreated = false;
-            if (!windowsFolder.existsSync()) {
-              int exampleCreateCode = await processRunner.runAndStream(
-                  flutterCommand, <String>['create', '.'],
-                  workingDir: example);
-              if (exampleCreateCode == 0) {
-                exampleCreated = true;
-              }
-            }
             int buildExitCode = await processRunner.runAndStream(
                 flutterCommand,
                 <String>[
@@ -139,9 +125,6 @@ class BuildExamplesCommand extends PluginCommand {
                 workingDir: example);
             if (buildExitCode != 0) {
               failingPackages.add('$packageName (windows)');
-            }
-            if (exampleCreated && windowsFolder.existsSync()) {
-              windowsFolder.deleteSync(recursive: true);
             }
           } else {
             print('Windows is not supported by this plugin');

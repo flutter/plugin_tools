@@ -62,7 +62,7 @@ class XCTestCommand extends PluginCommand {
     await for (Directory plugin in getPlugins()) {
       // Start running for package.
       final String packageName =
-            p.relative(plugin.path, from: packagesDir.path);
+          p.relative(plugin.path, from: packagesDir.path);
       print('Start running for $packageName ...');
       if (!isIosPlugin(plugin, fileSystem)) {
         print('iOS is not supported by this plugin.\n\n');

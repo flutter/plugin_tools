@@ -1,3 +1,7 @@
+## v.0.0.44
+
+- Add 'xctest' command to run xctests.
+
 ## v.0.0.43
 
 - Allow minor `*-nullsafety` pre release packages.

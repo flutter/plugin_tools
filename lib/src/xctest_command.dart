@@ -7,13 +7,16 @@ import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
-import 'package:platform/platform.dart';
 
 import 'common.dart';
 
 const String kiOSDestination = 'ios-destination';
 const String kScheme = 'scheme';
 
+/// The command to run iOS' XCTests in plugins, this should work for both XCUnitTest and XCUITest targets.
+/// The tests target have to be added to the xcode project of the example app. Usually at "example/ios/Runner.xcodeproj".
+/// The command takes a "-scheme" argument which has to match the scheme of the test target.
+/// For information on how to add test target in an xcode project, see https://developer.apple.com/library/archive/documentation/ToolsLanguages/Conceptual/Xcode_Overview/UnitTesting.html
 class XCTestCommand extends PluginCommand {
   XCTestCommand(
     Directory packagesDir,
@@ -22,7 +25,8 @@ class XCTestCommand extends PluginCommand {
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addOption(
       kiOSDestination,
-      help: 'Specify the destination when running the test, used for -destination flag for xcodebuild command.',
+      help:
+          'Specify the destination when running the test, used for -destination flag for xcodebuild command.',
     );
     argParser.addOption(
       kScheme,
@@ -34,21 +38,18 @@ class XCTestCommand extends PluginCommand {
   final String name = 'xctest';
 
   @override
-  final String description =
-      'Runs the xctests in the iOS example apps.\n\n'
+  final String description = 'Runs the xctests in the iOS example apps.\n\n'
       'This command requires "flutter" to be in your path.';
 
   @override
   Future<Null> run() async {
     if (argResults[kScheme] == null) {
-      print(
-          '--scheme must be specified');
+      print('--scheme must be specified');
       throw ToolExit(1);
     }
 
     if (argResults[kiOSDestination] == null) {
-      print(
-          '--ios-destination must be specified');
+      print('--ios-destination must be specified');
       throw ToolExit(1);
     }
 
@@ -57,183 +58,73 @@ class XCTestCommand extends PluginCommand {
     final String scheme = argResults[kScheme];
     final String destination = argResults[kiOSDestination];
 
-    
+    List<String> failingPackages = <String>[];
+    await for (Directory plugin in getPlugins()) {
+      // Start running for package.
+      final String packageName =
+            p.relative(plugin.path, from: packagesDir.path);
+      print('Start running for $packageName ...');
+      if (!isIosPlugin(plugin, fileSystem)) {
+        print('iOS is not supported by this plugin.\n\n');
+        continue;
+      }
+      for (Directory example in getExamplesForPlugin(plugin)) {
+        // Look for the test scheme in the example app.
+        print('Look for scheme named $scheme: ...');
+        final String findSchemeCommand =
+            'xcodebuild -project ios/Runner.xcodeproj -list -json';
+        print(findSchemeCommand);
+        final io.ProcessResult xcodeprojListResult = await processRunner.run(
+            'xcodebuild',
+            <String>['-project', 'ios/Runner.xcodeproj', '-list', '-json'],
+            workingDir: example);
+        if (xcodeprojListResult.exitCode != 0) {
+          print('Error occurred while running "$findSchemeCommand":\n\n'
+              '${xcodeprojListResult.stderr}');
+          failingPackages.add(packageName);
+          continue;
+        }
 
+        final String xcdeprojListOutput = xcodeprojListResult.stdout;
+        if (!xcdeprojListOutput.contains(scheme)) {
+          print('$scheme not configured for $packageName, skipping.\n\n');
+          continue;
+        }
+        // Found the scheme, running tests
+        print('Running XCUITests for $packageName ...');
+        final String xctestCommand =
+            'xcodebuild test -project ios/Runner.xcodeproj -scheme $scheme -destination "$destination" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO';
+        print(xctestCommand);
+        final int exitCode = await processRunner.runAndStream(
+            'xcodebuild',
+            <String>[
+              'test',
+              '-project',
+              'ios/Runner.xcodeproj',
+              '-scheme',
+              scheme,
+              '-destination',
+              destination,
+              'CODE_SIGN_IDENTITY=""',
+              'CODE_SIGNING_REQUIRED=NO'
+            ],
+            workingDir: example);
+        if (exitCode != 0) {
+          failingPackages.add(packageName);
+        }
+      }
+    }
 
-
-    print('Look for scheme named $scheme:');
-    final String findSchemeCommand = 'xcodebuild -project example/ios/Runner.xcodeproj -list -json';
-    print(findSchemeCommand);
-    final io.ProcessResult xcodeprojListResult = await processRunner.run('xcodebuld', <String>['-project', 'example/ios/Runner.xcodeproj', '-list', '-json']);
-    if (xcodeprojListResult.stderr != null) {
-      print('Error occurred while running "$findSchemeCommand":\n\n'
-            '${xcodeprojListResult.stderr}');
+    // Command end, print reports.
+    if (failingPackages.isEmpty) {
+      print("All XCUITests have passed!");
+    } else {
+      print(
+          'The following packages are failing XCUITests (see above for details):');
+      for (String package in failingPackages) {
+        print(' * $package');
+      }
       throw ToolExit(1);
     }
-    final String xcdeprojListOutput = xcodeprojListResult.stdout;
-    if (!xcdeprojListOutput.contains(scheme)) {
-      print('$scheme not configured for this project, skipping');
-      return;
-    }
-    final String xctestCommand = 'xcodebuild test -project example/ios/Runner.xcodeproj -scheme $scheme -destination $destination CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO';
-    print(xctestCommand);
-    final int exitCode = await processRunner.runAndStream(
-                'xcodebuild',
-                <String>[
-                  'test',
-                  '-project',
-                  'example/ios/Runner.xcodeproj',
-                ],);
-
-        // final String flutterCommand =
-        // LocalPlatform().isWindows ? 'flutter.bat' : 'flutter';
-
-    // final String enableExperiment = argResults[kEnableExperiment];
-    // final List<String> failingPackages = <String>[];
-    // await for (Directory plugin in getPlugins()) {
-    //   for (Directory example in getExamplesForPlugin(plugin)) {
-    //     final String packageName =
-    //         p.relative(example.path, from: packagesDir.path);
-
-    //     if (argResults[kLinux]) {
-    //       print('\nBUILDING Linux for $packageName');
-    //       if (isLinuxPlugin(plugin, fileSystem)) {
-    //         int buildExitCode = await processRunner.runAndStream(
-    //             flutterCommand,
-    //             <String>[
-    //               'build',
-    //               kLinux,
-    //               if (enableExperiment.isNotEmpty)
-    //                 '--enable-experiment=$enableExperiment',
-    //             ],
-    //             workingDir: example);
-    //         if (buildExitCode != 0) {
-    //           failingPackages.add('$packageName (linux)');
-    //         }
-    //       } else {
-    //         print('Linux is not supported by this plugin');
-    //       }
-    //     }
-
-    //     if (argResults[kMacos]) {
-    //       print('\nBUILDING macOS for $packageName');
-    //       if (isMacOsPlugin(plugin, fileSystem)) {
-    //         // TODO(https://github.com/flutter/flutter/issues/46236):
-    //         // Builing macos without running flutter pub get first results
-    //         // in an error.
-    //         int exitCode = await processRunner.runAndStream(
-    //             flutterCommand, <String>['pub', 'get'],
-    //             workingDir: example);
-    //         if (exitCode != 0) {
-    //           failingPackages.add('$packageName (macos)');
-    //         } else {
-    //           exitCode = await processRunner.runAndStream(
-    //               flutterCommand,
-    //               <String>[
-    //                 'build',
-    //                 kMacos,
-    //                 if (enableExperiment.isNotEmpty)
-    //                   '--enable-experiment=$enableExperiment',
-    //               ],
-    //               workingDir: example);
-    //           if (exitCode != 0) {
-    //             failingPackages.add('$packageName (macos)');
-    //           }
-    //         }
-    //       } else {
-    //         print('macOS is not supported by this plugin');
-    //       }
-    //     }
-
-    //     if (argResults[kWindows]) {
-    //       print('\nBUILDING Windows for $packageName');
-    //       if (isWindowsPlugin(plugin, fileSystem)) {
-    //         // The Windows tooling is not yet stable, so we need to
-    //         // delete any existing windows directory and create a new one
-    //         // with 'flutter create .'
-    //         final Directory windowsFolder =
-    //             fileSystem.directory(p.join(example.path, 'windows'));
-    //         bool exampleCreated = false;
-    //         if (!windowsFolder.existsSync()) {
-    //           int exampleCreateCode = await processRunner.runAndStream(
-    //               flutterCommand, <String>['create', '.'],
-    //               workingDir: example);
-    //           if (exampleCreateCode == 0) {
-    //             exampleCreated = true;
-    //           }
-    //         }
-    //         int buildExitCode = await processRunner.runAndStream(
-    //             flutterCommand,
-    //             <String>[
-    //               'build',
-    //               kWindows,
-    //               if (enableExperiment.isNotEmpty)
-    //                 '--enable-experiment=$enableExperiment',
-    //             ],
-    //             workingDir: example);
-    //         if (buildExitCode != 0) {
-    //           failingPackages.add('$packageName (windows)');
-    //         }
-    //         if (exampleCreated && windowsFolder.existsSync()) {
-    //           windowsFolder.deleteSync(recursive: true);
-    //         }
-    //       } else {
-    //         print('Windows is not supported by this plugin');
-    //       }
-    //     }
-
-    //     if (argResults[kIpa]) {
-    //       print('\nBUILDING IPA for $packageName');
-    //       if (isIosPlugin(plugin, fileSystem)) {
-    //         final int exitCode = await processRunner.runAndStream(
-    //             flutterCommand,
-    //             <String>[
-    //               'build',
-    //               'ios',
-    //               '--no-codesign',
-    //               if (enableExperiment.isNotEmpty)
-    //                 '--enable-experiment=$enableExperiment',
-    //             ],
-    //             workingDir: example);
-    //         if (exitCode != 0) {
-    //           failingPackages.add('$packageName (ipa)');
-    //         }
-    //       } else {
-    //         print('iOS is not supported by this plugin');
-    //       }
-    //     }
-
-    //     if (argResults[kApk]) {
-    //       print('\nBUILDING APK for $packageName');
-    //       if (isAndroidPlugin(plugin, fileSystem)) {
-    //         final int exitCode = await processRunner.runAndStream(
-    //             flutterCommand,
-    //             <String>[
-    //               'build',
-    //               'apk',
-    //               if (enableExperiment.isNotEmpty)
-    //                 '--enable-experiment=$enableExperiment',
-    //             ],
-    //             workingDir: example);
-    //         if (exitCode != 0) {
-    //           failingPackages.add('$packageName (apk)');
-    //         }
-    //       } else {
-    //         print('Android is not supported by this plugin');
-    //       }
-    //     }
-    //   }
-    // }
-    // print('\n\n');
-
-    // if (failingPackages.isNotEmpty) {
-    //   print('The following build are failing (see above for details):');
-    //   for (String package in failingPackages) {
-    //     print(' * $package');
-    //   }
-    //   throw ToolExit(1);
-    // }
-
-    // print('All builds successful!');
   }
 }

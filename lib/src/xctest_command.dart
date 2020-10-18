@@ -51,14 +51,14 @@ class XCTestCommand extends PluginCommand {
   Future<Null> run() async {
     if (argResults[_kTarget] == null) {
       // TODO(cyanglaz): Automatically find all the available testing schemes if this argument is not specified.
-      //
+      // https://github.com/flutter/flutter/issues/68419
       print('--$_kTarget must be specified');
       throw ToolExit(1);
     }
 
     if (argResults[_kiOSDestination] == null) {
       // TODO(cyanglaz): Automatically assign an available destination if this argument is not specified.
-      //
+      // https://github.com/flutter/flutter/issues/68419
       print('--$_kiOSDestination must be specified');
       throw ToolExit(1);
     }

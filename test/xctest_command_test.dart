@@ -12,6 +12,10 @@ import 'mocks.dart';
 import 'util.dart';
 
 void main() {
+  const String _kDestination = '--ios-destination';
+  const String _kTarget = '--target';
+  const String _kSkip = '--skip';
+
   group('test xctest_command', () {
     CommandRunner<Null> runner;
     RecordingProcessRunner processRunner;
@@ -30,16 +34,15 @@ void main() {
 
     test('Not specifying ios--destination or scheme throws', () async {
       await expectLater(
-          () => runner.run(<String>['xctest', '--scheme', 'a_scheme']),
+          () => runner.run(<String>['xctest', _kTarget, 'a_scheme']),
           throwsA(const TypeMatcher<ToolExit>()));
 
       await expectLater(
-          () => runner
-              .run(<String>['xctest', '--ios-destination', 'a_destination']),
+          () => runner.run(<String>['xctest', _kDestination, 'a_destination']),
           throwsA(const TypeMatcher<ToolExit>()));
     });
 
-    test('skip is ios is not supported', () async {
+    test('skip if ios is not supported', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
             <String>['example', 'test'],
@@ -56,16 +59,12 @@ void main() {
       processRunner.processToReturn = mockProcess;
       final List<String> output = await runCapturingPrint(runner, <String>[
         'xctest',
-        '--scheme',
+        _kTarget,
         'foo_scheme',
-        '--ios-destination',
+        _kDestination,
         'foo_destination'
       ]);
-      expect(
-          output,
-          contains('iOS is not supported by this plugin.\n'
-              '\n'
-              ''));
+      expect(output, contains('iOS is not supported by this plugin.'));
       expect(processRunner.recordedCalls, orderedEquals(<ProcessCall>[]));
 
       cleanupPackages();
@@ -87,30 +86,32 @@ void main() {
       final MockProcess mockProcess = MockProcess();
       mockProcess.exitCodeCompleter.complete(0);
       processRunner.processToReturn = mockProcess;
-      processRunner.resultStdout = 'bar_scheme';
-      final List<String> output = await runCapturingPrint(runner, <String>[
-        'xctest',
-        '--scheme',
-        'foo_scheme',
-        '--ios-destination',
-        'foo_destination'
-      ]);
+      processRunner.resultStdout = '{"project":{"targets":["bar_scheme"]}}';
 
-      expect(
-          output,
-          contains('foo_scheme not configured for plugin, skipping.\n'
-              '\n'
-              ''));
-
-      expect(
-          processRunner.recordedCalls,
-          orderedEquals(<ProcessCall>[
-            ProcessCall(
-                'xcodebuild',
-                <String>['-project', 'ios/Runner.xcodeproj', '-list', '-json'],
-                pluginExampleDirectory.path),
-          ]));
-
+      await expectLater(() async {
+        final List<String> output = await runCapturingPrint(runner, <String>[
+          'xctest',
+          _kTarget,
+          'foo_scheme',
+          _kDestination,
+          'foo_destination'
+        ]);
+        expect(output,
+            contains('foo_scheme not configured for plugin, test failed.'));
+        expect(
+            processRunner.recordedCalls,
+            orderedEquals(<ProcessCall>[
+              ProcessCall(
+                  'xcodebuild',
+                  <String>[
+                    '-project',
+                    'ios/Runner.xcodeproj',
+                    '-list',
+                    '-json'
+                  ],
+                  pluginExampleDirectory.path),
+            ]));
+      }, throwsA(const TypeMatcher<ToolExit>()));
       cleanupPackages();
     });
 
@@ -129,12 +130,13 @@ void main() {
       final MockProcess mockProcess = MockProcess();
       mockProcess.exitCodeCompleter.complete(0);
       processRunner.processToReturn = mockProcess;
-      processRunner.resultStdout = 'foo_scheme, bar_scheme';
+      processRunner.resultStdout =
+          '{"project":{"targets":["bar_scheme", "foo_scheme"]}}';
       await runner.run(<String>[
         'xctest',
-        '--scheme',
+        _kTarget,
         'foo_scheme',
-        '--ios-destination',
+        _kDestination,
         'foo_destination'
       ]);
 
@@ -149,8 +151,8 @@ void main() {
                 'xcodebuild',
                 <String>[
                   'test',
-                  '-project',
-                  'ios/Runner.xcodeproj',
+                  '-workspace',
+                  'ios/Runner.xcworkspace',
                   '-scheme',
                   'foo_scheme',
                   '-destination',
@@ -159,6 +161,69 @@ void main() {
                   'CODE_SIGNING_REQUIRED=NO'
                 ],
                 pluginExampleDirectory.path),
+          ]));
+
+      cleanupPackages();
+    });
+
+    test('running with correct scheme and destination, skip 1 plugin',
+        () async {
+      createFakePlugin('plugin1',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test'],
+          ],
+          isIosPlugin: true);
+      createFakePlugin('plugin2',
+          withExtraFiles: <List<String>>[
+            <String>['example', 'test'],
+          ],
+          isIosPlugin: true);
+
+      final Directory pluginExampleDirectory1 =
+          mockPackagesDir.childDirectory('plugin1').childDirectory('example');
+      createFakePubspec(pluginExampleDirectory1, isFlutter: true);
+      final Directory pluginExampleDirectory2 =
+          mockPackagesDir.childDirectory('plugin2').childDirectory('example');
+      createFakePubspec(pluginExampleDirectory2, isFlutter: true);
+
+      final MockProcess mockProcess = MockProcess();
+      mockProcess.exitCodeCompleter.complete(0);
+      processRunner.processToReturn = mockProcess;
+      processRunner.resultStdout =
+          '{"project":{"targets":["bar_scheme", "foo_scheme"]}}';
+      List<String> output = await runCapturingPrint(runner, <String>[
+        'xctest',
+        _kTarget,
+        'foo_scheme',
+        _kDestination,
+        'foo_destination',
+        _kSkip,
+        'plugin1'
+      ]);
+
+      expect(output, contains('plugin1 was skipped with the --skip flag.'));
+
+      expect(
+          processRunner.recordedCalls,
+          orderedEquals(<ProcessCall>[
+            ProcessCall(
+                'xcodebuild',
+                <String>['-project', 'ios/Runner.xcodeproj', '-list', '-json'],
+                pluginExampleDirectory2.path),
+            ProcessCall(
+                'xcodebuild',
+                <String>[
+                  'test',
+                  '-workspace',
+                  'ios/Runner.xcworkspace',
+                  '-scheme',
+                  'foo_scheme',
+                  '-destination',
+                  'foo_destination',
+                  'CODE_SIGN_IDENTITY=""',
+                  'CODE_SIGNING_REQUIRED=NO'
+                ],
+                pluginExampleDirectory2.path),
           ]));
 
       cleanupPackages();

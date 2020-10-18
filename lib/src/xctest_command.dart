@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
@@ -10,12 +11,13 @@ import 'package:path/path.dart' as p;
 
 import 'common.dart';
 
-const String kiOSDestination = 'ios-destination';
-const String kScheme = 'scheme';
+const String _kiOSDestination = 'ios-destination';
+const String _kTarget = 'target';
+const String _kSkip = 'skip';
 
 /// The command to run iOS' XCTests in plugins, this should work for both XCUnitTest and XCUITest targets.
 /// The tests target have to be added to the xcode project of the example app. Usually at "example/ios/Runner.xcodeproj".
-/// The command takes a "-scheme" argument which has to match the scheme of the test target.
+/// The command takes a "-target" argument which has to match the target of the test target.
 /// For information on how to add test target in an xcode project, see https://developer.apple.com/library/archive/documentation/ToolsLanguages/Conceptual/Xcode_Overview/UnitTesting.html
 class XCTestCommand extends PluginCommand {
   XCTestCommand(
@@ -24,14 +26,18 @@ class XCTestCommand extends PluginCommand {
     ProcessRunner processRunner = const ProcessRunner(),
   }) : super(packagesDir, fileSystem, processRunner: processRunner) {
     argParser.addOption(
-      kiOSDestination,
+      _kiOSDestination,
       help:
-          'Specify the destination when running the test, used for -destination flag for xcodebuild command.',
+          'Specify the destination when running the test, used for -destination flag for xcodebuild command.\n'
+          'this is passed to the `-destination` argument in xcodebuild command.\n'
+          'See https://developer.apple.com/library/archive/technotes/tn2339/_index.html#//apple_ref/doc/uid/DTS40014588-CH1-UNIT for details on how to specify the destination.',
     );
-    argParser.addOption(
-      kScheme,
-      help: 'The test target scheme.',
-    );
+    argParser.addOption(_kTarget,
+        help: 'The test target.\n'
+            'This is the xcode project test target. This is passed to the `-scheme` argument in the xcodebuild command. \n'
+            'See https://developer.apple.com/library/archive/technotes/tn2339/_index.html#//apple_ref/doc/uid/DTS40014588-CH1-UNIT for details on how to specify the scheme');
+    argParser.addMultiOption(_kSkip,
+        help: 'Plugins to skip while running this command. \n');
   }
 
   @override
@@ -43,20 +49,25 @@ class XCTestCommand extends PluginCommand {
 
   @override
   Future<Null> run() async {
-    if (argResults[kScheme] == null) {
-      print('--scheme must be specified');
+    if (argResults[_kTarget] == null) {
+      // TODO(cyanglaz): Automatically find all the available testing schemes if this argument is not specified.
+      //
+      print('--$_kTarget must be specified');
       throw ToolExit(1);
     }
 
-    if (argResults[kiOSDestination] == null) {
-      print('--ios-destination must be specified');
+    if (argResults[_kiOSDestination] == null) {
+      // TODO(cyanglaz): Automatically assign an available destination if this argument is not specified.
+      //
+      print('--$_kiOSDestination must be specified');
       throw ToolExit(1);
     }
 
     checkSharding();
 
-    final String scheme = argResults[kScheme];
-    final String destination = argResults[kiOSDestination];
+    final String target = argResults[_kTarget];
+    final String destination = argResults[_kiOSDestination];
+    final List<String> skipped = argResults[_kSkip];
 
     List<String> failingPackages = <String>[];
     await for (Directory plugin in getPlugins()) {
@@ -65,50 +76,68 @@ class XCTestCommand extends PluginCommand {
           p.relative(plugin.path, from: packagesDir.path);
       print('Start running for $packageName ...');
       if (!isIosPlugin(plugin, fileSystem)) {
-        print('iOS is not supported by this plugin.\n\n');
+        print('iOS is not supported by this plugin.');
+        print('\n\n');
+        continue;
+      }
+      if (skipped.contains(packageName)) {
+        print('$packageName was skipped with the --skip flag.');
+        print('\n\n');
         continue;
       }
       for (Directory example in getExamplesForPlugin(plugin)) {
         // Look for the test scheme in the example app.
-        print('Look for scheme named $scheme: ...');
-        final String findSchemeCommand =
-            'xcodebuild -project ios/Runner.xcodeproj -list -json';
-        print(findSchemeCommand);
-        final io.ProcessResult xcodeprojListResult = await processRunner.run(
-            'xcodebuild',
-            <String>['-project', 'ios/Runner.xcodeproj', '-list', '-json'],
-            workingDir: example);
+        print('Look for target named: $_kTarget ...');
+        final String xcodeBuildCommand = 'xcodebuild';
+        final List<String> findSchemeArgs = <String>[
+          '-project',
+          'ios/Runner.xcodeproj',
+          '-list',
+          '-json'
+        ];
+        final String completeFindSchemeCommand =
+            '$xcodeBuildCommand ${findSchemeArgs.join(' ')}';
+        print(completeFindSchemeCommand);
+        final io.ProcessResult xcodeprojListResult = await processRunner
+            .run(xcodeBuildCommand, findSchemeArgs, workingDir: example);
         if (xcodeprojListResult.exitCode != 0) {
-          print('Error occurred while running "$findSchemeCommand":\n\n'
+          print('Error occurred while running "$completeFindSchemeCommand":\n'
               '${xcodeprojListResult.stderr}');
           failingPackages.add(packageName);
+          print('\n\n');
           continue;
         }
 
-        final String xcdeprojListOutput = xcodeprojListResult.stdout;
-        if (!xcdeprojListOutput.contains(scheme)) {
-          print('$scheme not configured for $packageName, skipping.\n\n');
+        final String xcodeprojListOutput = xcodeprojListResult.stdout;
+        Map<String, dynamic> xcodeprojListOutputJson =
+            jsonDecode(xcodeprojListOutput);
+        if (!xcodeprojListOutputJson['project']['targets'].contains(target)) {
+          failingPackages.add(packageName);
+          print('$target not configured for $packageName, test failed.');
+          print(
+              'Please check the scheme for the test target if it matches the name $target.\n'
+              'If this plugin does not have an XCTest target, use the $_kSkip flag in the $name command to skip the plugin.');
+          print('\n\n');
           continue;
         }
         // Found the scheme, running tests
-        print('Running XCUITests for $packageName ...');
-        final String xctestCommand =
-            'xcodebuild test -project ios/Runner.xcodeproj -scheme $scheme -destination "$destination" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO';
-        print(xctestCommand);
-        final int exitCode = await processRunner.runAndStream(
-            'xcodebuild',
-            <String>[
-              'test',
-              '-project',
-              'ios/Runner.xcodeproj',
-              '-scheme',
-              scheme,
-              '-destination',
-              destination,
-              'CODE_SIGN_IDENTITY=""',
-              'CODE_SIGNING_REQUIRED=NO'
-            ],
-            workingDir: example);
+        print('Running XCTests:$target for $packageName ...');
+        final List<String> xctestArgs = <String>[
+          'test',
+          '-workspace',
+          'ios/Runner.xcworkspace',
+          '-scheme',
+          target,
+          '-destination',
+          destination,
+          'CODE_SIGN_IDENTITY=""',
+          'CODE_SIGNING_REQUIRED=NO'
+        ];
+        final String completeTestCommand =
+            '$xcodeBuildCommand ${xctestArgs.join(' ')}';
+        print(completeTestCommand);
+        final int exitCode = await processRunner
+            .runAndStream(xcodeBuildCommand, xctestArgs, workingDir: example);
         if (exitCode != 0) {
           failingPackages.add(packageName);
         }
@@ -117,10 +146,10 @@ class XCTestCommand extends PluginCommand {
 
     // Command end, print reports.
     if (failingPackages.isEmpty) {
-      print("All XCUITests have passed!");
+      print("All XCTests have passed!");
     } else {
       print(
-          'The following packages are failing XCUITests (see above for details):');
+          'The following packages are failing XCTests (see above for details):');
       for (String package in failingPackages) {
         print(' * $package');
       }

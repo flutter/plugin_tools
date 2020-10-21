@@ -14,6 +14,10 @@ import 'common.dart';
 const String _kiOSDestination = 'ios-destination';
 const String _kTarget = 'target';
 const String _kSkip = 'skip';
+const String _kXcodeBuildCommand = 'xcodebuild';
+const String _kXCRunCommand = 'xcrun';
+const String _kFoundNoSimulatorsMessage =
+    'Cannot find any available simulators, tests failed';
 
 /// The command to run iOS' XCTests in plugins, this should work for both XCUnitTest and XCUITest targets.
 /// The tests target have to be added to the xcode project of the example app. Usually at "example/ios/Runner.xcodeproj".
@@ -56,17 +60,19 @@ class XCTestCommand extends PluginCommand {
       throw ToolExit(1);
     }
 
-    if (argResults[_kiOSDestination] == null) {
-      // TODO(cyanglaz): Automatically assign an available destination if this argument is not specified.
-      // https://github.com/flutter/flutter/issues/68419
-      print('--$_kiOSDestination must be specified');
-      throw ToolExit(1);
+    String destination = argResults[_kiOSDestination];
+    if (destination == null) {
+      String simulatorId = await _findAvailableIphoneSimulator();
+      if (simulatorId == null) {
+        print(_kFoundNoSimulatorsMessage);
+        throw ToolExit(1);
+      }
+      destination = 'id=$simulatorId';
     }
 
     checkSharding();
 
     final String target = argResults[_kTarget];
-    final String destination = argResults[_kiOSDestination];
     final List<String> skipped = argResults[_kSkip];
 
     List<String> failingPackages = <String>[];
@@ -88,7 +94,6 @@ class XCTestCommand extends PluginCommand {
       for (Directory example in getExamplesForPlugin(plugin)) {
         // Look for the test scheme in the example app.
         print('Look for target named: $_kTarget ...');
-        final String xcodeBuildCommand = 'xcodebuild';
         final List<String> findSchemeArgs = <String>[
           '-project',
           'ios/Runner.xcodeproj',
@@ -96,10 +101,10 @@ class XCTestCommand extends PluginCommand {
           '-json'
         ];
         final String completeFindSchemeCommand =
-            '$xcodeBuildCommand ${findSchemeArgs.join(' ')}';
+            '$_kXcodeBuildCommand ${findSchemeArgs.join(' ')}';
         print(completeFindSchemeCommand);
         final io.ProcessResult xcodeprojListResult = await processRunner
-            .run(xcodeBuildCommand, findSchemeArgs, workingDir: example);
+            .run(_kXcodeBuildCommand, findSchemeArgs, workingDir: example);
         if (xcodeprojListResult.exitCode != 0) {
           print('Error occurred while running "$completeFindSchemeCommand":\n'
               '${xcodeprojListResult.stderr}');
@@ -134,10 +139,10 @@ class XCTestCommand extends PluginCommand {
           'CODE_SIGNING_REQUIRED=NO'
         ];
         final String completeTestCommand =
-            '$xcodeBuildCommand ${xctestArgs.join(' ')}';
+            '$_kXcodeBuildCommand ${xctestArgs.join(' ')}';
         print(completeTestCommand);
         final int exitCode = await processRunner
-            .runAndStream(xcodeBuildCommand, xctestArgs, workingDir: example);
+            .runAndStream(_kXcodeBuildCommand, xctestArgs, workingDir: example);
         if (exitCode != 0) {
           failingPackages.add(packageName);
         }
@@ -155,5 +160,57 @@ class XCTestCommand extends PluginCommand {
       }
       throw ToolExit(1);
     }
+  }
+
+  Future<String> _findAvailableIphoneSimulator() async {
+    // Find the first available destination if not specified.
+    final List<String> findSimulatorsArguments = <String>[
+      'simctl',
+      'list',
+      '--json'
+    ];
+    final String findSimulatorCompleteCommand =
+        '$_kXCRunCommand ${findSimulatorsArguments.join(' ')}';
+    print('Looking for available simulators...');
+    print(findSimulatorCompleteCommand);
+    final io.ProcessResult findSimulatorsResult =
+        await processRunner.run(_kXCRunCommand, findSimulatorsArguments);
+    if (findSimulatorsResult.exitCode != 0) {
+      print('Error occurred while running "$findSimulatorCompleteCommand":\n'
+          '${findSimulatorsResult.stderr}');
+      throw ToolExit(1);
+    }
+    print(findSimulatorsResult.stdout);
+    final Map<String, dynamic> simulatorListJson =
+        jsonDecode(findSimulatorsResult.stdout);
+    final List<dynamic> runtimes = simulatorListJson['runtimes'];
+    final Map<String, dynamic> devices = simulatorListJson['devices'];
+    if (runtimes.isEmpty || devices.isEmpty) {
+      return null;
+    }
+    String id;
+    // Looking for runtimes, trying to find one with highest OS version.
+    for (Map<String, dynamic> runtimeMap in runtimes.reversed) {
+      if (!runtimeMap['name'].contains('iOS')) {
+        continue;
+      }
+      final String runtimeID = runtimeMap['identifier'];
+      final List<dynamic> devicesForRuntime = devices[runtimeID];
+      if (devicesForRuntime.isEmpty) {
+        continue;
+      }
+      // Looking for runtimes, trying to find latest version of device.
+      for (Map<String, dynamic> device in devicesForRuntime.reversed) {
+        if (device['availabilityError'] != null ||
+            (device['isAvailable'] as bool == false)) {
+          continue;
+        }
+        id = device['udid'];
+        print('device selected: ');
+        print(device);
+        return id;
+      }
+    }
+    return null;
   }
 }

@@ -165,6 +165,7 @@ void main() {
         expect(
             processRunner.recordedCalls,
             orderedEquals(<ProcessCall>[
+              ProcessCall('xcrun', <String>['simctl', 'list', '--json'], null),
               ProcessCall(
                   'xcodebuild',
                   <String>[
@@ -207,6 +208,7 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
+            ProcessCall('xcrun', <String>['simctl', 'list', '--json'], null),
             ProcessCall(
                 'xcodebuild',
                 <String>['-project', 'ios/Runner.xcodeproj', '-list', '-json'],
@@ -270,6 +272,7 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
+            ProcessCall('xcrun', <String>['simctl', 'list', '--json'], null),
             ProcessCall(
                 'xcodebuild',
                 <String>['-project', 'ios/Runner.xcodeproj', '-list', '-json'],
@@ -341,7 +344,7 @@ void main() {
                   '-scheme',
                   'foo_scheme',
                   '-destination',
-                  'id=2706BBEB-1E01-403E-A8E9-70E8E5A24774',
+                  'id=1E76A0FD-38AC-4537-A989-EA639D7D012A',
                   'CODE_SIGN_IDENTITY=""',
                   'CODE_SIGNING_REQUIRED=NO'
                 ],

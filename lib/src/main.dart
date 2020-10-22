@@ -22,6 +22,7 @@ import 'lint_podspecs_command.dart';
 import 'list_command.dart';
 import 'test_command.dart';
 import 'version_check_command.dart';
+import 'xctest_command.dart';
 
 void main(List<String> args) {
   final FileSystem fileSystem = const LocalFileSystem();
@@ -52,7 +53,8 @@ void main(List<String> args) {
     ..addCommand(ListCommand(packagesDir, fileSystem))
     ..addCommand(PublishPluginCommand(packagesDir, fileSystem))
     ..addCommand(TestCommand(packagesDir, fileSystem))
-    ..addCommand(VersionCheckCommand(packagesDir, fileSystem));
+    ..addCommand(VersionCheckCommand(packagesDir, fileSystem))
+    ..addCommand(XCTestCommand(packagesDir, fileSystem));
 
   commandRunner.run(args).catchError((Object e) {
     final ToolExit toolExit = e;

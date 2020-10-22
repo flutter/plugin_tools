@@ -102,7 +102,7 @@ void main() {
 
     test('Not specifying --target throws', () async {
       await expectLater(
-          () => runner.run(<String>['xctest', _kTarget, 'a_scheme']),
+          () => runner.run(<String>['xctest', _kDestination, 'a_destination']),
           throwsA(const TypeMatcher<ToolExit>()));
     });
 
@@ -208,7 +208,6 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
-            ProcessCall('xcrun', <String>['simctl', 'list', '--json'], null),
             ProcessCall(
                 'xcodebuild',
                 <String>['-project', 'ios/Runner.xcodeproj', '-list', '-json'],
@@ -272,7 +271,6 @@ void main() {
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[
-            ProcessCall('xcrun', <String>['simctl', 'list', '--json'], null),
             ProcessCall(
                 'xcodebuild',
                 <String>['-project', 'ios/Runner.xcodeproj', '-list', '-json'],

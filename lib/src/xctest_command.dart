@@ -143,7 +143,9 @@ class XCTestCommand extends PluginCommand {
         print(completeTestCommand);
         final int exitCode = await processRunner
             .runAndStream(_kXcodeBuildCommand, xctestArgs, workingDir: example);
-        if (exitCode != 0) {
+        if (exitCode == 0) {
+          print('Successfully ran xctest for $packageName');
+        } else {
           failingPackages.add(packageName);
         }
       }
@@ -180,7 +182,6 @@ class XCTestCommand extends PluginCommand {
           '${findSimulatorsResult.stderr}');
       throw ToolExit(1);
     }
-    print(findSimulatorsResult.stdout);
     final Map<String, dynamic> simulatorListJson =
         jsonDecode(findSimulatorsResult.stdout);
     final List<dynamic> runtimes = simulatorListJson['runtimes'];
@@ -206,8 +207,7 @@ class XCTestCommand extends PluginCommand {
           continue;
         }
         id = device['udid'];
-        print('device selected: ');
-        print(device);
+        print('device selected: $device');
         return id;
       }
     }

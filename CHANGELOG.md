@@ -1,3 +1,8 @@
+## v.0.0.44+1
+
+- Print packages that passed tests in `xctest` command.
+- Remove printing the whole list of simulators.
+
 ## v.0.0.44
 
 - Add 'xctest' command to run xctests.

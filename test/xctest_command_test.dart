@@ -197,13 +197,15 @@ void main() {
       processRunner.processToReturn = mockProcess;
       processRunner.resultStdout =
           '{"project":{"targets":["bar_scheme", "foo_scheme"]}}';
-      await runner.run(<String>[
+      List<String> output = await runCapturingPrint(runner, <String>[
         'xctest',
         _kTarget,
         'foo_scheme',
         _kDestination,
         'foo_destination'
       ]);
+
+      expect(output, contains('Successfully ran xctest for plugin'));
 
       expect(
           processRunner.recordedCalls,
@@ -267,6 +269,7 @@ void main() {
       ]);
 
       expect(output, contains('plugin1 was skipped with the --skip flag.'));
+      expect(output, contains('Successfully ran xctest for plugin2'));
 
       expect(
           processRunner.recordedCalls,

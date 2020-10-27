@@ -1,3 +1,7 @@
+## v.0.0.44+2
+
+- Remove pre-alpha Windows workaround to create examples on the fly.
+
 ## v.0.0.44+1
 
 - Print packages that passed tests in `xctest` command.

@@ -61,21 +61,6 @@ class DriveExamplesCommand extends PluginCommand {
         if (!(await pluginSupportedOnCurrentPlatform(plugin, fileSystem))) {
           continue;
         }
-        if (isWindows) {
-          // The Windows tooling is not yet stable, so the platform directory for the application
-          // might not exist, to prevent it from becoming stale. If it doesn't, create one.
-          final Directory windowsFolder =
-              fileSystem.directory(p.join(example.path, 'windows'));
-          if (!windowsFolder.existsSync()) {
-            int exitCode = await processRunner.runAndStream(
-                flutterCommand, <String>['create', '.'],
-                workingDir: example);
-            if (exitCode != 0) {
-              print('Failed to create a windows directory for $packageName');
-              continue;
-            }
-          }
-        }
         final Directory driverTests =
             fileSystem.directory(p.join(example.path, 'test_driver'));
         if (!driverTests.existsSync()) {

@@ -181,46 +181,6 @@ void main() {
       cleanupPackages();
     });
 
-    test(
-        'building for Linux does not call flutter create if a directory exists',
-        () async {
-      createFakePlugin('plugin',
-          withExtraFiles: <List<String>>[
-            <String>['example', 'test'],
-            <String>['example', 'linux', 'test.h']
-          ],
-          isLinuxPlugin: true);
-
-      final Directory pluginExampleDirectory =
-          mockPackagesDir.childDirectory('plugin').childDirectory('example');
-
-      createFakePubspec(pluginExampleDirectory, isFlutter: true);
-
-      final List<String> output = await runCapturingPrint(
-          runner, <String>['build-examples', '--no-ipa', '--linux']);
-      final String packageName =
-          p.relative(pluginExampleDirectory.path, from: mockPackagesDir.path);
-
-      expect(
-        output,
-        orderedEquals(<String>[
-          '\nBUILDING Linux for $packageName',
-          '\n\n',
-          'All builds successful!',
-        ]),
-      );
-
-      print(processRunner.recordedCalls);
-      // flutter create . should NOT be called.
-      expect(
-          processRunner.recordedCalls,
-          orderedEquals(<ProcessCall>[
-            ProcessCall(flutterCommand, <String>['build', 'linux'],
-                pluginExampleDirectory.path),
-          ]));
-      cleanupPackages();
-    });
-
     test('building for macos with no implementation results in no-op',
         () async {
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
@@ -355,48 +315,6 @@ void main() {
       );
 
       print(processRunner.recordedCalls);
-      expect(
-          processRunner.recordedCalls,
-          orderedEquals(<ProcessCall>[
-            ProcessCall(flutterCommand, <String>['create', '.'],
-                pluginExampleDirectory.path),
-            ProcessCall(flutterCommand, <String>['build', 'windows'],
-                pluginExampleDirectory.path),
-          ]));
-      cleanupPackages();
-    });
-
-    test(
-        'building for windows does not call flutter create if a directory exists',
-        () async {
-      createFakePlugin('plugin',
-          withExtraFiles: <List<String>>[
-            <String>['example', 'test'],
-            <String>['example', 'windows', 'test.h']
-          ],
-          isWindowsPlugin: true);
-
-      final Directory pluginExampleDirectory =
-          mockPackagesDir.childDirectory('plugin').childDirectory('example');
-
-      createFakePubspec(pluginExampleDirectory, isFlutter: true);
-
-      final List<String> output = await runCapturingPrint(
-          runner, <String>['build-examples', '--no-ipa', '--windows']);
-      final String packageName =
-          p.relative(pluginExampleDirectory.path, from: mockPackagesDir.path);
-
-      expect(
-        output,
-        orderedEquals(<String>[
-          '\nBUILDING Windows for $packageName',
-          '\n\n',
-          'All builds successful!',
-        ]),
-      );
-
-      print(processRunner.recordedCalls);
-      // flutter create . should NOT be called.
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[

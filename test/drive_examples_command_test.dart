@@ -276,57 +276,6 @@ void main() {
           ]));
     });
 
-    test(
-        'driving on a Linux plugin with a Linux direactory does not call flutter create',
-        () async {
-      createFakePlugin('plugin',
-          withExtraFiles: <List<String>>[
-            <String>['example', 'test_driver', 'plugin_test.dart'],
-            <String>['example', 'test_driver', 'plugin.dart'],
-            <String>['example', 'linux', 'test.h'],
-          ],
-          isLinuxPlugin: true);
-
-      final Directory pluginExampleDirectory =
-          mockPackagesDir.childDirectory('plugin').childDirectory('example');
-
-      createFakePubspec(pluginExampleDirectory, isFlutter: true);
-
-      final List<String> output = await runCapturingPrint(runner, <String>[
-        'drive-examples',
-        '--linux',
-      ]);
-
-      expect(
-        output,
-        orderedEquals(<String>[
-          '\n\n',
-          'All driver tests successful!',
-        ]),
-      );
-
-      String deviceTestPath = p.join('test_driver', 'plugin.dart');
-      String driverTestPath = p.join('test_driver', 'plugin_test.dart');
-      print(processRunner.recordedCalls);
-      // flutter create . should NOT be called.
-      expect(
-          processRunner.recordedCalls,
-          orderedEquals(<ProcessCall>[
-            ProcessCall(
-                flutterCommand,
-                <String>[
-                  'drive',
-                  '-d',
-                  'linux',
-                  '--driver',
-                  driverTestPath,
-                  '--target',
-                  deviceTestPath
-                ],
-                pluginExampleDirectory.path),
-          ]));
-    });
-
     test('driving when plugin does not suppport macOS is a no-op', () async {
       createFakePlugin('plugin', withExtraFiles: <List<String>>[
         <String>['example', 'test_driver', 'plugin_test.dart'],
@@ -403,6 +352,7 @@ void main() {
                 pluginExampleDirectory.path),
           ]));
     });
+
     test('driving when plugin does not suppport windows is a no-op', () async {
       createFakePlugin('plugin',
           withExtraFiles: <List<String>>[
@@ -464,58 +414,6 @@ void main() {
       String deviceTestPath = p.join('test_driver', 'plugin.dart');
       String driverTestPath = p.join('test_driver', 'plugin_test.dart');
       print(processRunner.recordedCalls);
-      expect(
-          processRunner.recordedCalls,
-          orderedEquals(<ProcessCall>[
-            ProcessCall(flutterCommand, <String>['create', '.'],
-                pluginExampleDirectory.path),
-            ProcessCall(
-                flutterCommand,
-                <String>[
-                  'drive',
-                  '-d',
-                  'windows',
-                  '--driver',
-                  driverTestPath,
-                  '--target',
-                  deviceTestPath
-                ],
-                pluginExampleDirectory.path),
-          ]));
-    });
-    test(
-        'driving on a Windows plugin with a windows direactory does not call flutter create',
-        () async {
-      createFakePlugin('plugin',
-          withExtraFiles: <List<String>>[
-            <String>['example', 'test_driver', 'plugin_test.dart'],
-            <String>['example', 'test_driver', 'plugin.dart'],
-            <String>['example', 'windows', 'test.h'],
-          ],
-          isWindowsPlugin: true);
-
-      final Directory pluginExampleDirectory =
-          mockPackagesDir.childDirectory('plugin').childDirectory('example');
-
-      createFakePubspec(pluginExampleDirectory, isFlutter: true);
-
-      final List<String> output = await runCapturingPrint(runner, <String>[
-        'drive-examples',
-        '--windows',
-      ]);
-
-      expect(
-        output,
-        orderedEquals(<String>[
-          '\n\n',
-          'All driver tests successful!',
-        ]),
-      );
-
-      String deviceTestPath = p.join('test_driver', 'plugin.dart');
-      String driverTestPath = p.join('test_driver', 'plugin_test.dart');
-      print(processRunner.recordedCalls);
-      // flutter create . should NOT be called.
       expect(
           processRunner.recordedCalls,
           orderedEquals(<ProcessCall>[

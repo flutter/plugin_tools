@@ -1,3 +1,7 @@
+## v.0.0.44+5
+
+- Remove `-v` flag on drive-examples.
+
 ## v.0.0.44+4
 
 - Fix bug where directory isn't passed

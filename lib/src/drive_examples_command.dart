@@ -120,7 +120,7 @@ Tried searching for the following:
             }
           }
 
-          final List<String> driveArgs = <String>['drive', '-v'];
+          final List<String> driveArgs = <String>['drive'];
 
           final String enableExperiment = argResults[kEnableExperiment];
           if (enableExperiment.isNotEmpty) {

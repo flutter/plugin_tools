@@ -1,3 +1,7 @@
+## v.0.0.44+3
+
+- More verbose logging
+
 ## v.0.0.44+2
 
 - Remove pre-alpha Windows workaround to create examples on the fly.

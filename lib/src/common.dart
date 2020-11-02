@@ -370,6 +370,7 @@ class ProcessRunner {
     Directory workingDir,
     bool exitOnError = false,
   }) async {
+    print('Running command: "$executable ${args.join(' ')}" in ${workingDir.path}');
     final io.Process process = await io.Process.start(executable, args,
         workingDirectory: workingDir?.path);
     await io.stdout.addStream(process.stdout);

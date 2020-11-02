@@ -1,3 +1,7 @@
+## v.0.0.44+4
+
+- Fix bug where directory isn't passed
+
 ## v.0.0.44+3
 
 - More verbose logging

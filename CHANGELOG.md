@@ -1,3 +1,7 @@
+## v.0.0.44+7
+
+- Migrate template to AGP 4.1.0
+
 ## v.0.0.44+6
 
 - Fix code formatting.

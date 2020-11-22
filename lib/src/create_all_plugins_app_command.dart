@@ -78,7 +78,7 @@ class CreateAllPluginsAppCommand extends PluginCommand {
 
     final String newGradle = gradleFile.readAsStringSync().replaceFirst(
           RegExp(r"classpath \'com.android.tools.build:gradle:\d.\d.\d\'"),
-          'classpath \'com.android.tools.build:gradle:3.3.1\'',
+          'classpath \'com.android.tools.build:gradle:4.1.0\'',
         );
     gradleFile.writeAsStringSync(newGradle);
   }

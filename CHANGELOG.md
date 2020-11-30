@@ -1,3 +1,7 @@
+## v.0.0.44+7
+
+- `all-plugins-app` doesn't override the AGP version.
+
 ## v.0.0.44+6
 
 - Fix code formatting.

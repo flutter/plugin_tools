@@ -45,7 +45,6 @@ class CreateAllPluginsAppCommand extends PluginCommand {
       _genPubspecWithAllPlugins(),
       _updateAppGradle(),
       _updateManifest(),
-      _updateProjectGradle(),
     ]);
   }
 
@@ -64,23 +63,6 @@ class CreateAllPluginsAppCommand extends PluginCommand {
     print(result.stdout);
     print(result.stderr);
     return result.exitCode;
-  }
-
-  Future<void> _updateProjectGradle() async {
-    final File gradleFile = fileSystem.file(p.join(
-      'all_plugins',
-      'android',
-      'build.gradle',
-    ));
-    if (!gradleFile.existsSync()) {
-      throw ToolExit(64);
-    }
-
-    final String newGradle = gradleFile.readAsStringSync().replaceFirst(
-          RegExp(r"classpath \'com.android.tools.build:gradle:\d.\d.\d\'"),
-          'classpath \'com.android.tools.build:gradle:3.3.1\'',
-        );
-    gradleFile.writeAsStringSync(newGradle);
   }
 
   Future<void> _updateAppGradle() async {

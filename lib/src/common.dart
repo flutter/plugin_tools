@@ -273,14 +273,16 @@ abstract class PluginCommand extends Command<Null> {
   ///    "client library" package, which declares the API for the plugin, as
   ///    well as one or more platform-specific implementations.
   Stream<Directory> _getAllPlugins() async* {
-    final Set<String> plugins = Set<String>.from(argResults[_pluginsArg])
-        .difference(Set<String>.from(argResults[_excludeArg]));
+    final Set<String> plugins = Set<String>.from(argResults[_pluginsArg]);
+    final Set<String> excludedPlugins =
+        Set<String>.from(argResults[_excludeArg]);
 
     await for (FileSystemEntity entity
         in packagesDir.list(followLinks: false)) {
       // A top-level Dart package is a plugin package.
       if (_isDartPackage(entity)) {
-        if (plugins.isEmpty || plugins.contains(p.basename(entity.path))) {
+        if (!excludedPlugins.contains(entity.basename) &&
+            (plugins.isEmpty || plugins.contains(p.basename(entity.path)))) {
           yield entity;
         }
       } else if (entity is Directory) {
@@ -290,10 +292,11 @@ abstract class PluginCommand extends Command<Null> {
             // If --plugin=my_plugin is passed, then match all federated
             // plugins under 'my_plugin'. Also match if the exact plugin is
             // passed.
-            if (plugins.isEmpty ||
-                plugins.contains(
-                    p.relative(subdir.path, from: packagesDir.path)) ||
-                plugins.contains(p.basename(entity.path))) {
+            if (!excludedPlugins.contains(subdir.basename) &&
+                (plugins.isEmpty ||
+                    plugins.contains(
+                        p.relative(subdir.path, from: packagesDir.path)) ||
+                    plugins.contains(p.basename(entity.path)))) {
               yield subdir;
             }
           }

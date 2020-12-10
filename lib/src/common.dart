@@ -173,11 +173,18 @@ abstract class PluginCommand extends Command<Null> {
       valueHelp: 'n',
       defaultsTo: '1',
     );
+    argParser.addMultiOption(
+      _excludeArg,
+      abbr: 'e',
+      help: 'Exclude packages from this command.',
+      defaultsTo: <String>[],
+    );
   }
 
   static const String _pluginsArg = 'plugins';
   static const String _shardIndexArg = 'shardIndex';
   static const String _shardCountArg = 'shardCount';
+  static const String _excludeArg = 'exclude';
 
   /// The directory containing the plugin packages.
   final Directory packagesDir;
@@ -229,6 +236,12 @@ abstract class PluginCommand extends Command<Null> {
     _shardCount = shardCount;
   }
 
+  /// Returns true if this plugin or package should be excluded from the current step.
+  /// This is the case if the user specified [name] in the `--exclude` flag.
+  bool isPluginOrPackageExcluded(String name) {
+    return argResults[_excludeArg].contains(name);
+  }
+
   /// Returns the root Dart package folders of the plugins involved in this
   /// command execution.
   Stream<Directory> getPlugins() async* {
@@ -266,7 +279,9 @@ abstract class PluginCommand extends Command<Null> {
   ///    "client library" package, which declares the API for the plugin, as
   ///    well as one or more platform-specific implementations.
   Stream<Directory> _getAllPlugins() async* {
-    final Set<String> plugins = Set<String>.from(argResults[_pluginsArg]);
+    final Set<String> plugins = Set<String>.from(argResults[_pluginsArg])
+        .difference(Set<String>.from(argResults[_excludeArg]));
+
     await for (FileSystemEntity entity
         in packagesDir.list(followLinks: false)) {
       // A top-level Dart package is a plugin package.

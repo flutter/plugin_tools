@@ -50,6 +50,17 @@ void main() {
     await runner.run(<String>['sample', '--exclude=plugin1,plugin2']);
     expect(plugins, unorderedEquals(<String>[]));
   });
+
+  test('exclude federated plugins when plugins flag is specified', () async {
+    createFakePlugin('plugin1', parentDirectoryName: 'federated');
+    final Directory plugin2 = createFakePlugin('plugin2');
+    await runner.run(<String>[
+      'sample',
+      '--plugins=federated/plugin1,plugin2',
+      '--exclude=federated/plugin1'
+    ]);
+    expect(plugins, unorderedEquals(<String>[plugin2.path]));
+  });
 }
 
 class SamplePluginCommand extends PluginCommand {

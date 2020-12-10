@@ -292,10 +292,12 @@ abstract class PluginCommand extends Command<Null> {
             // If --plugin=my_plugin is passed, then match all federated
             // plugins under 'my_plugin'. Also match if the exact plugin is
             // passed.
+            final String relativePath =
+                p.relative(subdir.path, from: packagesDir.path);
             if (!excludedPlugins.contains(subdir.basename) &&
+                !excludedPlugins.contains(relativePath) &&
                 (plugins.isEmpty ||
-                    plugins.contains(
-                        p.relative(subdir.path, from: packagesDir.path)) ||
+                    plugins.contains(relativePath) ||
                     plugins.contains(p.basename(entity.path)))) {
               yield subdir;
             }

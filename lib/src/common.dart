@@ -236,12 +236,6 @@ abstract class PluginCommand extends Command<Null> {
     _shardCount = shardCount;
   }
 
-  /// Returns true if this plugin or package should be excluded from the current step.
-  /// This is the case if the user specified [name] in the `--exclude` flag.
-  bool isPluginOrPackageExcluded(String name) {
-    return argResults[_excludeArg].contains(name);
-  }
-
   /// Returns the root Dart package folders of the plugins involved in this
   /// command execution.
   Stream<Directory> getPlugins() async* {

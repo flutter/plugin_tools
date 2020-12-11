@@ -1,3 +1,7 @@
+## v.0.0.44+8
+
+- Add exclude flag to exclude any plugin from further processing.
+
 ## v.0.0.44+7
 
 - `all-plugins-app` doesn't override the AGP version.

@@ -37,12 +37,16 @@ Directory createFakePlugin(
   bool isLinuxPlugin = false,
   bool isMacOsPlugin = false,
   bool isWindowsPlugin = false,
+  String parentDirectoryName = '',
 }) {
   assert(!(withSingleExample && withExamples.isNotEmpty),
       'cannot pass withSingleExample and withExamples simultaneously');
 
-  final Directory pluginDirectory = mockPackagesDir.childDirectory(name)
-    ..createSync();
+  final Directory pluginDirectory = (parentDirectoryName != '')
+      ? mockPackagesDir.childDirectory(parentDirectoryName).childDirectory(name)
+      : mockPackagesDir.childDirectory(name);
+  pluginDirectory.createSync(recursive: true);
+
   createFakePubspec(
     pluginDirectory,
     name: name,

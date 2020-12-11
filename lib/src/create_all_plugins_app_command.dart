@@ -16,16 +16,7 @@ import 'common.dart';
 // https://github.com/flutter/flutter/issues/61049
 class CreateAllPluginsAppCommand extends PluginCommand {
   CreateAllPluginsAppCommand(Directory packagesDir, FileSystem fileSystem)
-      : super(packagesDir, fileSystem) {
-    argParser.addMultiOption(
-      excludeOption,
-      abbr: 'e',
-      help: 'Exclude packages from the generated pubspec.yaml.',
-      defaultsTo: <String>[],
-    );
-  }
-
-  static const String excludeOption = 'exclude';
+      : super(packagesDir, fileSystem);
 
   @override
   String get description =>
@@ -155,10 +146,6 @@ class CreateAllPluginsAppCommand extends PluginCommand {
 
     await for (Directory package in getPlugins()) {
       final String pluginName = package.path.split('/').last;
-      if (argResults[excludeOption].contains(pluginName)) {
-        continue;
-      }
-
       final File pubspecFile =
           fileSystem.file(p.join(package.path, 'pubspec.yaml'));
       final Pubspec pubspec = Pubspec.parse(pubspecFile.readAsStringSync());

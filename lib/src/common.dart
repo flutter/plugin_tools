@@ -173,11 +173,18 @@ abstract class PluginCommand extends Command<Null> {
       valueHelp: 'n',
       defaultsTo: '1',
     );
+    argParser.addMultiOption(
+      _excludeArg,
+      abbr: 'e',
+      help: 'Exclude packages from this command.',
+      defaultsTo: <String>[],
+    );
   }
 
   static const String _pluginsArg = 'plugins';
   static const String _shardIndexArg = 'shardIndex';
   static const String _shardCountArg = 'shardCount';
+  static const String _excludeArg = 'exclude';
 
   /// The directory containing the plugin packages.
   final Directory packagesDir;
@@ -267,11 +274,15 @@ abstract class PluginCommand extends Command<Null> {
   ///    well as one or more platform-specific implementations.
   Stream<Directory> _getAllPlugins() async* {
     final Set<String> plugins = Set<String>.from(argResults[_pluginsArg]);
+    final Set<String> excludedPlugins =
+        Set<String>.from(argResults[_excludeArg]);
+
     await for (FileSystemEntity entity
         in packagesDir.list(followLinks: false)) {
       // A top-level Dart package is a plugin package.
       if (_isDartPackage(entity)) {
-        if (plugins.isEmpty || plugins.contains(p.basename(entity.path))) {
+        if (!excludedPlugins.contains(entity.basename) &&
+            (plugins.isEmpty || plugins.contains(p.basename(entity.path)))) {
           yield entity;
         }
       } else if (entity is Directory) {
@@ -281,10 +292,14 @@ abstract class PluginCommand extends Command<Null> {
             // If --plugin=my_plugin is passed, then match all federated
             // plugins under 'my_plugin'. Also match if the exact plugin is
             // passed.
-            if (plugins.isEmpty ||
-                plugins.contains(
-                    p.relative(subdir.path, from: packagesDir.path)) ||
-                plugins.contains(p.basename(entity.path))) {
+            final String relativePath =
+                p.relative(subdir.path, from: packagesDir.path);
+            final String basenamePath = p.basename(entity.path);
+            if (!excludedPlugins.contains(basenamePath) &&
+                !excludedPlugins.contains(relativePath) &&
+                (plugins.isEmpty ||
+                    plugins.contains(relativePath) ||
+                    plugins.contains(basenamePath))) {
               yield subdir;
             }
           }

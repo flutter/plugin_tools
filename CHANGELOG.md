@@ -1,4 +1,4 @@
-## v.0.0.44+8
+## v.0.0.45
 
 - Add exclude flag to exclude any plugin from further processing.
 

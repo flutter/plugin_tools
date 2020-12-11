@@ -62,7 +62,8 @@ void main() {
     expect(plugins, unorderedEquals(<String>[plugin2.path]));
   });
 
-  test('exclude entire federated plugins when plugins flag is specified', () async {
+  test('exclude entire federated plugins when plugins flag is specified',
+      () async {
     createFakePlugin('plugin1', parentDirectoryName: 'federated');
     final Directory plugin2 = createFakePlugin('plugin2');
     await runner.run(<String>[

@@ -1,3 +1,7 @@
+## v.0.0.45+1
+
+- Don't call `flutter format` if there are no Dart files to format.
+
 ## v.0.0.45
 
 - Add exclude flag to exclude any plugin from further processing.

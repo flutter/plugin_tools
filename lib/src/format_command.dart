@@ -114,9 +114,14 @@ class FormatCommand extends PluginCommand {
     // specifically shell out to dartfmt -w in that case.
     print('Formatting all .dart files...');
     final Iterable<String> dartFiles = await _getFilesWithExtension('.dart');
-    await processRunner.runAndStream(
-        'flutter', <String>['format']..addAll(dartFiles),
-        workingDir: packagesDir, exitOnError: true);
+    if (dartFiles.isEmpty) {
+      print(
+          'No .dart files to format. If you set the `--exclude` flag, most likey they were skipped');
+    } else {
+      await processRunner.runAndStream(
+          'flutter', <String>['format']..addAll(dartFiles),
+          workingDir: packagesDir, exitOnError: true);
+    }
   }
 
   Future<List<String>> _getFilesWithExtension(String extension) async =>

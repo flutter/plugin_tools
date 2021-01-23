@@ -68,7 +68,7 @@ void main() {
           throwsA(const TypeMatcher<ToolExit>()));
     });
 
-    test('takes a whitelist', () async {
+    test('takes an allow list', () async {
       final Directory pluginDir =
           await createFakePlugin('foo', withExtraFiles: <List<String>>[
         <String>['analysis_options.yaml']

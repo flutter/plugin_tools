@@ -1,3 +1,7 @@
+## v.0.0.45+3
+
+- Pin `collection` to 1.14.13 to be able to target Flutter stable.
+
 ## v.0.0.45+2
 
 - Make `publish-plugin` to work on non-flutter packages.

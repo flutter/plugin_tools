@@ -1,3 +1,7 @@
+## v.0.0.45+2
+
+- Make `publish-plugin` to work on non-flutter packages.
+
 ## v.0.0.45+1
 
 - Don't call `flutter format` if there are no Dart files to format.

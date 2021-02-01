@@ -112,6 +112,25 @@ void main() {
 
       expect(printedMessages.last, 'Done!');
     });
+
+    test('can publish non-flutter package', () async {
+      createFakePubspec(pluginDir, includeVersion: true, isFlutter: false);
+      io.Process.runSync('git', <String>['init'],
+          workingDirectory: mockPackagesDir.path);
+      gitDir = await GitDir.fromExisting(mockPackagesDir.path);
+      await gitDir.runCommand(<String>['add', '-A']);
+      await gitDir.runCommand(<String>['commit', '-m', 'Initial commit']);
+      // Immediately return 0 when running `pub publish`.
+      processRunner.mockPublishProcess.exitCodeCompleter.complete(0);
+      await commandRunner.run(<String>[
+        'publish-plugin',
+        '--package',
+        testPluginName,
+        '--no-push-tags',
+        '--no-tag-release'
+      ]);
+      expect(printedMessages.last, 'Done!');
+    });
   });
 
   group('Publishes package', () {

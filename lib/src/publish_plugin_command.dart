@@ -134,10 +134,6 @@ class PublishPluginCommand extends PluginCommand {
       _print('${_packageDir.absolute.path} does not exist.');
       throw ToolExit(1);
     }
-    if (!isFlutterPackage(_packageDir, fileSystem)) {
-      _print('${_packageDir.absolute.path} is not a flutter package.');
-      throw ToolExit(1);
-    }
     return _packageDir;
   }
 

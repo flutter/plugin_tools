@@ -1,6 +1,6 @@
 ## v.0.0.45+3
 
-- Pin `collection` to 1.14.13 to be able to target Flutter stable.
+- Pin `collection` to `1.14.13` to be able to target Flutter stable (v1.22.6).
 
 ## v.0.0.45+2
 

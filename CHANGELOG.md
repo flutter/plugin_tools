@@ -1,4 +1,4 @@
-## v.0.0.45+3
+## v.0.0.45+4
 
 - Pin `charcode` to `1.1.3` to be able to target Flutter stable (v1.22.6).
 
